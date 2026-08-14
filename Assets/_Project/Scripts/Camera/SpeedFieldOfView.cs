@@ -29,13 +29,41 @@ namespace Adler.CameraRig
         [Tooltip("최고 속도에서 기준 화각에 더해지는 각도.")]
         [SerializeField] private float _fieldOfViewGain = 18f;
 
-        [Tooltip("이 속도에서 가산분이 최대가 된다 (m/s).\n" +
-                 "0 이하로 두면 기체의 부스터 속도를 자동으로 따라간다 — 정비로 부스터 성능이 " +
-                 "바뀌어도 연출이 어긋나지 않는다.")]
-        [SerializeField] private float _maxSpeed;
+        [Tooltip("기체의 부스터 속도를 기준으로 삼는다.\n" +
+                 "정비로 부스터 성능이 바뀌어도 연출이 따라가므로 대개 켜두면 된다.")]
+        [SerializeField] private bool _useBoostSpeedAsReference = true;
+
+        [Tooltip("기준 속도를 직접 지정할 때 쓴다 (m/s). 위 항목을 끄면 이 값이 쓰인다.")]
+        [SerializeField] private float _maxSpeed = 32f;
 
         [Tooltip("클수록 화각 변화가 빠르게 따라붙는다.")]
         [SerializeField] private float _responsiveness = 3f;
+
+        /// <summary>
+        /// 설정이 잘못되면 이 확장은 아무 일도 하지 않는데, 화면만 봐서는 그 사실을 알 수 없다.
+        /// 무엇이 빠졌는지 시작할 때 짚어준다.
+        /// </summary>
+        protected override void Awake()
+        {
+            base.Awake();
+
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            if (GetComponent<CinemachineVirtualCameraBase>() == null)
+            {
+                Debug.LogError(
+                    $"{nameof(SpeedFieldOfView)}: CinemachineCamera와 같은 오브젝트에 있어야 합니다. " +
+                    "Brain이 붙은 Main Camera가 아니라 CinemachineCamera 쪽입니다.", this);
+            }
+
+            if (_aircraft == null)
+            {
+                Debug.LogError($"{nameof(SpeedFieldOfView)}: Aircraft가 비어 있어 속도를 읽을 수 없습니다.", this);
+            }
+        }
 
         protected override void PostPipelineStageCallback(
             CinemachineVirtualCameraBase vcam,
@@ -79,11 +107,12 @@ namespace Adler.CameraRig
 
         private float ResolveMaxSpeed()
         {
-            if (_maxSpeed > 0f)
+            if (!_useBoostSpeedAsReference && _maxSpeed > 0f)
             {
                 return _maxSpeed;
             }
 
+            // Stats는 AircraftController.Awake에서 만들어지므로 첫 프레임에는 비어 있을 수 있다.
             return _aircraft.Stats != null ? _aircraft.Stats.BoostSpeed : 0f;
         }
 

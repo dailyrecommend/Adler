@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.4, z: -1.2}
+  m_LocalPosition: {x: 0, y: 0.4, z: -1.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -619,7 +619,7 @@ Transform:
   m_GameObject: {fileID: 898042521}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.4, z: -1.2}
+  m_LocalPosition: {x: 0, y: 0.4, z: -1.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -638,7 +638,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.SpeedFieldOfView
   _aircraft: {fileID: 1812182285}
-  _fieldOfViewGain: 18
+  _fieldOfViewGain: 60
+  _useBoostSpeedAsReference: 1
   _maxSpeed: 0
   _responsiveness: 3
 --- !u!114 &898042527
@@ -659,7 +660,7 @@ MonoBehaviour:
     AngularDampingMode: 1
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 0.5
-  FollowOffset: {x: 0, y: 0.4, z: -1.2}
+  FollowOffset: {x: 0, y: 0.4, z: -1.1}
 --- !u!1 &1389705165
 GameObject:
   m_ObjectHideFlags: 0

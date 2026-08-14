@@ -26,4 +26,4 @@ MonoBehaviour:
   ControlResponse: 4
   LowSpeedAgility: 0.45
   BankTurnRate: 45
-  GravityInfluence: 0.25
+  GravityInfluence: 0
