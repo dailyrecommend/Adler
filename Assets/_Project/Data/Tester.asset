@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74d1ee1bd208556468fa536d9c7ea146, type: 3}
+  m_Name: Tester
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Aircraft.AirframeDefinition
+  DisplayName: Tester
+  MinSpeed: 35
+  CruiseSpeed: 65
+  MaxSpeed: 110
+  BoostSpeed: 165
+  Acceleration: 30
+  Deceleration: 22
+  ThrottleResponse: 0.6
+  PitchRate: 55
+  RollRate: 140
+  YawRate: 25
+  ControlResponse: 4
+  LowSpeedAgility: 0.45
+  BankTurnRate: 45
+  GravityInfluence: 0.25
