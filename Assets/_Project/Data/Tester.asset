@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Tester
   m_EditorClassIdentifier: Adler.Runtime::Adler.Aircraft.AirframeDefinition
   DisplayName: Tester
-  MinSpeed: 6
-  CruiseSpeed: 12
-  MaxSpeed: 20
-  BoostSpeed: 32
+  MinSpeed: 10
+  CruiseSpeed: 20
+  MaxSpeed: 25
+  BoostSpeed: 40
   Acceleration: 30
   Deceleration: 22
   ThrottleResponse: 0.6

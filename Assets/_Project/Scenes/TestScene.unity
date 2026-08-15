@@ -2424,6 +2424,9 @@ GameObject:
   - component: {fileID: 1812182285}
   - component: {fileID: 1812182289}
   - component: {fileID: 1812182288}
+  - component: {fileID: 1812182292}
+  - component: {fileID: 1812182291}
+  - component: {fileID: 1812182290}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -2529,6 +2532,57 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 2103
+--- !u!114 &1812182290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a3a5054a7277b74daeb66a942fbd7c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftWreck
+  _health: {fileID: 1812182292}
+  _disableOnDeath: []
+  _restorePhysics: 1
+  _tumbleTorque: 4
+--- !u!114 &1812182291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5caf17208276a3142ac2d9a214fb0880, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.ImpactDamage
+  _health: {fileID: 1812182292}
+  _impactMask:
+    serializedVersion: 2
+    m_Bits: 55
+  _minImpactSpeed: 6
+  _lethal: 1
+  _damagePerImpactSpeed: 4
+--- !u!114 &1812182292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666fced05baaf4e49932f28f8a66c274, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.Health
+  _maxHealth: 100
+  _armor: 1
+  _requiredDemolition: 0
+  _deactivateOnDeath: 1
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0

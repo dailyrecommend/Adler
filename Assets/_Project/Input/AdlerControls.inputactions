@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "AdlerControls",
     "maps": [
         {
@@ -45,7 +46,7 @@
                     "name": "Boost",
                     "type": "Button",
                     "id": "11000000-0000-4000-8000-000000000005",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -322,7 +323,7 @@
                 {
                     "name": "",
                     "id": "20000000-0000-4000-8000-000000000016",
-                    "path": "<Keyboard>/tab",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -345,17 +346,6 @@
                     "name": "",
                     "id": "20000000-0000-4000-8000-000000000018",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Fire",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "20000000-0000-4000-8000-000000000019",
-                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -450,7 +440,7 @@
                     "name": "Pause",
                     "type": "Button",
                     "id": "12000000-0000-4000-8000-000000000001",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
