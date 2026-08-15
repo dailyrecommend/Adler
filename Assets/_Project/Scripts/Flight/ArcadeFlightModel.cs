@@ -33,6 +33,7 @@ namespace Adler.Flight
 
         private float _throttle = 0.5f;
         private float _speed;
+        private bool _boosting;
 
         public ArcadeFlightModel(AircraftStatSheet stats)
         {
@@ -41,6 +42,7 @@ namespace Adler.Flight
 
         public float Speed => _speed;
         public float ThrottleNormalized => _throttle;
+        public bool IsBoosting => _boosting;
 
         /// <summary>스틱을 밀 때 기수가 올라가게 한다. 기체 성능이 아니라 플레이어 취향이다.</summary>
         public bool InvertPitch { get; set; }
@@ -96,6 +98,8 @@ namespace Adler.Flight
 
         private void UpdateSpeed(in FlightInput input, float deltaTime)
         {
+            _boosting = input.Boost;
+
             // 스로틀은 즉시 값이 아니라 레버다. 밀고 있는 동안 서서히 올라간다.
             _throttle = Mathf.Clamp01(_throttle + (input.Throttle * _stats.ThrottleResponse * deltaTime));
 

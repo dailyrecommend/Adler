@@ -59,11 +59,11 @@ namespace Adler.Combat
 
         private void OnEnable() => _current = _maxHealth;
 
-        public void TakeDamage(in DamageInfo damage)
+        public DamageResult TakeDamage(in DamageInfo damage)
         {
             if (!IsAlive)
             {
-                return;
+                return DamageResult.None;
             }
 
             DamageRejection rejection = Evaluate(damage);
@@ -71,15 +71,16 @@ namespace Adler.Combat
             {
                 // 맞았지만 통하지 않았다. 이것도 플레이어에게 알려야 무기를 바꿀 판단이 선다.
                 Blocked?.Invoke(this, damage, rejection);
-                return;
+                return new DamageResult(rejection, 0f, killed: false);
             }
 
-            _current = Mathf.Max(0f, _current - damage.Amount);
+            float applied = Mathf.Min(_current, damage.Amount);
+            _current -= applied;
             Damaged?.Invoke(this, damage);
 
             if (_current > 0f)
             {
-                return;
+                return new DamageResult(DamageRejection.None, applied, killed: false);
             }
 
             Died?.Invoke(this, damage);
@@ -88,6 +89,8 @@ namespace Adler.Combat
             {
                 gameObject.SetActive(false);
             }
+
+            return new DamageResult(DamageRejection.None, applied, killed: true);
         }
 
         /// <summary>

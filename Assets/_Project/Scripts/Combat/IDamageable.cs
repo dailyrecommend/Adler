@@ -11,7 +11,10 @@ namespace Adler.Combat
     {
         bool IsAlive { get; }
 
-        /// <summary>피해를 전달한다. 장갑을 얼마나 뚫는지는 받는 쪽이 판단한다.</summary>
-        void TakeDamage(in DamageInfo damage);
+        /// <summary>
+        /// 피해를 전달하고 결과를 돌려준다. 통했는지는 받는 쪽이 판단하지만,
+        /// 그 판단은 쏜 쪽이 화면에 무엇을 띄울지 정하는 데 필요하다.
+        /// </summary>
+        DamageResult TakeDamage(in DamageInfo damage);
     }
 }

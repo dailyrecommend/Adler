@@ -34,8 +34,12 @@ namespace Adler.Weapons
         /// <summary>발사할 때마다. 예광탄과 총구 화염이 구독한다. (시작점, 끝점)</summary>
         public event Action<Vector3, Vector3> Fired;
 
-        /// <summary>무언가를 맞혔을 때. 피격 효과가 구독한다.</summary>
-        public event Action<RaycastHit, IDamageable> Hit;
+        /// <summary>
+        /// 무언가를 맞혔을 때. 피격 효과와 화면 표시가 구독한다.
+        /// <see cref="DamageResult"/>는 표적을 맞혔을 때만 의미가 있다 — 지형에 맞으면
+        /// <see cref="IDamageable"/>이 null이고 결과는 비어 있다.
+        /// </summary>
+        public event Action<RaycastHit, IDamageable, DamageResult> Hit;
 
         private void Awake()
         {
@@ -111,14 +115,16 @@ namespace Adler.Weapons
 
                 // 콜라이더가 자식에 있어도 본체의 Health를 찾아야 한다.
                 damaged = hit.collider.GetComponentInParent<IDamageable>();
+
+                DamageResult result = DamageResult.None;
                 if (damaged != null && damaged.IsAlive)
                 {
-                    damaged.TakeDamage(new DamageInfo(
+                    result = damaged.TakeDamage(new DamageInfo(
                         _gun.Damage, _gun.Penetration, _gun.Demolition,
                         hit.point, hit.normal, gameObject));
                 }
 
-                Hit?.Invoke(hit, damaged);
+                Hit?.Invoke(hit, damaged, result);
             }
 
             Fired?.Invoke(origin, end);

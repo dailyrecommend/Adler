@@ -18,6 +18,9 @@ namespace Adler.Flight
         /// <summary>현재 스로틀 설정값. 0 = 최저 속도, 1 = 최고 속도.</summary>
         float ThrottleNormalized { get; }
 
+        /// <summary>부스터를 쓰는 중인지. 화면 표시와 효과음이 참조한다.</summary>
+        bool IsBoosting { get; }
+
         /// <summary>
         /// 물리 시뮬레이션 시작 전에 한 번 호출. 구현체가 Rigidbody 설정을
         /// 자신에게 맞게 강제하는 자리이기도 하다.
