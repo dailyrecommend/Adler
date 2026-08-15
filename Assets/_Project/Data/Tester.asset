@@ -21,7 +21,7 @@ MonoBehaviour:
   Deceleration: 22
   ThrottleResponse: 0.6
   PitchRate: 70
-  RollRate: 180
+  RollRate: 120
   YawRate: 25
   ControlResponse: 6
   LowSpeedAgility: 0.7
