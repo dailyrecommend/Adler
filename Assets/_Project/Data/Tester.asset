@@ -25,5 +25,5 @@ MonoBehaviour:
   YawRate: 25
   ControlResponse: 6
   LowSpeedAgility: 0.7
-  BankTurnRate: 55
-  GravityInfluence: 1
+  BankTurnRate: 45
+  GravityInfluence: 0.7
