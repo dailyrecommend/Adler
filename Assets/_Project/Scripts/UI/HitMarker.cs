@@ -21,6 +21,9 @@ namespace Adler.UI
         [Header("읽어올 대상")]
         [SerializeField] private AircraftGun _gun;
 
+        [Tooltip("폭발 결과도 표시하려면 넣는다. 비워두면 기총만 표시한다.")]
+        [SerializeField] private BombBay _bombBay;
+
         [Header("표식")]
         [Tooltip("피해가 들어갔을 때 띄울 요소. 보통 조준점 위에 겹쳐 둔다.")]
         [SerializeField] private CanvasGroup _hitMarker;
@@ -51,9 +54,40 @@ namespace Adler.UI
             Hide(_blockedMarker);
         }
 
-        private void OnEnable() => _gun.Hit += OnHit;
+        private void OnEnable()
+        {
+            _gun.Hit += OnHit;
 
-        private void OnDisable() => _gun.Hit -= OnHit;
+            if (_bombBay != null)
+            {
+                _bombBay.Detonated += OnDetonated;
+            }
+        }
+
+        private void OnDisable()
+        {
+            _gun.Hit -= OnHit;
+
+            if (_bombBay != null)
+            {
+                _bombBay.Detonated -= OnDetonated;
+            }
+        }
+
+        /// <summary>
+        /// 폭발은 한 번에 여러 표적을 때린다. 하나라도 피해가 들어갔으면 명중으로 본다.
+        /// 전부 막혔을 때만 막힘 표시를 띄워야, 장갑 차량 옆의 보병을 잡은 것을
+        /// 실패로 알리는 일이 없다.
+        /// </summary>
+        private void OnDetonated(BombDefinition bomb, BlastReport report)
+        {
+            if (report.MissedEverything)
+            {
+                return;
+            }
+
+            Show(report.Damaged > 0 ? _hitMarker : _blockedMarker);
+        }
 
         private void OnHit(RaycastHit hit, IDamageable damaged, DamageResult result)
         {
@@ -64,7 +98,11 @@ namespace Adler.UI
                 return;
             }
 
-            CanvasGroup marker = result.Blocked ? _blockedMarker : _hitMarker;
+            Show(result.Blocked ? _blockedMarker : _hitMarker);
+        }
+
+        private void Show(CanvasGroup marker)
+        {
             if (marker == null)
             {
                 return;
