@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0009ebf86e2a9e4428ffffdcfea7a18a, type: 3}
+  m_Name: DN-01
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombDefinition
+  DisplayName: DN-01
+  Command: 0000000003000000010000000100000001000000
+  Prefab: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
+  ArmingDelay: 1.5
+  InnerRadius: 4
+  BlastRadius: 12
+  Damage: 3000
+  Penetration: 10
+  Demolition: 50
