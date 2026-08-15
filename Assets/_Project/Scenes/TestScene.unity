@@ -2849,6 +2849,7 @@ MonoBehaviour:
   _muzzle: {fileID: 2022929754}
   _camera: {fileID: 330585545}
   _reticle: {fileID: 1889517888}
+  _canvas: {fileID: 0}
   _aimMask:
     serializedVersion: 2
     m_Bits: 4294967295
