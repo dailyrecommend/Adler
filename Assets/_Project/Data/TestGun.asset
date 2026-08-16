@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: TestGun
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GunDefinition
   DisplayName: TestGun
-  RoundsPerMinute: 900
+  RoundsPerMinute: 1500
+  Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
+  MuzzleVelocity: 120
+  GravityScale: 0.3
   Range: 300
   Damage: 12
   Penetration: 2
