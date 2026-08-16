@@ -2,43 +2,17 @@ using UnityEngine;
 
 namespace Adler.Weapons
 {
-    /// <summary>승인 커맨드를 이루는 방향 입력 하나.</summary>
-    public enum CommandDirection
-    {
-        Up = 0,
-        Down = 1,
-        Left = 2,
-        Right = 3,
-    }
-
     /// <summary>
-    /// 폭탄 한 종류의 성능과, 그것을 요청하는 커맨드.
+    /// 폭탄 한 종류의 성능.
     /// <para>
-    /// 폭탄은 들고 다니는 무기가 아니라 매번 승인을 받아 쓰는 것이다. 그래서 위력만이
-    /// 아니라 <see cref="Command"/>가 함께 붙어 있다. 강한 폭탄일수록 커맨드를 길게
-    /// 만들면, 위력의 대가를 입력하는 시간으로 치르게 된다 — 비행 중에 손이 묶이는
-    /// 그 몇 초가 이 무기의 진짜 비용이다.
+    /// 폭탄은 들고 다니는 무기가 아니라 매번 승인을 받아 쓰는 것이다. 강한 폭탄일수록
+    /// 커맨드를 길게 만들면, 위력의 대가를 입력하는 시간으로 치르게 된다 — 비행 중에
+    /// 손이 묶이는 그 몇 초가 이 무기의 진짜 비용이다.
     /// </para>
     /// </summary>
     [CreateAssetMenu(fileName = "Bomb", menuName = "Adler/Weapons/Bomb Definition")]
-    public sealed class BombDefinition : ScriptableObject
+    public sealed class BombDefinition : StratagemDefinition
     {
-        [Header("표시")]
-        public string DisplayName = "Unnamed Bomb";
-
-        [Tooltip("화면에 띄울 아이콘.")]
-        public Sprite Icon;
-
-        [Header("승인 커맨드")]
-        [Tooltip("이 순서대로 방향키를 눌러야 장전된다. 길수록 강한 폭탄에 어울린다.")]
-        public CommandDirection[] Command =
-        {
-            CommandDirection.Up,
-            CommandDirection.Down,
-            CommandDirection.Left,
-            CommandDirection.Right,
-        };
-
         [Header("투하")]
         [Tooltip("떨어뜨릴 폭탄 프리팹. Rigidbody와 Bomb 컴포넌트가 있어야 한다.")]
         public GameObject Prefab;

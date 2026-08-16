@@ -21,6 +21,10 @@ namespace Adler.Weapons
         [Min(1f)]
         public float RoundsPerMinute = 900f;
 
+        [Tooltip("가득 채웠을 때 실을 수 있는 탄 수.")]
+        [Min(1)]
+        public int AmmoCapacity = 600;
+
         [Tooltip("날아갈 탄환 프리팹. Projectile 컴포넌트가 있어야 한다.\n" +
                  "Rigidbody는 필요 없다 — 탄도는 Projectile이 직접 계산한다.")]
         public GameObject Prefab;
@@ -63,6 +67,9 @@ namespace Adler.Weapons
 
         /// <summary>한 발과 다음 발 사이의 간격(초).</summary>
         public float ShotInterval => 60f / RoundsPerMinute;
+
+        /// <summary>가득 채운 탄을 쉬지 않고 쏟아부었을 때 버티는 시간(초).</summary>
+        public float SustainedFireSeconds => AmmoCapacity * ShotInterval;
 
         /// <summary>총구를 떠난 탄이 사거리 끝까지 가는 데 걸리는 시간(초).</summary>
         public float TimeOfFlight => Range / MuzzleVelocity;

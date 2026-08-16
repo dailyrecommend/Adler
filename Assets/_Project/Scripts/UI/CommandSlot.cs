@@ -42,27 +42,27 @@ namespace Adler.UI
 
         private readonly List<Image> _arrows = new();
 
-        /// <summary>이 칸이 나타내는 폭탄.</summary>
-        public BombDefinition Bomb { get; private set; }
+        /// <summary>이 칸이 나타내는 스트라타젬.</summary>
+        public StratagemDefinition Stratagem { get; private set; }
 
-        /// <summary>폭탄을 붙이고 커맨드 길이만큼 화살표를 만든다.</summary>
-        public void Bind(BombDefinition bomb, Image arrowPrefab)
+        /// <summary>스트라타젬을 붙이고 커맨드 길이만큼 화살표를 만든다.</summary>
+        public void Bind(StratagemDefinition stratagem, Image arrowPrefab)
         {
-            Bomb = bomb;
+            Stratagem = stratagem;
 
             if (_icon != null)
             {
-                _icon.sprite = bomb.Icon;
-                _icon.enabled = bomb.Icon != null;
+                _icon.sprite = stratagem.Icon;
+                _icon.enabled = stratagem.Icon != null;
             }
 
-            BuildArrows(bomb, arrowPrefab);
+            BuildArrows(stratagem, arrowPrefab);
             SetMatchedCount(0);
             SetDimmed(false);
             SetArmed(false);
         }
 
-        private void BuildArrows(BombDefinition bomb, Image arrowPrefab)
+        private void BuildArrows(StratagemDefinition stratagem, Image arrowPrefab)
         {
             foreach (Image arrow in _arrows)
             {
@@ -76,7 +76,7 @@ namespace Adler.UI
                 return;
             }
 
-            foreach (CommandDirection direction in bomb.Command)
+            foreach (CommandDirection direction in stratagem.Command)
             {
                 Image arrow = Instantiate(arrowPrefab, _arrowRoot);
                 arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, RotationFor(direction));

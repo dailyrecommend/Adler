@@ -22,7 +22,7 @@ namespace Adler.UI
         [SerializeField] private AircraftGun _gun;
 
         [Tooltip("폭발 결과도 표시하려면 넣는다. 비워두면 기총만 표시한다.")]
-        [SerializeField] private BombBay _bombBay;
+        [SerializeField] private StratagemBay _stratagemBay;
 
         [Header("표식")]
         [Tooltip("피해가 들어갔을 때 띄울 요소. 보통 조준점 위에 겹쳐 둔다.")]
@@ -58,9 +58,9 @@ namespace Adler.UI
         {
             _gun.Hit += OnHit;
 
-            if (_bombBay != null)
+            if (_stratagemBay != null)
             {
-                _bombBay.Detonated += OnDetonated;
+                _stratagemBay.Detonated += OnDetonated;
             }
         }
 
@@ -68,9 +68,9 @@ namespace Adler.UI
         {
             _gun.Hit -= OnHit;
 
-            if (_bombBay != null)
+            if (_stratagemBay != null)
             {
-                _bombBay.Detonated -= OnDetonated;
+                _stratagemBay.Detonated -= OnDetonated;
             }
         }
 

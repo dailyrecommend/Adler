@@ -26,6 +26,9 @@ namespace Adler.Weapons
         [Tooltip("탄에 속도를 물려줄 기체. 비워두면 부모에서 찾는다.")]
         [SerializeField] private Rigidbody _carrier;
 
+        [Tooltip("남은 탄을 관리하는 곳. 비워두면 탄약 제한 없이 쏜다.")]
+        [SerializeField] private GunAmmo _ammo;
+
         [Header("판정")]
         [Tooltip("탄이 맞을 레이어. 기체 자신이 속한 레이어는 빼야 자기 총에 맞지 않는다.")]
         [SerializeField] private LayerMask _hitMask = ~0;
@@ -33,6 +36,9 @@ namespace Adler.Weapons
         private InputAction _fireAction;
         private float _cooldown;
         private int _nextMuzzle;
+
+        /// <summary>이 총이 쓰는 성능 에셋. 탄약 관리가 장탄수를 읽어 간다.</summary>
+        public GunDefinition Definition => _gun;
 
         /// <summary>발사할 때마다. 총구 화염과 소리가 구독한다. (총구 위치, 발사 방향)</summary>
         public event Action<Vector3, Vector3> Fired;
@@ -104,6 +110,13 @@ namespace Adler.Weapons
 
             while (_cooldown <= 0f && shots < MaxShotsPerFrame)
             {
+                if (!TrySpendRound())
+                {
+                    // 탄이 없다. 남은 시간을 지워, 보급되면 곧바로 다시 나가게 한다.
+                    _cooldown = 0f;
+                    return;
+                }
+
                 FireOnce();
                 _cooldown += _gun.ShotInterval;
                 shots++;
@@ -113,6 +126,12 @@ namespace Adler.Weapons
             {
                 _cooldown = 0f;
             }
+        }
+
+        /// <summary>탄이 남아 있으면 한 발 쓰고 참을 돌려준다.</summary>
+        private bool TrySpendRound()
+        {
+            return _ammo == null || _ammo.TryConsume();
         }
 
         private void FireOnce()

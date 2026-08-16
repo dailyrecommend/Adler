@@ -6,18 +6,18 @@ using UnityEngine.InputSystem;
 namespace Adler.Weapons
 {
     /// <summary>
-    /// 폭탄 승인과 투하를 맡는다.
+    /// 커맨드를 받아 스트라타젬을 승인한다. 폭탄 장전과 투하도 여기서 맡는다.
     /// <para>
-    /// 폭탄은 기체에 실려 있는 것이 아니라 매번 요청해서 허가받는 물건이다. 방향키로
-    /// 커맨드를 맞게 입력하면 한 발이 장전되고, 쓰고 나면 다시 입력해야 한다.
+    /// 무엇을 요청하든 절차는 같다. 방향키를 맞게 눌러야 하고, 그동안 손이 조종에서
+    /// 떠난다. 그래서 판정을 폭탄 전용으로 두지 않고 한곳에 모았다 — 재보급이든
+    /// 나중에 붙일 수리든 커맨드 처리를 다시 짤 일이 없다.
     /// </para>
     /// <para>
-    /// 조종은 커맨드를 입력하는 동안에도 그대로 살아 있다. 대신 손이 방향키에 가 있는
-    /// 몇 초가 대가다 — 그 사이에는 기총을 쏠 수 없고 지형도 봐야 한다.
+    /// 조종은 커맨드를 입력하는 동안에도 살아 있다. 대신 그 몇 초가 대가다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class BombBay : MonoBehaviour
+    public sealed class StratagemBay : MonoBehaviour
     {
         [Header("참조")]
         [SerializeField] private InputActionAsset _controls;
@@ -28,9 +28,9 @@ namespace Adler.Weapons
         [Tooltip("투하 순간의 속도를 물려받을 기체. 비워두면 부모에서 찾는다.")]
         [SerializeField] private Rigidbody _carrier;
 
-        [Header("탑재 가능 폭탄")]
-        [Tooltip("각자 다른 커맨드를 가진다. 입력이 맞아떨어진 폭탄이 장전된다.")]
-        [SerializeField] private List<BombDefinition> _loadout = new();
+        [Header("요청 가능 목록")]
+        [Tooltip("각자 다른 커맨드를 가진다. 입력이 맞아떨어진 것이 승인된다.")]
+        [SerializeField] private List<StratagemDefinition> _loadout = new();
 
         [Header("커맨드")]
         [Tooltip("다음 입력이 이 시간 안에 들어오지 않으면 처음부터 다시 입력해야 한다(초).")]
@@ -40,7 +40,7 @@ namespace Adler.Weapons
         private InputAction _dropAction;
         private readonly InputAction[] _directionActions = new InputAction[4];
         private readonly List<CommandDirection> _entered = new();
-        private readonly List<BombDefinition> _candidates = new();
+        private readonly List<StratagemDefinition> _candidates = new();
 
         private float _lastInputTime;
 
@@ -50,10 +50,10 @@ namespace Adler.Weapons
         /// <summary>입력이 틀렸거나 시간이 지나 처음으로 돌아갔을 때.</summary>
         public event Action CommandReset;
 
-        /// <summary>커맨드가 완성돼 한 발이 장전됐을 때.</summary>
-        public event Action<BombDefinition> Authorized;
+        /// <summary>커맨드가 완성됐을 때. 재보급처럼 폭탄이 아닌 것들이 여기서 받아 간다.</summary>
+        public event Action<StratagemDefinition> Authorized;
 
-        /// <summary>투하했을 때.</summary>
+        /// <summary>폭탄을 투하했을 때.</summary>
         public event Action<BombDefinition> Dropped;
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Adler.Weapons
         /// <summary>지금까지 입력된 커맨드.</summary>
         public IReadOnlyList<CommandDirection> EnteredCommand => _entered;
 
-        /// <summary>탑재 가능한 폭탄 목록. 화면에 커맨드를 늘어놓는 데 쓴다.</summary>
-        public IReadOnlyList<BombDefinition> Loadout => _loadout;
+        /// <summary>요청 가능한 목록. 화면에 커맨드를 늘어놓는 데 쓴다.</summary>
+        public IReadOnlyList<StratagemDefinition> Loadout => _loadout;
 
         private void Awake()
         {
@@ -90,7 +90,7 @@ namespace Adler.Weapons
         {
             if (_controls == null)
             {
-                Debug.LogError($"{nameof(BombBay)}: Controls 에셋이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(StratagemBay)}: Controls 에셋이 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -176,7 +176,7 @@ namespace Adler.Weapons
 
             CommandProgressed?.Invoke(_entered);
 
-            foreach (BombDefinition candidate in _candidates)
+            foreach (StratagemDefinition candidate in _candidates)
             {
                 if (candidate.Command.Length == _entered.Count)
                 {
@@ -186,14 +186,14 @@ namespace Adler.Weapons
             }
         }
 
-        /// <summary>지금까지의 입력으로 아직 가능한 폭탄들을 추린다.</summary>
+        /// <summary>지금까지의 입력으로 아직 가능한 것들을 추린다.</summary>
         private bool RefreshCandidates()
         {
             _candidates.Clear();
 
-            foreach (BombDefinition bomb in _loadout)
+            foreach (StratagemDefinition stratagem in _loadout)
             {
-                if (bomb == null || bomb.Command.Length < _entered.Count)
+                if (stratagem == null || stratagem.Command.Length < _entered.Count)
                 {
                     continue;
                 }
@@ -201,7 +201,7 @@ namespace Adler.Weapons
                 bool matches = true;
                 for (int i = 0; i < _entered.Count; i++)
                 {
-                    if (bomb.Command[i] != _entered[i])
+                    if (stratagem.Command[i] != _entered[i])
                     {
                         matches = false;
                         break;
@@ -210,19 +210,25 @@ namespace Adler.Weapons
 
                 if (matches)
                 {
-                    _candidates.Add(bomb);
+                    _candidates.Add(stratagem);
                 }
             }
 
             return _candidates.Count > 0;
         }
 
-        private void Authorize(BombDefinition bomb)
+        private void Authorize(StratagemDefinition stratagem)
         {
-            ArmedBomb = bomb;
             _entered.Clear();
             _candidates.Clear();
-            Authorized?.Invoke(bomb);
+
+            // 폭탄은 여기서 장전해 둔다. 나머지는 알아듣는 쪽이 받아 처리한다.
+            if (stratagem is BombDefinition bomb)
+            {
+                ArmedBomb = bomb;
+            }
+
+            Authorized?.Invoke(stratagem);
         }
 
         private void ResetCommand()
@@ -242,7 +248,7 @@ namespace Adler.Weapons
             BombDefinition bomb = ArmedBomb;
             if (bomb.Prefab == null)
             {
-                Debug.LogError($"{nameof(BombBay)}: '{bomb.DisplayName}'에 프리팹이 지정되지 않았습니다.", this);
+                Debug.LogError($"{nameof(StratagemBay)}: '{bomb.DisplayName}'에 프리팹이 지정되지 않았습니다.", this);
                 return;
             }
 
@@ -262,7 +268,7 @@ namespace Adler.Weapons
             }
             else
             {
-                Debug.LogError($"{nameof(BombBay)}: '{bomb.DisplayName}'의 프리팹에 {nameof(Bomb)}이 없습니다.", this);
+                Debug.LogError($"{nameof(StratagemBay)}: '{bomb.DisplayName}'의 프리팹에 {nameof(Bomb)}이 없습니다.", this);
             }
 
             ArmedBomb = null;

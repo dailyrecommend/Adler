@@ -18,9 +18,9 @@ namespace Adler.Weapons
     public sealed class BombImpactPredictor : MonoBehaviour
     {
         [Header("참조")]
-        [SerializeField] private BombBay _bombBay;
+        [SerializeField] private StratagemBay _stratagemBay;
 
-        [Tooltip("폭탄이 떨어져 나오는 자리. BombBay에 지정한 것과 같아야 한다.")]
+        [Tooltip("폭탄이 떨어져 나오는 자리. StratagemBay에 지정한 것과 같아야 한다.")]
         [SerializeField] private Transform _dropPoint;
 
         [Tooltip("투하 순간의 속도를 넘겨줄 기체. 비워두면 부모에서 찾는다.")]
@@ -98,9 +98,9 @@ namespace Adler.Weapons
                 _markerBaseScale = _marker.localScale;
             }
 
-            if (_bombBay == null || _dropPoint == null || _carrier == null)
+            if (_stratagemBay == null || _dropPoint == null || _carrier == null)
             {
-                Debug.LogError($"{nameof(BombImpactPredictor)}: BombBay, Drop Point, 기체 중 빠진 것이 있습니다.", this);
+                Debug.LogError($"{nameof(BombImpactPredictor)}: StratagemBay, Drop Point, 기체 중 빠진 것이 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -118,7 +118,7 @@ namespace Adler.Weapons
         private void LateUpdate()
         {
             // 기체가 자리를 잡은 뒤에 계산해야 표식이 한 프레임 늦지 않는다.
-            HasImpact = _onlyWhenArmed && !_bombBay.IsArmed
+            HasImpact = _onlyWhenArmed && !_stratagemBay.IsArmed
                 ? false
                 : Predict();
 
@@ -228,7 +228,7 @@ namespace Adler.Weapons
         /// </summary>
         private float ResolveDamping()
         {
-            BombDefinition bomb = _bombBay.ArmedBomb;
+            BombDefinition bomb = _stratagemBay.ArmedBomb;
             if (bomb == null || bomb.Prefab == null)
             {
                 return 0f;

@@ -17,7 +17,7 @@ namespace Adler.UI
     public sealed class CommandDisplay : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private BombBay _bombBay;
+        [SerializeField] private StratagemBay _stratagemBay;
 
         [Header("만들어 둔 조각")]
         [Tooltip("폭탄 한 칸의 모양. CommandSlot이 붙어 있어야 한다.")]
@@ -33,9 +33,9 @@ namespace Adler.UI
 
         private void Awake()
         {
-            if (_bombBay == null || _slotPrefab == null)
+            if (_stratagemBay == null || _slotPrefab == null)
             {
-                Debug.LogError($"{nameof(CommandDisplay)}: Bomb Bay 또는 Slot Prefab이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(CommandDisplay)}: Stratagem Bay 또는 Slot Prefab이 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -50,31 +50,31 @@ namespace Adler.UI
 
         private void OnEnable()
         {
-            _bombBay.CommandProgressed += OnCommandProgressed;
-            _bombBay.CommandReset += OnCommandReset;
-            _bombBay.Authorized += OnAuthorized;
-            _bombBay.Dropped += OnDropped;
+            _stratagemBay.CommandProgressed += OnCommandProgressed;
+            _stratagemBay.CommandReset += OnCommandReset;
+            _stratagemBay.Authorized += OnAuthorized;
+            _stratagemBay.Dropped += OnDropped;
         }
 
         private void OnDisable()
         {
-            _bombBay.CommandProgressed -= OnCommandProgressed;
-            _bombBay.CommandReset -= OnCommandReset;
-            _bombBay.Authorized -= OnAuthorized;
-            _bombBay.Dropped -= OnDropped;
+            _stratagemBay.CommandProgressed -= OnCommandProgressed;
+            _stratagemBay.CommandReset -= OnCommandReset;
+            _stratagemBay.Authorized -= OnAuthorized;
+            _stratagemBay.Dropped -= OnDropped;
         }
 
         private void BuildSlots()
         {
-            foreach (BombDefinition bomb in _bombBay.Loadout)
+            foreach (StratagemDefinition stratagem in _stratagemBay.Loadout)
             {
-                if (bomb == null)
+                if (stratagem == null)
                 {
                     continue;
                 }
 
                 CommandSlot slot = Instantiate(_slotPrefab, _slotRoot);
-                slot.Bind(bomb, _arrowPrefab);
+                slot.Bind(stratagem, _arrowPrefab);
                 _slots.Add(slot);
             }
         }
@@ -83,9 +83,9 @@ namespace Adler.UI
         {
             foreach (CommandSlot slot in _slots)
             {
-                bool matches = Matches(slot.Bomb, entered);
+                bool matches = Matches(slot.Stratagem, entered);
 
-                // 맞는 폭탄만 진행 상황을 보여준다. 어긋난 폭탄까지 화살표를 채우면
+                // 맞는 것만 진행 상황을 보여준다. 어긋난 것까지 화살표를 채우면
                 // 지금 어느 커맨드를 입력하고 있는지 알아볼 수 없다.
                 slot.SetMatchedCount(matches ? entered.Count : 0);
                 slot.SetDimmed(!matches);
@@ -101,13 +101,19 @@ namespace Adler.UI
             }
         }
 
-        private void OnAuthorized(BombDefinition bomb)
+        /// <summary>
+        /// 폭탄만 장전 상태로 남는다. 재보급처럼 즉시 처리되는 것은 승인과 동시에 끝나므로
+        /// 켜둘 표시가 없다.
+        /// </summary>
+        private void OnAuthorized(StratagemDefinition stratagem)
         {
+            bool arms = stratagem is BombDefinition;
+
             foreach (CommandSlot slot in _slots)
             {
                 slot.SetMatchedCount(0);
                 slot.SetDimmed(false);
-                slot.SetArmed(slot.Bomb == bomb);
+                slot.SetArmed(arms && slot.Stratagem == stratagem);
             }
         }
 
@@ -119,16 +125,16 @@ namespace Adler.UI
             }
         }
 
-        private static bool Matches(BombDefinition bomb, IReadOnlyList<CommandDirection> entered)
+        private static bool Matches(StratagemDefinition stratagem, IReadOnlyList<CommandDirection> entered)
         {
-            if (bomb == null || bomb.Command.Length < entered.Count)
+            if (stratagem == null || stratagem.Command.Length < entered.Count)
             {
                 return false;
             }
 
             for (int i = 0; i < entered.Count; i++)
             {
-                if (bomb.Command[i] != entered[i])
+                if (stratagem.Command[i] != entered[i])
                 {
                     return false;
                 }
