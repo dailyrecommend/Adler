@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0009ebf86e2a9e4428ffffdcfea7a18a, type: 3}
   m_Name: DN-02
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombDefinition
-  DisplayName: DN-01
+  DisplayName: DN-02
   Icon: {fileID: 21300000, guid: 5aa3e76dd2d117448a374337a9305eeb, type: 3}
-  Command: 0000000003000000010000000100000001000000
+  Command: 00000000030000000200000001000000
   Prefab: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-  ArmingDelay: 1.5
-  InnerRadius: 4
-  BlastRadius: 12
-  Damage: 3000
-  Penetration: 10
-  Demolition: 50
+  ArmingDelay: 0
+  InnerRadius: 3
+  BlastRadius: 6
+  Damage: 2500
+  Penetration: 1
+  Demolition: 60

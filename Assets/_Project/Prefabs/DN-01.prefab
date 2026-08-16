@@ -140,7 +140,7 @@ MonoBehaviour:
   _impactRadius: 0.15
   _stopOnImpact: 1
   _maxLifetime: 30
-  _explosionEffect: {fileID: 0}
+  _explosionEffect: {fileID: 2310054169237447230, guid: 5c150bb059d3efc4c8adbb43aec518e7, type: 3}
   _explosionEffectLifetime: 3
   _drawBlastRange: 1
   _blastDebugDuration: 3
