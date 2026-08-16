@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0009ebf86e2a9e4428ffffdcfea7a18a, type: 3}
-  m_Name: DN-01
+  m_Name: DN-02
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombDefinition
   DisplayName: DN-01
   Icon: {fileID: 21300000, guid: 5aa3e76dd2d117448a374337a9305eeb, type: 3}
