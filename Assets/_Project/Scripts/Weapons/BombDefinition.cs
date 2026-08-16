@@ -26,6 +26,9 @@ namespace Adler.Weapons
         [Header("표시")]
         public string DisplayName = "Unnamed Bomb";
 
+        [Tooltip("화면에 띄울 아이콘.")]
+        public Sprite Icon;
+
         [Header("승인 커맨드")]
         [Tooltip("이 순서대로 방향키를 눌러야 장전된다. 길수록 강한 폭탄에 어울린다.")]
         public CommandDirection[] Command =

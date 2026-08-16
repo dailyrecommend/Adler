@@ -70,6 +70,9 @@ namespace Adler.Weapons
         /// <summary>지금까지 입력된 커맨드.</summary>
         public IReadOnlyList<CommandDirection> EnteredCommand => _entered;
 
+        /// <summary>탑재 가능한 폭탄 목록. 화면에 커맨드를 늘어놓는 데 쓴다.</summary>
+        public IReadOnlyList<BombDefinition> Loadout => _loadout;
+
         private void Awake()
         {
             if (_carrier == null)
