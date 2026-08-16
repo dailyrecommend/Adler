@@ -21,7 +21,19 @@ namespace Adler.Weapons
         [Min(1f)]
         public float RoundsPerMinute = 900f;
 
-        [Tooltip("탄이 닿는 최대 거리 (m). 1m 기체 기준이므로 실제 항공기보다 훨씬 짧다.")]
+        [Tooltip("날아갈 탄환 프리팹. Projectile 컴포넌트가 있어야 한다.\n" +
+                 "Rigidbody는 필요 없다 — 탄도는 Projectile이 직접 계산한다.")]
+        public GameObject Prefab;
+
+        [Tooltip("탄이 총구를 떠나는 속도 (m/s). 여기에 기체 속도가 더해진다.")]
+        [Min(1f)]
+        public float MuzzleVelocity = 120f;
+
+        [Tooltip("탄이 받는 중력의 비율. 0이면 직선, 1이면 온전히 떨어진다.")]
+        [Range(0f, 1f)]
+        public float GravityScale = 0.3f;
+
+        [Tooltip("이만큼 날아가면 사라진다 (m).")]
         [Min(1f)]
         public float Range = 300f;
 
@@ -51,5 +63,8 @@ namespace Adler.Weapons
 
         /// <summary>한 발과 다음 발 사이의 간격(초).</summary>
         public float ShotInterval => 60f / RoundsPerMinute;
+
+        /// <summary>총구를 떠난 탄이 사거리 끝까지 가는 데 걸리는 시간(초).</summary>
+        public float TimeOfFlight => Range / MuzzleVelocity;
     }
 }

@@ -8,9 +8,9 @@ namespace Adler.Weapons
     /// <summary>
     /// 기체에 달린 기총. 방아쇠를 당기는 동안 일정 간격으로 탄을 뿌린다.
     /// <para>
-    /// 탄을 날리지 않고 즉시 판정한다(히트스캔). 캐주얼한 조작을 원하므로 편차를 계산해
-    /// 앞을 겨냥하는 부담을 주지 않는 편이 맞고, 명중 판정도 확실해진다. 날아가는 탄의
-    /// 모양새는 예광탄 연출이 대신한다.
+    /// 탄은 실제로 날아간다. 그래서 움직이는 표적은 앞을 겨냥해야 맞고, 명중은 쏜 순간이
+    /// 아니라 탄이 도달한 뒤에 정해진다. 탄의 사정은 <see cref="Projectile"/>이 맡고,
+    /// 이 컴포넌트는 방아쇠와 발사 간격만 다룬다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
@@ -23,6 +23,9 @@ namespace Adler.Weapons
         [Tooltip("총구 위치. 여러 개면 번갈아 발사한다. 비어 있으면 이 오브젝트에서 나간다.")]
         [SerializeField] private Transform[] _muzzles = Array.Empty<Transform>();
 
+        [Tooltip("탄에 속도를 물려줄 기체. 비워두면 부모에서 찾는다.")]
+        [SerializeField] private Rigidbody _carrier;
+
         [Header("판정")]
         [Tooltip("탄이 맞을 레이어. 기체 자신이 속한 레이어는 빼야 자기 총에 맞지 않는다.")]
         [SerializeField] private LayerMask _hitMask = ~0;
@@ -31,7 +34,7 @@ namespace Adler.Weapons
         private float _cooldown;
         private int _nextMuzzle;
 
-        /// <summary>발사할 때마다. 예광탄과 총구 화염이 구독한다. (시작점, 끝점)</summary>
+        /// <summary>발사할 때마다. 총구 화염과 소리가 구독한다. (총구 위치, 발사 방향)</summary>
         public event Action<Vector3, Vector3> Fired;
 
         /// <summary>
@@ -43,9 +46,21 @@ namespace Adler.Weapons
 
         private void Awake()
         {
+            if (_carrier == null)
+            {
+                _carrier = GetComponentInParent<Rigidbody>();
+            }
+
             if (_gun == null)
             {
                 Debug.LogError($"{nameof(AircraftGun)}: Gun Definition이 비어 있습니다.", this);
+                enabled = false;
+                return;
+            }
+
+            if (_gun.Prefab == null)
+            {
+                Debug.LogError($"{nameof(AircraftGun)}: '{_gun.DisplayName}'에 탄환 프리팹이 없습니다.", this);
                 enabled = false;
             }
         }
@@ -106,44 +121,30 @@ namespace Adler.Weapons
             Vector3 origin = muzzle.position;
             Vector3 direction = ApplySpread(muzzle.forward);
 
-            Vector3 end = origin + (direction * _gun.Range);
-            IDamageable damaged = null;
+            // 기체 속도를 얹는다. 이게 없으면 빠르게 날면서 쏠 때 탄이 뒤로 처지는
+            // 것처럼 보이고, 기체가 자기 탄을 따라잡는 상황까지 나온다.
+            Vector3 velocity = (direction * _gun.MuzzleVelocity)
+                               + (_carrier != null ? _carrier.linearVelocity : Vector3.zero);
 
-            if (TryHit(origin, direction, out RaycastHit hit))
+            GameObject instance = Instantiate(_gun.Prefab, origin, Quaternion.LookRotation(direction));
+
+            if (instance.TryGetComponent(out Projectile projectile))
             {
-                end = hit.point;
-
-                // 콜라이더가 자식에 있어도 본체의 Health를 찾아야 한다.
-                damaged = hit.collider.GetComponentInParent<IDamageable>();
-
-                DamageResult result = DamageResult.None;
-                if (damaged != null && damaged.IsAlive)
-                {
-                    result = damaged.TakeDamage(new DamageInfo(
-                        _gun.Damage, _gun.Penetration, _gun.Demolition,
-                        hit.point, hit.normal, gameObject));
-                }
-
-                Hit?.Invoke(hit, damaged, result);
+                // 탄은 맞는 순간 사라지므로 화면 표시가 직접 붙을 수 없다.
+                // 총이 대신 받아 자기 신호로 다시 내보낸다.
+                projectile.Struck += (hit, damaged, result) => Hit?.Invoke(hit, damaged, result);
+                projectile.Launch(_gun, _carrier != null ? _carrier.gameObject : gameObject,
+                    velocity, _hitMask);
+            }
+            else
+            {
+                Debug.LogError(
+                    $"{nameof(AircraftGun)}: '{_gun.DisplayName}'의 탄환 프리팹에 " +
+                    $"{nameof(Projectile)}이 없습니다.", this);
+                Destroy(instance);
             }
 
-            Fired?.Invoke(origin, end);
-        }
-
-        private bool TryHit(Vector3 origin, Vector3 direction, out RaycastHit hit)
-        {
-            // 굵기가 있으면 살짝 빗나가도 맞는다. 보병처럼 작은 표적을 비행 중에
-            // 맞히려면 이 관용이 있어야 캐주얼한 사격이 된다.
-            if (_gun.HitRadius > 0f)
-            {
-                return Physics.SphereCast(
-                    origin, _gun.HitRadius, direction, out hit,
-                    _gun.Range, _hitMask, QueryTriggerInteraction.Ignore);
-            }
-
-            return Physics.Raycast(
-                origin, direction, out hit,
-                _gun.Range, _hitMask, QueryTriggerInteraction.Ignore);
+            Fired?.Invoke(origin, direction);
         }
 
         private Transform ResolveMuzzle()
