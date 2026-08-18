@@ -14,16 +14,16 @@ namespace Adler.Weapons
     public sealed class ResupplyDefinition : StratagemDefinition
     {
         [Header("보급량")]
-        [Tooltip("채워 넣을 탄 수. 0 이하면 가득 채운다.")]
-        public int Rounds;
+        [Tooltip("최대 장탄수를 기준으로 채워 넣을 비율(%).\n" +
+                 "탄 수가 아니라 비율로 두는 이유는, 정비로 장탄수를 늘렸을 때 보급량도 " +
+                 "함께 따라오게 하기 위해서다. 고정 수치면 큰 탄창일수록 재보급이 초라해진다.")]
+        [Range(0f, 100f)]
+        public float RefillPercent = 100f;
 
-        [Header("제한")]
-        [Tooltip("한 번 쓰고 나서 다시 요청할 수 있을 때까지의 시간(초).\n" +
-                 "0이면 제한 없이 몇 번이든 부를 수 있다.")]
-        [Min(0f)]
-        public float Cooldown = 20f;
-
-        [Tooltip("출격 한 번에 부를 수 있는 횟수. 0 이하면 무제한.")]
-        public int UsesPerSortie;
+        /// <summary>주어진 최대 장탄수에서 이번 보급으로 채울 탄 수.</summary>
+        public int RoundsFor(int capacity)
+        {
+            return Mathf.CeilToInt(capacity * (RefillPercent / 100f));
+        }
     }
 }

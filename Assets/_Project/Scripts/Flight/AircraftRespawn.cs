@@ -39,6 +39,9 @@ namespace Adler.Flight
         [Tooltip("부스터 연료. 비워두면 같은 오브젝트에서 찾는다.")]
         [SerializeField] private BoostFuel _boostFuel;
 
+        [Tooltip("스트라타젬 쿨타임과 사용 횟수를 되돌린다. 비워두면 부모에서 찾는다.")]
+        [SerializeField] private StratagemBay _stratagemBay;
+
         [Tooltip("둘러보던 시야. 비워두면 건드리지 않는다.")]
         [SerializeField] private FreeLookPivot _freeLook;
 
@@ -78,6 +81,11 @@ namespace Adler.Flight
             if (_boostFuel == null)
             {
                 _boostFuel = GetComponent<BoostFuel>();
+            }
+
+            if (_stratagemBay == null)
+            {
+                _stratagemBay = GetComponentInChildren<StratagemBay>();
             }
 
             if (_body == null || _controller == null)
@@ -146,6 +154,11 @@ namespace Adler.Flight
             if (_ammo != null)
             {
                 _ammo.Restock();
+            }
+
+            if (_stratagemBay != null)
+            {
+                _stratagemBay.ResetRestrictions();
             }
 
             if (_boostFuel != null)

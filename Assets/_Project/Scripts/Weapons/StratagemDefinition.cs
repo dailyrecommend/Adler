@@ -36,5 +36,13 @@ namespace Adler.Weapons
             CommandDirection.Left,
             CommandDirection.Right,
         };
+
+        [Header("제한")]
+        [Tooltip("승인된 뒤 다시 부를 수 있을 때까지의 시간(초). 0이면 제한 없다.")]
+        [Min(0f)]
+        public float Cooldown = 20f;
+
+        [Tooltip("출격 한 번에 부를 수 있는 횟수. 0 이하면 무제한.")]
+        public int UsesPerSortie;
     }
 }

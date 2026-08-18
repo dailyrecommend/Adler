@@ -23,8 +23,6 @@ namespace Adler.Weapons
 
         private int _capacity;
         private int _remaining;
-        private float _resupplyReadyAt;
-        private int _resuppliesUsed;
 
         /// <summary>남은 탄이 바뀔 때마다. 화면 표시가 구독한다.</summary>
         public event Action<GunAmmo> Changed;
@@ -103,6 +101,11 @@ namespace Adler.Weapons
             return true;
         }
 
+        /// <summary>
+        /// 쿨타임이나 횟수 제한은 여기서 보지 않는다. 부를 수 있는지는
+        /// <see cref="StratagemBay"/>가 이미 판단했고, 승인이 왔다는 것은 통과했다는 뜻이다.
+        /// 양쪽에서 각자 세면 표시된 쿨타임과 실제 동작이 어긋나기 시작한다.
+        /// </summary>
         private void OnAuthorized(StratagemDefinition stratagem)
         {
             if (stratagem is not ResupplyDefinition resupply)
@@ -110,42 +113,16 @@ namespace Adler.Weapons
                 return;
             }
 
-            if (!CanResupply(resupply))
-            {
-                return;
-            }
-
-            int amount = resupply.Rounds > 0 ? resupply.Rounds : _capacity;
-            _remaining = Mathf.Min(_capacity, _remaining + amount);
-
-            _resuppliesUsed++;
-            _resupplyReadyAt = Time.time + resupply.Cooldown;
+            _remaining = Mathf.Min(_capacity, _remaining + resupply.RoundsFor(_capacity));
 
             Changed?.Invoke(this);
             Resupplied?.Invoke(this);
-        }
-
-        /// <summary>
-        /// 재보급을 부를 수 있는지. 막혀 있어도 커맨드 자체는 통과시킨다 —
-        /// 입력이 맞았는데 아무 반응이 없는 것과, 승인은 됐지만 보급이 안 되는 것은
-        /// 플레이어에게 다른 정보다.
-        /// </summary>
-        public bool CanResupply(ResupplyDefinition resupply)
-        {
-            if (resupply.Cooldown > 0f && Time.time < _resupplyReadyAt)
-            {
-                return false;
-            }
-
-            return resupply.UsesPerSortie <= 0 || _resuppliesUsed < resupply.UsesPerSortie;
         }
 
         /// <summary>출격을 다시 시작할 때 되돌린다.</summary>
         public void Restock()
         {
             _remaining = _capacity;
-            _resuppliesUsed = 0;
-            _resupplyReadyAt = 0f;
             Changed?.Invoke(this);
         }
     }

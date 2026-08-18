@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Adler.Weapons;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,33 @@ namespace Adler.UI
         [Tooltip("장전됐을 때 켤 요소. 테두리나 발광 같은 것. 비워둬도 된다.")]
         [SerializeField] private GameObject _armedHighlight;
 
+        [Header("이름 / 쿨타임")]
+        [Tooltip("평소에는 이름을, 쿨타임 중에는 남은 시간을 보여주는 글자.")]
+        [SerializeField] private TMP_Text _label;
+
+        [Tooltip("{0}에 분, {1}에 초가 들어간다. 초는 두 자리로 채워야 4:9처럼 보이지 않는다.")]
+        [SerializeField] private string _cooldownFormat = "Cooldown {0}:{1:00}";
+
+        [Tooltip("장전되어 쓸 수 있을 때 보여줄 글자.")]
+        [SerializeField] private string _armedText = "READY";
+
+        [Tooltip("출격 횟수를 다 썼을 때 보여줄 글자.")]
+        [SerializeField] private string _exhaustedText = "Expended";
+
+        [Tooltip("쿨타임 진행을 보여줄 이미지. Image Type을 Filled로 둘 것.")]
+        [SerializeField] private Image _cooldownFill;
+
+        [Tooltip("체크하면 쿨타임이 끝날수록 채워진다. 끄면 다 찬 상태에서 줄어든다.")]
+        [SerializeField] private bool _fillAsItRecovers;
+
+        [Tooltip("쿨타임 중일 때의 글자색.")]
+        [SerializeField] private Color _cooldownTextColor = new Color(1f, 0.6f, 0.35f, 1f);
+
+        [Tooltip("장전됐을 때의 글자색.")]
+        [SerializeField] private Color _armedTextColor = new Color(0.4f, 1f, 0.5f, 1f);
+
+        [SerializeField] private Color _readyTextColor = Color.white;
+
         [Header("화살표 색")]
         [Tooltip("아직 누르지 않은 화살표.")]
         [SerializeField] private Color _pendingColor = new Color(1f, 1f, 1f, 0.35f);
@@ -41,6 +69,12 @@ namespace Adler.UI
         [SerializeField] private float _dimmedAlpha = 0.25f;
 
         private readonly List<Image> _arrows = new();
+
+        // 초 단위로만 표시하므로 그 자릿수가 바뀔 때만 문자열을 다시 만든다.
+        private int _shownSeconds = -1;
+        private bool _shownExhausted;
+        private bool _shownArmed;
+        private bool _armed;
 
         /// <summary>이 칸이 나타내는 스트라타젬.</summary>
         public StratagemDefinition Stratagem { get; private set; }
@@ -60,6 +94,66 @@ namespace Adler.UI
             SetMatchedCount(0);
             SetDimmed(false);
             SetArmed(false);
+
+            _shownSeconds = -1;
+            _shownExhausted = false;
+            SetCooldown(0f, 0f, exhausted: false);
+        }
+
+        /// <summary>
+        /// 한 줄이 네 가지를 번갈아 보여준다. 장전됨 → 소진 → 쿨타임 → 이름 순으로 우선한다.
+        /// <para>
+        /// 같은 자리를 쓰는 이유는 그때그때 알아야 할 것이 다르기 때문이다. 쿨타임이 도는
+        /// 동안 궁금한 것은 이름이 아니라 언제 되는지고, 장전된 뒤에는 쓸 수 있다는 사실이다.
+        /// </para>
+        /// </summary>
+        public void SetCooldown(float remainingSeconds, float normalized, bool exhausted)
+        {
+            if (_cooldownFill != null)
+            {
+                _cooldownFill.fillAmount = _fillAsItRecovers ? 1f - normalized : normalized;
+            }
+
+            if (_label == null)
+            {
+                return;
+            }
+
+            // 올림해서 보여준다. 0.4초 남았는데 0으로 뜨면 눌러도 안 되는 순간이 생긴다.
+            int seconds = Mathf.CeilToInt(remainingSeconds);
+
+            if (seconds == _shownSeconds && exhausted == _shownExhausted && _armed == _shownArmed)
+            {
+                return;
+            }
+
+            _shownSeconds = seconds;
+            _shownExhausted = exhausted;
+            _shownArmed = _armed;
+
+            if (_armed)
+            {
+                _label.SetText(_armedText);
+                _label.color = _armedTextColor;
+                return;
+            }
+
+            if (exhausted)
+            {
+                _label.SetText(_exhaustedText);
+                _label.color = _cooldownTextColor;
+                return;
+            }
+
+            if (seconds <= 0)
+            {
+                _label.SetText(Stratagem != null ? Stratagem.DisplayName : string.Empty);
+                _label.color = _readyTextColor;
+                return;
+            }
+
+            _label.SetText(string.Format(_cooldownFormat, seconds / 60, seconds % 60));
+            _label.color = _cooldownTextColor;
         }
 
         private void BuildArrows(StratagemDefinition stratagem, Image arrowPrefab)
@@ -104,6 +198,8 @@ namespace Adler.UI
 
         public void SetArmed(bool armed)
         {
+            _armed = armed;
+
             if (_armedHighlight != null)
             {
                 _armedHighlight.SetActive(armed);

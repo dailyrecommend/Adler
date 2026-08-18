@@ -29,7 +29,18 @@ namespace Adler.UI
         [Tooltip("칸들이 늘어설 자리. 비워두면 이 오브젝트 아래에 붙인다.")]
         [SerializeField] private RectTransform _slotRoot;
 
+        [Header("여닫기")]
+        [Tooltip("보이고 숨길 대상. 비워두면 칸들이 늘어선 자리를 쓴다.\n" +
+                 "오브젝트를 끄지 않고 투명도로 감춘다 — 이 스크립트가 그 안에 있으면 " +
+                 "함께 멈춰 다시 열 수 없게 된다.")]
+        [SerializeField] private CanvasGroup _panel;
+
+        [Tooltip("여닫히는 속도. 클수록 즉각적이다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _fadeSpeed = 14f;
+
         private readonly List<CommandSlot> _slots = new();
+        private float _targetAlpha;
 
         private void Awake()
         {
@@ -45,7 +56,24 @@ namespace Adler.UI
                 _slotRoot = transform as RectTransform;
             }
 
+            if (_panel == null && _slotRoot != null)
+            {
+                _panel = _slotRoot.GetComponent<CanvasGroup>();
+                if (_panel == null)
+                {
+                    _panel = _slotRoot.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
             BuildSlots();
+
+            // 닫힌 상태로 시작한다. Tab을 눌러야 열린다.
+            _targetAlpha = 0f;
+            if (_panel != null)
+            {
+                _panel.alpha = 0f;
+                _panel.blocksRaycasts = false;
+            }
         }
 
         private void OnEnable()
@@ -54,6 +82,7 @@ namespace Adler.UI
             _stratagemBay.CommandReset += OnCommandReset;
             _stratagemBay.Authorized += OnAuthorized;
             _stratagemBay.Dropped += OnDropped;
+            _stratagemBay.CommandModeChanged += OnCommandModeChanged;
         }
 
         private void OnDisable()
@@ -62,6 +91,17 @@ namespace Adler.UI
             _stratagemBay.CommandReset -= OnCommandReset;
             _stratagemBay.Authorized -= OnAuthorized;
             _stratagemBay.Dropped -= OnDropped;
+            _stratagemBay.CommandModeChanged -= OnCommandModeChanged;
+        }
+
+        private void OnCommandModeChanged(bool active)
+        {
+            _targetAlpha = active ? 1f : 0f;
+
+            if (_panel != null)
+            {
+                _panel.blocksRaycasts = active;
+            }
         }
 
         private void BuildSlots()
@@ -76,6 +116,28 @@ namespace Adler.UI
                 CommandSlot slot = Instantiate(_slotPrefab, _slotRoot);
                 slot.Bind(stratagem, _arrowPrefab);
                 _slots.Add(slot);
+            }
+        }
+
+        /// <summary>
+        /// 쿨타임은 계속 흐르므로 매 프레임 갱신한다. 슬롯 쪽에서 표시되는 초가 바뀔 때만
+        /// 글자를 다시 만들기 때문에, 여기서 매번 물어봐도 부담이 되지 않는다.
+        /// </summary>
+        private void Update()
+        {
+            if (_panel != null && !Mathf.Approximately(_panel.alpha, _targetAlpha))
+            {
+                _panel.alpha = Mathf.MoveTowards(_panel.alpha, _targetAlpha, _fadeSpeed * Time.deltaTime);
+            }
+
+            foreach (CommandSlot slot in _slots)
+            {
+                StratagemDefinition stratagem = slot.Stratagem;
+
+                slot.SetCooldown(
+                    _stratagemBay.RemainingCooldown(stratagem),
+                    _stratagemBay.CooldownNormalized(stratagem),
+                    _stratagemBay.IsExhausted(stratagem));
             }
         }
 
