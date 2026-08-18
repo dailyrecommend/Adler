@@ -26,4 +26,9 @@ MonoBehaviour:
   ControlResponse: 6
   LowSpeedAgility: 0.7
   BankTurnRate: 45
+  BoostCapacity: 100
+  BoostDrain: 20
+  BoostRecharge: 15
+  BoostRechargeDelay: 1
+  BoostReengageFraction: 0.25
   GravityInfluence: 0.7

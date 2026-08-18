@@ -414,12 +414,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.BoostReadout
   _fuel: {fileID: 1812182297}
-  _fill: {fileID: 0}
+  _fill: {fileID: 1707024023}
   _label: {fileID: 0}
   _format: '{0:0}%'
-  _normalColor: {r: 0.5, g: 0.8, b: 1, a: 1}
+  _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _lockedColor: {r: 1, g: 0.35, b: 0.3, a: 1}
-  _lowThreshold: 0.3
+  _lowThreshold: 0.2
   _lowColor: {r: 1, g: 0.75, b: 0.25, a: 1}
   _lockedWarning: {fileID: 0}
 --- !u!1 &134741782
@@ -2393,7 +2393,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 10fc4df2da32a41aaa32d77bc913491c, type: 2}
+  sharedProfile: {fileID: 11400000, guid: ab09877e2e707104187f6f83e2f62510, type: 2}
 --- !u!4 &832575519
 Transform:
   m_ObjectHideFlags: 0
@@ -2867,7 +2867,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
   NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
   PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 0.000000001367761
+  AmplitudeGain: 0.000000001133583
   FrequencyGain: 1.4
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &972978315
@@ -4347,6 +4347,55 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1701901516
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1701901518}
+  - component: {fileID: 1701901517}
+  m_Layer: 0
+  m_Name: BoostBolume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1701901517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701901516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 1
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: 9ab6271973b76db4a8276d0619921ef6, type: 2}
+--- !u!4 &1701901518
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701901516}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1915.3007, y: 1045.3411, z: -16.281084}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1707024021
 GameObject:
   m_ObjectHideFlags: 0
@@ -4664,6 +4713,7 @@ GameObject:
   - component: {fileID: 1812182295}
   - component: {fileID: 1812182296}
   - component: {fileID: 1812182297}
+  - component: {fileID: 1812182298}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -4904,6 +4954,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.BoostFuel
   _aircraft: {fileID: 1812182285}
+--- !u!114 &1812182298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecec4d1202fe2d84a91f3a64c382122d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.BoostPostFx
+  _aircraft: {fileID: 1812182285}
+  _volume: {fileID: 1701901517}
+  _boostWeight: 1
+  _idleWeight: 0
+  _rampUpSpeed: 9
+  _rampDownSpeed: 3.5
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -5849,3 +5917,4 @@ SceneRoots:
   - {fileID: 819950027}
   - {fileID: 583552690}
   - {fileID: 520946580}
+  - {fileID: 1701901518}
