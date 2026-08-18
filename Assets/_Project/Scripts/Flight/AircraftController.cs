@@ -114,6 +114,18 @@ namespace Adler.Flight
             _flightMap?.Disable();
         }
 
+        /// <summary>
+        /// 비행 상태를 처음으로 되돌린다. 리스폰이 기체를 옮긴 뒤에 부른다.
+        /// <para>
+        /// 위치만 옮기고 이걸 부르지 않으면, 추락하던 속도와 자세가 그대로 남은 채
+        /// 출발 지점에서 다시 시작하게 된다.
+        /// </para>
+        /// </summary>
+        public void ResetFlight()
+        {
+            _model?.Initialize(_body);
+        }
+
         private void FixedUpdate()
         {
             FlightInput input = ReadInput();

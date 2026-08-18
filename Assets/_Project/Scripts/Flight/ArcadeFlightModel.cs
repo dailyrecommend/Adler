@@ -47,9 +47,22 @@ namespace Adler.Flight
         /// <summary>스틱을 밀 때 기수가 올라가게 한다. 기체 성능이 아니라 플레이어 취향이다.</summary>
         public bool InvertPitch { get; set; }
 
+        /// <summary>
+        /// 물리 설정을 맞추고 조종 상태를 처음으로 되돌린다.
+        /// <para>
+        /// 리스폰 때 다시 불린다. 속도만 되돌리고 스로틀이나 조종면을 그대로 두면,
+        /// 추락 직전에 당기고 있던 입력이 남은 채로 되살아난다.
+        /// </para>
+        /// </summary>
         public void Initialize(Rigidbody body)
         {
             _body = body != null ? body : throw new ArgumentNullException(nameof(body));
+
+            _pitch = 0f;
+            _roll = 0f;
+            _yaw = 0f;
+            _throttle = 0.5f;
+            _boosting = false;
 
             // 이 모델이 속도와 회전을 전적으로 관리하므로 물리 엔진의 개입을 끈다.
             _body.useGravity = false;

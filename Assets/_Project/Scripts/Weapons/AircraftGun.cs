@@ -138,29 +138,21 @@ namespace Adler.Weapons
         {
             Transform muzzle = ResolveMuzzle();
             Vector3 origin = muzzle.position;
-            Vector3 direction = ApplySpread(muzzle.forward);
+            Vector3 direction = ProjectileLauncher.ApplySpread(muzzle.forward, _gun.SpreadDegrees);
 
             // 기체 속도를 얹는다. 이게 없으면 빠르게 날면서 쏠 때 탄이 뒤로 처지는
             // 것처럼 보이고, 기체가 자기 탄을 따라잡는 상황까지 나온다.
-            Vector3 velocity = (direction * _gun.MuzzleVelocity)
-                               + (_carrier != null ? _carrier.linearVelocity : Vector3.zero);
+            Vector3 inherited = _carrier != null ? _carrier.linearVelocity : Vector3.zero;
+            GameObject owner = _carrier != null ? _carrier.gameObject : gameObject;
 
-            GameObject instance = Instantiate(_gun.Prefab, origin, Quaternion.LookRotation(direction));
+            Projectile projectile = ProjectileLauncher.Fire(
+                _gun, origin, direction, inherited, owner, _hitMask);
 
-            if (instance.TryGetComponent(out Projectile projectile))
+            if (projectile != null)
             {
                 // 탄은 맞는 순간 사라지므로 화면 표시가 직접 붙을 수 없다.
                 // 총이 대신 받아 자기 신호로 다시 내보낸다.
                 projectile.Struck += (hit, damaged, result) => Hit?.Invoke(hit, damaged, result);
-                projectile.Launch(_gun, _carrier != null ? _carrier.gameObject : gameObject,
-                    velocity, _hitMask);
-            }
-            else
-            {
-                Debug.LogError(
-                    $"{nameof(AircraftGun)}: '{_gun.DisplayName}'의 탄환 프리팹에 " +
-                    $"{nameof(Projectile)}이 없습니다.", this);
-                Destroy(instance);
             }
 
             Fired?.Invoke(origin, direction);
@@ -178,16 +170,5 @@ namespace Adler.Weapons
             return muzzle != null ? muzzle : transform;
         }
 
-        private Vector3 ApplySpread(Vector3 forward)
-        {
-            if (_gun.SpreadDegrees <= 0f)
-            {
-                return forward;
-            }
-
-            // 원뿔 안에서 고르게 뽑는다. 각도를 두 축에 따로 흔들면 대각선이 더 벌어진다.
-            Vector2 offset = UnityEngine.Random.insideUnitCircle * _gun.SpreadDegrees;
-            return Quaternion.Euler(offset.y, offset.x, 0f) * forward;
-        }
     }
 }

@@ -66,6 +66,28 @@ namespace Adler.Flight
             }
         }
 
+        /// <summary>
+        /// 격추될 때 손댄 것들을 되돌린다. 리스폰이 부른다.
+        /// <para>
+        /// 무엇을 껐는지 아는 것은 이쪽이므로 되살리는 일도 여기서 맡는다. 리스폰 쪽에
+        /// 같은 목록을 한 번 더 적어두면 한쪽만 고쳤을 때 조종이 돌아오지 않는다.
+        /// </para>
+        /// </summary>
+        public void Restore()
+        {
+            foreach (Behaviour behaviour in _disableOnDeath)
+            {
+                if (behaviour != null)
+                {
+                    behaviour.enabled = true;
+                }
+            }
+
+            // 중력과 감쇠는 비행 모델이 자기 방식대로 다시 잡는다.
+            _body.linearVelocity = Vector3.zero;
+            _body.angularVelocity = Vector3.zero;
+        }
+
         private void OnDied(Health health, DamageInfo damage)
         {
             foreach (Behaviour behaviour in _disableOnDeath)

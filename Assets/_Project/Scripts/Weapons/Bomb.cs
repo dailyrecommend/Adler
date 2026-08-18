@@ -180,7 +180,10 @@ namespace Adler.Weapons
 
             if (overlapped.Length > 0)
             {
-                point = overlapped[0].ClosestPoint(to);
+                // 닿은 면 위의 정확한 점을 구하지 않는다. Collider.ClosestPoint는 볼록한
+                // 콜라이더에서만 쓸 수 있어서 지형 메시에서는 쓸 수 없고, 어차피 폭탄이
+                // 그 자리에 박혀 있으므로 자기 위치가 곧 폭발 지점이다.
+                point = to;
                 return true;
             }
 
@@ -259,7 +262,10 @@ namespace Adler.Weapons
                     continue;
                 }
 
-                Vector3 point = collider.ClosestPoint(position);
+                // 콜라이더 표면이 아니라 경계 상자에서 가장 가까운 점을 쓴다.
+                // Collider.ClosestPoint는 볼록한 것에만 쓸 수 있어 건물이나 지형처럼
+                // 오목한 메시를 만나면 예외가 난다. 감쇠 계산에는 이 정도면 충분하다.
+                Vector3 point = collider.bounds.ClosestPoint(position);
                 float amount = ResolveDamage(Vector3.Distance(position, point));
                 if (amount <= 0f)
                 {
