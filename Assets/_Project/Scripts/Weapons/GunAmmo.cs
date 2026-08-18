@@ -1,3 +1,4 @@
+using Adler.Flight;
 using System;
 using UnityEngine;
 
@@ -15,11 +16,8 @@ namespace Adler.Weapons
     public sealed class GunAmmo : MonoBehaviour
     {
         [Header("참조")]
-        [Tooltip("장탄수를 읽어올 총. 비워두면 같은 오브젝트에서 찾는다.")]
-        [SerializeField] private AircraftGun _gun;
-
-        [Tooltip("재보급 승인을 받아올 곳. 비워두면 부모에서 찾는다.")]
-        [SerializeField] private StratagemBay _stratagemBay;
+        [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         private int _capacity;
         private int _remaining;
@@ -43,42 +41,35 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            if (_gun == null)
-            {
-                _gun = GetComponent<AircraftGun>();
-            }
-
-            if (_stratagemBay == null)
-            {
-                _stratagemBay = GetComponentInParent<StratagemBay>();
-            }
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             // 장탄수는 총의 성능이지 이 컴포넌트의 설정이 아니다. 에셋에서 읽어야
             // 정비로 총을 바꾸거나 탄량을 올렸을 때 그대로 따라온다.
-            if (_gun == null || _gun.Definition == null)
+            AircraftGun gun = _aircraft != null ? _aircraft.Gun : null;
+            if (gun == null || gun.Definition == null)
             {
                 Debug.LogError($"{nameof(GunAmmo)}: 장탄수를 읽을 총을 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }
 
-            _capacity = _gun.Definition.AmmoCapacity;
+            _capacity = gun.Definition.AmmoCapacity;
             _remaining = _capacity;
         }
 
         private void OnEnable()
         {
-            if (_stratagemBay != null)
+            if (_aircraft != null && _aircraft.Stratagems != null)
             {
-                _stratagemBay.Authorized += OnAuthorized;
+                _aircraft.Stratagems.Authorized += OnAuthorized;
             }
         }
 
         private void OnDisable()
         {
-            if (_stratagemBay != null)
+            if (_aircraft != null && _aircraft.Stratagems != null)
             {
-                _stratagemBay.Authorized -= OnAuthorized;
+                _aircraft.Stratagems.Authorized -= OnAuthorized;
             }
         }
 

@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baa7b582f6ff1f74e8b79323cd9c8d70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.SpeedReadout
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
   _speedLabel: {fileID: 1818190747}
   _speedFormat: '{0:0}'
   _speedDisplayScale: 10
@@ -337,8 +337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3370c7bd48e9f440a1ad98e43a655cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HitMarker
-  _gun: {fileID: 1812182289}
-  _stratagemBay: {fileID: 1812182293}
+  _aircraft: {fileID: 1812182299}
   _hitMarker: {fileID: 972978319}
   _blockedMarker: {fileID: 1944196075}
   _duration: 0.25
@@ -354,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca646f09685f295448d29285316a3a30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.CommandDisplay
-  _stratagemBay: {fileID: 1812182293}
+  _aircraft: {fileID: 1812182299}
   _slotPrefab: {fileID: 2048752005125739745, guid: 27a35dd39de322c4ba4e84493d6328ea, type: 3}
   _arrowPrefab: {fileID: 3546928181431903623, guid: 724e51a3b02f3534282e595c48b87149, type: 3}
   _slotRoot: {fileID: 317987486}
@@ -372,7 +371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48fc3fa17effa6744b01baaf21de10e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.AmmoReadout
-  _ammo: {fileID: 1812182295}
+  _aircraft: {fileID: 1812182299}
   _label: {fileID: 389554579}
   _format: '{0}'
   _fill: {fileID: 92414514}
@@ -395,7 +394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fce1c6905496edb48a32da9ea6684aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HudShake
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
   _target: {fileID: 1608626950}
   _idleAmplitude: 0
   _boostAmplitude: 9
@@ -415,7 +414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8788eac0e3d4ccf44bf0d9ba0242b405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.BoostReadout
-  _fuel: {fileID: 1812182297}
+  _aircraft: {fileID: 1812182299}
   _fill: {fileID: 1707024023}
   _label: {fileID: 0}
   _format: '{0:0}%'
@@ -2813,7 +2812,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aaa0f0983410274a96862927dc6f1d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.SpeedFieldOfView
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
   _fieldOfViewGain: 30
   _useBoostSpeedAsReference: 1
   _maxSpeed: 0
@@ -2849,7 +2848,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149bbba50a043f84b9a6e5e5cc0b1182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.BoostCameraShake
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
   _idleAmplitude: 0
   _boostAmplitude: 0.6
   _boostFrequency: 1.4
@@ -4709,13 +4708,13 @@ GameObject:
   - component: {fileID: 1812182289}
   - component: {fileID: 1812182292}
   - component: {fileID: 1812182291}
-  - component: {fileID: 1812182290}
   - component: {fileID: 1812182293}
   - component: {fileID: 1812182294}
   - component: {fileID: 1812182295}
-  - component: {fileID: 1812182296}
   - component: {fileID: 1812182297}
   - component: {fileID: 1812182298}
+  - component: {fileID: 1812182299}
+  - component: {fileID: 1812182300}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -4738,7 +4737,6 @@ MonoBehaviour:
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
   _airframe: {fileID: 11400000, guid: 2ba22bcf339a66649b8b2538082452eb, type: 2}
   _initialParts: []
-  _boostFuel: {fileID: 0}
   _invertPitch: 1
 --- !u!54 &1812182286
 Rigidbody:
@@ -4803,27 +4801,10 @@ MonoBehaviour:
   _muzzles:
   - {fileID: 824846410}
   - {fileID: 2083879041}
-  _carrier: {fileID: 1812182286}
-  _ammo: {fileID: 1812182295}
+  _aircraft: {fileID: 0}
   _hitMask:
     serializedVersion: 2
     m_Bits: 2231
---- !u!114 &1812182290
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a3a5054a7277b74daeb66a942fbd7c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftWreck
-  _health: {fileID: 1812182292}
-  _disableOnDeath: []
-  _restorePhysics: 1
-  _tumbleTorque: 4
 --- !u!114 &1812182291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4873,7 +4854,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombBay
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
   _dropPoint: {fileID: 1812182287}
-  _carrier: {fileID: 1812182286}
+  _aircraft: {fileID: 0}
   _loadout:
   - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
   - {fileID: 11400000, guid: d23327169c014ce4eb408905966b4876, type: 2}
@@ -4892,9 +4873,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ee592243c77de9448c9a4369b810ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombImpactPredictor
-  _stratagemBay: {fileID: 1812182293}
+  _aircraft: {fileID: 0}
   _dropPoint: {fileID: 1812182287}
-  _carrier: {fileID: 1812182286}
   _marker: {fileID: 299142187}
   _markerSurfaceOffset: 0.05
   _onlyWhenArmed: 1
@@ -4920,31 +4900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a972a506247b97348a0fa5a13e34ae84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GunAmmo
-  _gun: {fileID: 1812182289}
-  _stratagemBay: {fileID: 1812182293}
---- !u!114 &1812182296
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ee6290af590546469010ff7ad92fa51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRespawn
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
-  _spawnPoint: {fileID: 819950027}
-  _body: {fileID: 1812182286}
-  _controller: {fileID: 1812182285}
-  _health: {fileID: 1812182292}
-  _wreck: {fileID: 1812182290}
-  _ammo: {fileID: 1812182295}
-  _boostFuel: {fileID: 0}
-  _stratagemBay: {fileID: 0}
-  _freeLook: {fileID: 0}
-  _onlyWhenDead: 0
+  _aircraft: {fileID: 0}
 --- !u!114 &1812182297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4957,7 +4913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55cc2e5f73c7fc247add4e44292033a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.BoostFuel
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
 --- !u!114 &1812182298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4970,12 +4926,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecec4d1202fe2d84a91f3a64c382122d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.BoostPostFx
-  _aircraft: {fileID: 1812182285}
+  _aircraft: {fileID: 1812182299}
   _volume: {fileID: 1701901517}
   _boostWeight: 1
   _idleWeight: 0
   _rampUpSpeed: 9
   _rampDownSpeed: 3.5
+--- !u!114 &1812182299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ab731d786ea99b42821f9e53f3de065, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRig
+--- !u!114 &1812182300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 984213f8472838f49abfb7a369e0aefa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftLifecycle
+  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
+  _spawnPoint: {fileID: 819950027}
+  _freeLook: {fileID: 2075592592}
+  _restorePhysics: 1
+  _tumbleTorque: 4
+  _alsoDisableOnDeath: []
+  _onlyWhenDead: 0
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0

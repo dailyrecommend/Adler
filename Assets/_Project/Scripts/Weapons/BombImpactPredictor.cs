@@ -1,3 +1,4 @@
+using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -18,13 +19,14 @@ namespace Adler.Weapons
     public sealed class BombImpactPredictor : MonoBehaviour
     {
         [Header("참조")]
-        [SerializeField] private StratagemBay _stratagemBay;
+        [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         [Tooltip("폭탄이 떨어져 나오는 자리. StratagemBay에 지정한 것과 같아야 한다.")]
         [SerializeField] private Transform _dropPoint;
 
-        [Tooltip("투하 순간의 속도를 넘겨줄 기체. 비워두면 부모에서 찾는다.")]
-        [SerializeField] private Rigidbody _carrier;
+        private StratagemBay _stratagemBay;
+        private Rigidbody _carrier;
 
         [Header("표시")]
         [Tooltip("착탄 지점으로 옮길 오브젝트. 지면에 눕도록 회전도 맞춰준다.")]
@@ -82,10 +84,9 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            if (_carrier == null)
-            {
-                _carrier = GetComponentInParent<Rigidbody>();
-            }
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
+            _carrier = _aircraft != null ? _aircraft.Body : null;
 
             if (_camera == null)
             {

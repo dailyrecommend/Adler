@@ -1,3 +1,4 @@
+using Adler.Flight;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,8 +26,8 @@ namespace Adler.Weapons
         [Tooltip("폭탄이 떨어져 나오는 자리. 기체 아래쪽에 빈 오브젝트를 두면 된다.")]
         [SerializeField] private Transform _dropPoint;
 
-        [Tooltip("투하 순간의 속도를 물려받을 기체. 비워두면 부모에서 찾는다.")]
-        [SerializeField] private Rigidbody _carrier;
+        [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("요청 가능 목록")]
         [Tooltip("각자 다른 커맨드를 가진다. 입력이 맞아떨어진 것이 승인된다.")]
@@ -147,10 +148,7 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            if (_carrier == null)
-            {
-                _carrier = GetComponentInParent<Rigidbody>();
-            }
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_dropPoint == null)
             {
@@ -444,15 +442,16 @@ namespace Adler.Weapons
 
             // 기체의 속도를 물려받아야 앞으로 던져진다. 그냥 놓으면 제자리에서 떨어져
             // 조준한 곳보다 한참 뒤에 떨어진다.
-            if (instance.TryGetComponent(out Rigidbody body) && _carrier != null)
+            Rigidbody carrier = _aircraft != null ? _aircraft.Body : null;
+            if (instance.TryGetComponent(out Rigidbody body) && carrier != null)
             {
-                body.linearVelocity = _carrier.linearVelocity;
+                body.linearVelocity = carrier.linearVelocity;
             }
 
             if (instance.TryGetComponent(out Bomb component))
             {
                 component.Detonated += report => Detonated?.Invoke(bomb, report);
-                component.Arm(bomb, _carrier != null ? _carrier.gameObject : gameObject);
+                component.Arm(bomb, _aircraft != null ? _aircraft.gameObject : gameObject);
             }
             else
             {

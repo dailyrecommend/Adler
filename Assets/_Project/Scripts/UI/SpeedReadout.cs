@@ -16,7 +16,7 @@ namespace Adler.UI
     public sealed class SpeedReadout : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private AircraftController _aircraft;
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("속도")]
         [SerializeField] private TMP_Text _speedLabel;

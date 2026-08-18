@@ -19,7 +19,7 @@ namespace Adler.UI
     public sealed class HudShake : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private AircraftController _aircraft;
+        [SerializeField] private AircraftRig _aircraft;
 
         [Tooltip("흔들 대상. 비워두면 이 오브젝트를 흔든다. HUD 전체를 담은 것으로 지정할 것.")]
         [SerializeField] private RectTransform _target;

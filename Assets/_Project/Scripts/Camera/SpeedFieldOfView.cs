@@ -23,7 +23,7 @@ namespace Adler.CameraRig
     public sealed class SpeedFieldOfView : CinemachineExtension
     {
         [Header("추적 대상")]
-        [SerializeField] private AircraftController _aircraft;
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("연출")]
         [Tooltip("최고 속도에서 기준 화각에 더해지는 각도.")]

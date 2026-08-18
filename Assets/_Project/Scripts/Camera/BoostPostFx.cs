@@ -20,7 +20,7 @@ namespace Adler.CameraRig
     public sealed class BoostPostFx : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private AircraftController _aircraft;
+        [SerializeField] private AircraftRig _aircraft;
 
         [Tooltip("부스터 전용 Volume. 평소 Weight는 0으로 둘 것.")]
         [SerializeField] private Volume _volume;

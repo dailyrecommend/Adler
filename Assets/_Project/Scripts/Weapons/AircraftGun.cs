@@ -1,3 +1,4 @@
+using Adler.Flight;
 using System;
 using Adler.Combat;
 using UnityEngine;
@@ -23,11 +24,8 @@ namespace Adler.Weapons
         [Tooltip("총구 위치. 여러 개면 번갈아 발사한다. 비어 있으면 이 오브젝트에서 나간다.")]
         [SerializeField] private Transform[] _muzzles = Array.Empty<Transform>();
 
-        [Tooltip("탄에 속도를 물려줄 기체. 비워두면 부모에서 찾는다.")]
-        [SerializeField] private Rigidbody _carrier;
-
-        [Tooltip("남은 탄을 관리하는 곳. 비워두면 탄약 제한 없이 쏜다.")]
-        [SerializeField] private GunAmmo _ammo;
+        [Tooltip("이 총을 단 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("판정")]
         [Tooltip("탄이 맞을 레이어. 기체 자신이 속한 레이어는 빼야 자기 총에 맞지 않는다.")]
@@ -52,10 +50,7 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            if (_carrier == null)
-            {
-                _carrier = GetComponentInParent<Rigidbody>();
-            }
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_gun == null)
             {
@@ -131,7 +126,8 @@ namespace Adler.Weapons
         /// <summary>탄이 남아 있으면 한 발 쓰고 참을 돌려준다.</summary>
         private bool TrySpendRound()
         {
-            return _ammo == null || _ammo.TryConsume();
+            GunAmmo ammo = _aircraft != null ? _aircraft.Ammo : null;
+            return ammo == null || ammo.TryConsume();
         }
 
         private void FireOnce()
@@ -142,8 +138,9 @@ namespace Adler.Weapons
 
             // 기체 속도를 얹는다. 이게 없으면 빠르게 날면서 쏠 때 탄이 뒤로 처지는
             // 것처럼 보이고, 기체가 자기 탄을 따라잡는 상황까지 나온다.
-            Vector3 inherited = _carrier != null ? _carrier.linearVelocity : Vector3.zero;
-            GameObject owner = _carrier != null ? _carrier.gameObject : gameObject;
+            Rigidbody body = _aircraft != null ? _aircraft.Body : null;
+            Vector3 inherited = body != null ? body.linearVelocity : Vector3.zero;
+            GameObject owner = _aircraft != null ? _aircraft.gameObject : gameObject;
 
             Projectile projectile = ProjectileLauncher.Fire(
                 _gun, origin, direction, inherited, owner, _hitMask);

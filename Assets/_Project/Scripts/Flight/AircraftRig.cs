@@ -1,0 +1,73 @@
+using Adler.Aircraft;
+using Adler.Combat;
+using Adler.Weapons;
+using UnityEngine;
+
+namespace Adler.Flight
+{
+    /// <summary>
+    /// 기체 한 대를 대표한다. 기체를 이루는 부품들을 한 번 찾아두고 나눠준다.
+    /// <para>
+    /// 이것이 없으면 부품마다 서로를 직접 참조하게 되고, 컴포넌트를 하나 붙일 때마다
+    /// 인스펙터에서 이어야 할 선이 늘어난다. 기체 밖에서도 마찬가지여서, 화면 표시는
+    /// 속도계는 조종을, 탄약계는 탄창을, 연료계는 부스터를 각각 가리키게 된다.
+    /// </para>
+    /// <para>
+    /// 이제 이어야 할 선은 기체당 하나다. 기체 위에 있는 부품은 알아서 찾고, 밖에 있는
+    /// 것은 이 컴포넌트만 받으면 된다.
+    /// </para>
+    /// </summary>
+    [DefaultExecutionOrder(-100)]
+    [DisallowMultipleComponent]
+    public sealed class AircraftRig : MonoBehaviour
+    {
+        public Rigidbody Body { get; private set; }
+
+        public AircraftController Control { get; private set; }
+
+        public AircraftLifecycle Lifecycle { get; private set; }
+
+        public Health Health { get; private set; }
+
+        public BoostFuel Boost { get; private set; }
+
+        public AircraftGun Gun { get; private set; }
+
+        public GunAmmo Ammo { get; private set; }
+
+        public StratagemBay Stratagems { get; private set; }
+
+        /// <summary>지금 비행 상태. 속도와 부스터 여부를 화면 표시와 연출이 읽어 간다.</summary>
+        public IFlightModel Model => Control != null ? Control.Model : null;
+
+        /// <summary>부품 보정이 반영된 실효 성능. 조종이 준비된 뒤에야 값이 있다.</summary>
+        public AircraftStatSheet Stats => Control != null ? Control.Stats : null;
+
+        /// <summary>부품으로 바뀌지 않는 기체 고유 특성.</summary>
+        public AirframeDefinition Airframe => Control != null ? Control.Airframe : null;
+
+        /// <summary>
+        /// 다른 부품보다 먼저 돈다. 그래서 나머지는 자기 Awake에서 이 결과를 믿고 쓸 수 있다.
+        /// </summary>
+        private void Awake()
+        {
+            Body = GetComponent<Rigidbody>();
+            Control = GetComponentInChildren<AircraftController>(includeInactive: true);
+            Lifecycle = GetComponentInChildren<AircraftLifecycle>(includeInactive: true);
+            Health = GetComponentInChildren<Health>(includeInactive: true);
+            Boost = GetComponentInChildren<BoostFuel>(includeInactive: true);
+            Gun = GetComponentInChildren<AircraftGun>(includeInactive: true);
+            Ammo = GetComponentInChildren<GunAmmo>(includeInactive: true);
+            Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
+        }
+
+        /// <summary>
+        /// 기체 위에 얹힌 부품이 자기 기체를 찾을 때 쓴다.
+        /// 인스펙터에 넣어두면 그것을 쓰고, 비어 있으면 위로 거슬러 올라가 찾는다.
+        /// </summary>
+        public static AircraftRig Resolve(Component component, AircraftRig assigned)
+        {
+            return assigned != null ? assigned : component.GetComponentInParent<AircraftRig>();
+        }
+    }
+}

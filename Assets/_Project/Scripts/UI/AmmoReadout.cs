@@ -1,3 +1,4 @@
+using Adler.Flight;
 using Adler.Weapons;
 using TMPro;
 using UnityEngine;
@@ -16,7 +17,9 @@ namespace Adler.UI
     public sealed class AmmoReadout : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private GunAmmo _ammo;
+        [SerializeField] private AircraftRig _aircraft;
+
+        private GunAmmo _ammo;
 
         [Header("숫자")]
         [SerializeField] private TMP_Text _label;
@@ -63,9 +66,12 @@ namespace Adler.UI
 
         private void Awake()
         {
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _ammo = _aircraft != null ? _aircraft.Ammo : null;
+
             if (_ammo == null)
             {
-                Debug.LogError($"{nameof(AmmoReadout)}: Gun Ammo가 비어 있습니다.", this);
+                Debug.LogError($"{nameof(AmmoReadout)}: 기체의 탄약을 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }

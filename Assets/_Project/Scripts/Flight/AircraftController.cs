@@ -27,8 +27,6 @@ namespace Adler.Flight
         [Tooltip("출격 시점의 부품 구성. 비행 중 교체는 Stats.Equip()으로 한다.")]
         [SerializeField] private List<PartDefinition> _initialParts = new();
 
-        [Tooltip("부스터 연료. 비워두면 연료 제한 없이 계속 쓸 수 있다.")]
-        [SerializeField] private BoostFuel _boostFuel;
 
         [Header("조작 설정")]
         [Tooltip("스틱을 밀 때 기수가 올라간다.")]
@@ -36,6 +34,9 @@ namespace Adler.Flight
 
         private Rigidbody _body;
         private ArcadeFlightModel _model;
+
+        // 같은 오브젝트에 있으면 연료 제한이 걸리고, 없으면 무제한이다.
+        private BoostFuel _boostFuel;
 
         private InputActionMap _flightMap;
         private InputAction _pitchAction;
@@ -57,10 +58,7 @@ namespace Adler.Flight
         {
             _body = GetComponent<Rigidbody>();
 
-            if (_boostFuel == null)
-            {
-                _boostFuel = GetComponent<BoostFuel>();
-            }
+            _boostFuel = GetComponent<BoostFuel>();
 
             if (_airframe == null)
             {

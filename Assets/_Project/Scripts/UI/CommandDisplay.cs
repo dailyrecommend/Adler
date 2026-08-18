@@ -1,3 +1,4 @@
+using Adler.Flight;
 using System.Collections.Generic;
 using Adler.Weapons;
 using UnityEngine;
@@ -17,7 +18,9 @@ namespace Adler.UI
     public sealed class CommandDisplay : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private StratagemBay _stratagemBay;
+        [SerializeField] private AircraftRig _aircraft;
+
+        private StratagemBay _stratagemBay;
 
         [Header("만들어 둔 조각")]
         [Tooltip("폭탄 한 칸의 모양. CommandSlot이 붙어 있어야 한다.")]
@@ -44,9 +47,12 @@ namespace Adler.UI
 
         private void Awake()
         {
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
+
             if (_stratagemBay == null || _slotPrefab == null)
             {
-                Debug.LogError($"{nameof(CommandDisplay)}: Stratagem Bay 또는 Slot Prefab이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(CommandDisplay)}: 기체의 스트라타젬 또는 Slot Prefab이 비어 있습니다.", this);
                 enabled = false;
                 return;
             }

@@ -16,7 +16,9 @@ namespace Adler.UI
     public sealed class BoostReadout : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private BoostFuel _fuel;
+        [SerializeField] private AircraftRig _aircraft;
+
+        private BoostFuel _fuel;
 
         [Header("게이지")]
         [Tooltip("남은 비율을 채움량으로 넣을 이미지. Image Type을 Filled로 둘 것.")]
@@ -46,9 +48,12 @@ namespace Adler.UI
 
         private void Awake()
         {
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _fuel = _aircraft != null ? _aircraft.Boost : null;
+
             if (_fuel == null)
             {
-                Debug.LogError($"{nameof(BoostReadout)}: Boost Fuel이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(BoostReadout)}: 기체의 부스터 연료를 찾지 못했습니다.", this);
                 enabled = false;
             }
         }

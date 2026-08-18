@@ -21,7 +21,7 @@ namespace Adler.CameraRig
     public sealed class BoostCameraShake : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private AircraftController _aircraft;
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("세기")]
         [Tooltip("평상시 흔들림. 0이면 부스터를 쓸 때만 흔들린다.")]

@@ -20,8 +20,8 @@ namespace Adler.Flight
     public sealed class BoostFuel : MonoBehaviour
     {
         [Header("참조")]
-        [Tooltip("연료 수치를 읽어올 기체. 비워두면 같은 오브젝트에서 찾는다.")]
-        [SerializeField] private AircraftController _aircraft;
+        [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         private float _remaining;
         private float _rechargeAt;
@@ -48,10 +48,7 @@ namespace Adler.Flight
 
         private void Awake()
         {
-            if (_aircraft == null)
-            {
-                _aircraft = GetComponent<AircraftController>();
-            }
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_aircraft == null)
             {

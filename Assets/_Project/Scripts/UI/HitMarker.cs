@@ -1,3 +1,4 @@
+using Adler.Flight;
 using Adler.Combat;
 using Adler.Weapons;
 using UnityEngine;
@@ -19,10 +20,11 @@ namespace Adler.UI
     public sealed class HitMarker : MonoBehaviour
     {
         [Header("읽어올 대상")]
-        [SerializeField] private AircraftGun _gun;
+        [SerializeField] private AircraftRig _aircraft;
 
-        [Tooltip("폭발 결과도 표시하려면 넣는다. 비워두면 기총만 표시한다.")]
-        [SerializeField] private StratagemBay _stratagemBay;
+        private AircraftGun _gun;
+        private StratagemBay _stratagemBay;
+
 
         [Header("표식")]
         [Tooltip("피해가 들어갔을 때 띄울 요소. 보통 조준점 위에 겹쳐 둔다.")]
@@ -43,9 +45,13 @@ namespace Adler.UI
 
         private void Awake()
         {
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _gun = _aircraft != null ? _aircraft.Gun : null;
+            _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
+
             if (_gun == null)
             {
-                Debug.LogError($"{nameof(HitMarker)}: Gun이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(HitMarker)}: 기체의 기총을 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }
