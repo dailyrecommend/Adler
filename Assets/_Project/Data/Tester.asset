@@ -23,7 +23,7 @@ MonoBehaviour:
   PitchRate: 70
   RollRate: 120
   YawRate: 25
-  ControlResponse: 6
+  ControlResponse: 13
   LowSpeedAgility: 0.7
   BankTurnRate: 45
   BoostCapacity: 100

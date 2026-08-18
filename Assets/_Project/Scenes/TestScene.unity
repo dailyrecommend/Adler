@@ -2833,8 +2833,8 @@ MonoBehaviour:
   TrackerSettings:
     BindingMode: 3
     PositionDamping: {x: 0, y: 0, z: 0}
-    AngularDampingMode: 0
-    RotationDamping: {x: 0, y: 0, z: 0}
+    AngularDampingMode: 1
+    RotationDamping: {x: 0.5, y: 0.5, z: 0.5}
     QuaternionDamping: 0.5
   FollowOffset: {x: 0, y: 0.4, z: -1.1}
 --- !u!114 &898042528
@@ -2869,7 +2869,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
   NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
   PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 1.464421e-29
+  AmplitudeGain: 0.00001993856
   FrequencyGain: 1.4
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &972978315
