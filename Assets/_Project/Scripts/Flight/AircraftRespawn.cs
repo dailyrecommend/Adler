@@ -36,6 +36,9 @@ namespace Adler.Flight
         [Tooltip("탄약. 비워두면 건드리지 않는다.")]
         [SerializeField] private GunAmmo _ammo;
 
+        [Tooltip("부스터 연료. 비워두면 같은 오브젝트에서 찾는다.")]
+        [SerializeField] private BoostFuel _boostFuel;
+
         [Tooltip("둘러보던 시야. 비워두면 건드리지 않는다.")]
         [SerializeField] private FreeLookPivot _freeLook;
 
@@ -70,6 +73,11 @@ namespace Adler.Flight
             if (_wreck == null)
             {
                 _wreck = GetComponent<AircraftWreck>();
+            }
+
+            if (_boostFuel == null)
+            {
+                _boostFuel = GetComponent<BoostFuel>();
             }
 
             if (_body == null || _controller == null)
@@ -138,6 +146,11 @@ namespace Adler.Flight
             if (_ammo != null)
             {
                 _ammo.Restock();
+            }
+
+            if (_boostFuel != null)
+            {
+                _boostFuel.Refill();
             }
 
             if (_freeLook != null)

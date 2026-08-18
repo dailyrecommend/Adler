@@ -27,6 +27,9 @@ namespace Adler.Flight
         [Tooltip("출격 시점의 부품 구성. 비행 중 교체는 Stats.Equip()으로 한다.")]
         [SerializeField] private List<PartDefinition> _initialParts = new();
 
+        [Tooltip("부스터 연료. 비워두면 연료 제한 없이 계속 쓸 수 있다.")]
+        [SerializeField] private BoostFuel _boostFuel;
+
         [Header("조작 설정")]
         [Tooltip("스틱을 밀 때 기수가 올라간다.")]
         [SerializeField] private bool _invertPitch;
@@ -47,9 +50,17 @@ namespace Adler.Flight
         /// <summary>정비창과 전투 로직이 성능을 읽고 바꾸는 통로.</summary>
         public AircraftStatSheet Stats { get; private set; }
 
+        /// <summary>부품으로 바뀌지 않는 기체 고유 특성을 읽는 통로.</summary>
+        public AirframeDefinition Airframe => _airframe;
+
         private void Awake()
         {
             _body = GetComponent<Rigidbody>();
+
+            if (_boostFuel == null)
+            {
+                _boostFuel = GetComponent<BoostFuel>();
+            }
 
             if (_airframe == null)
             {
@@ -134,13 +145,20 @@ namespace Adler.Flight
 
         private FlightInput ReadInput()
         {
+            // 연료 쪽은 누르지 않을 때도 불러야 한다. 회복을 그쪽에서 함께 처리하므로,
+            // 쓰지 않는 동안 부르지 않으면 연료가 영영 차지 않는다.
+            bool wantsBoost = _boostAction.IsPressed();
+            bool boosting = _boostFuel != null
+                ? _boostFuel.RequestBoost(wantsBoost, Time.fixedDeltaTime)
+                : wantsBoost;
+
             return new FlightInput
             {
                 Pitch = _pitchAction.ReadValue<float>(),
                 Roll = _rollAction.ReadValue<float>(),
                 Yaw = _yawAction.ReadValue<float>(),
                 Throttle = _throttleAction.ReadValue<float>(),
-                Boost = _boostAction.IsPressed(),
+                Boost = boosting,
             };
         }
 

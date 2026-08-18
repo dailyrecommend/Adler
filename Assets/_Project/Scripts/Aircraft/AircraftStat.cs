@@ -32,6 +32,10 @@ namespace Adler.Aircraft
         ControlResponse = 10,
         LowSpeedAgility = 11,
         BankTurnRate = 12,
+
+        BoostCapacity = 13,
+        BoostDrain = 14,
+        BoostRecharge = 15,
     }
 
     /// <summary>보정치를 어떻게 얹을지.</summary>
@@ -66,7 +70,7 @@ namespace Adler.Aircraft
     /// </summary>
     public static class AircraftStatInfo
     {
-        public const int Count = 13;
+        public const int Count = 16;
 
         // 기체 길이 1m 기준의 범위다. 속도 상한이 낮아 보이지만 1m 기체에게 60m/s는
         // 실제 전투기의 900m/s에 해당한다 — 조종이 불가능한 속도다.
@@ -85,6 +89,9 @@ namespace Adler.Aircraft
             (0.1f, 30f),    // ControlResponse
             (0.05f, 1f),    // LowSpeedAgility
             (0f, 180f),     // BankTurnRate
+            (10f, 1000f),   // BoostCapacity
+            (1f, 200f),     // BoostDrain
+            (0f, 200f),     // BoostRecharge
         };
 
         public static float Clamp(AircraftStat stat, float value)

@@ -54,7 +54,28 @@ namespace Adler.Aircraft
         [Tooltip("기울이면 러더 입력 없이도 그쪽으로 선회하는 정도 (도/초).")]
         public float BankTurnRate = 55f;
 
+        [Header("부스터 연료")]
+        [Tooltip("가득 찼을 때의 연료량.")]
+        public float BoostCapacity = 100f;
+
+        [Tooltip("부스터를 쓰는 동안 초당 줄어드는 양.\n" +
+                 "용량 100에 25면 4초를 쓸 수 있다.")]
+        public float BoostDrain = 25f;
+
+        [Tooltip("쓰지 않을 때 초당 차오르는 양.")]
+        public float BoostRecharge = 15f;
+
         [Header("고정 특성 (부품으로 바뀌지 않음)")]
+        [Tooltip("부스터를 놓고 이만큼 지나야 다시 차오르기 시작한다(초).\n" +
+                 "0이면 놓자마자 회복해서 짧게 끊어 누르는 것이 이득이 된다.")]
+        [Min(0f)]
+        public float BoostRechargeDelay = 1f;
+
+        [Tooltip("연료가 바닥나면 이 비율까지 차야 다시 쓸 수 있다.\n" +
+                 "없으면 바닥 근처에서 켜졌다 꺼졌다를 반복한다.")]
+        [Range(0f, 1f)]
+        public float BoostReengageFraction = 0.25f;
+
         [Tooltip("기수가 하늘을 향할 때 속도가 깎이고, 강하할 때 붙는 정도.")]
         [Range(0f, 1f)]
         public float GravityInfluence = 0.15f;
@@ -75,6 +96,9 @@ namespace Adler.Aircraft
             values[(int)AircraftStat.ControlResponse] = ControlResponse;
             values[(int)AircraftStat.LowSpeedAgility] = LowSpeedAgility;
             values[(int)AircraftStat.BankTurnRate] = BankTurnRate;
+            values[(int)AircraftStat.BoostCapacity] = BoostCapacity;
+            values[(int)AircraftStat.BoostDrain] = BoostDrain;
+            values[(int)AircraftStat.BoostRecharge] = BoostRecharge;
         }
     }
 }

@@ -64,6 +64,9 @@ namespace Adler.Aircraft
         public float ControlResponse => this[AircraftStat.ControlResponse];
         public float LowSpeedAgility => this[AircraftStat.LowSpeedAgility];
         public float BankTurnRate => this[AircraftStat.BankTurnRate];
+        public float BoostCapacity => this[AircraftStat.BoostCapacity];
+        public float BoostDrain => this[AircraftStat.BoostDrain];
+        public float BoostRecharge => this[AircraftStat.BoostRecharge];
 
         // ------------------------------------------------------------------
         // 부품
