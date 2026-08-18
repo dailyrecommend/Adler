@@ -50,9 +50,31 @@ namespace Adler.UI
         [Min(0.1f)]
         [SerializeField] private float _rampDownSpeed = 3f;
 
+        [Header("충격")]
+        [Tooltip("피격 같은 일회성 충격이 잦아드는 속도. 클수록 짧게 끝난다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _impulseDecay = 6f;
+
+        [Tooltip("충격이 쌓일 수 있는 한계 (픽셀). 연달아 맞아도 여기까지만 흔들린다.")]
+        [Min(0f)]
+        [SerializeField] private float _maxImpulse = 40f;
+
         private Vector2 _basePosition;
         private Quaternion _baseRotation;
         private float _amplitude;
+        private float _impulse;
+
+        /// <summary>
+        /// 일회성으로 흔든다. 피격처럼 상태가 아니라 사건인 것에 쓴다.
+        /// <para>
+        /// 부스터 흔들림 위에 더해진다. 부스터를 켠 채로 맞으면 두 흔들림이 겹쳐
+        /// 더 심하게 떨리는데, 실제로 그때가 더 위태로운 상황이다.
+        /// </para>
+        /// </summary>
+        public void AddImpulse(float amplitude)
+        {
+            _impulse = Mathf.Min(_impulse + Mathf.Max(0f, amplitude), _maxImpulse);
+        }
 
         // 축마다 다른 자리에서 노이즈를 읽는다. 같은 값을 쓰면 대각선으로만 움직인다.
         private float _seedX;
@@ -99,7 +121,11 @@ namespace Adler.UI
             float speed = boosting ? _rampUpSpeed : _rampDownSpeed;
             _amplitude = Mathf.Lerp(_amplitude, target, 1f - Mathf.Exp(-speed * Time.deltaTime));
 
-            if (_amplitude <= 0.01f)
+            _impulse = Mathf.Lerp(_impulse, 0f, 1f - Mathf.Exp(-_impulseDecay * Time.deltaTime));
+
+            float amplitude = _amplitude + _impulse;
+
+            if (amplitude <= 0.01f)
             {
                 Restore();
                 return;
@@ -109,13 +135,13 @@ namespace Adler.UI
 
             // 무작위 값 대신 펄린 노이즈를 쓴다. 매 프레임 튀는 값은 진동이 아니라
             // 화면이 깜빡이는 것처럼 보인다.
-            Vector2 offset = new Vector2(Sample(_seedX, t), Sample(_seedY, t)) * _amplitude;
+            Vector2 offset = new Vector2(Sample(_seedX, t), Sample(_seedY, t)) * amplitude;
 
             _target.anchoredPosition = _basePosition + offset;
 
             if (_boostRotation > 0f)
             {
-                float roll = Sample(_seedRoll, t) * _boostRotation * (_amplitude / Mathf.Max(_boostAmplitude, 0.01f));
+                float roll = Sample(_seedRoll, t) * _boostRotation * (amplitude / Mathf.Max(_boostAmplitude, 0.01f));
                 _target.localRotation = _baseRotation * Quaternion.Euler(0f, 0f, roll);
             }
         }

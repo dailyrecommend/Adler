@@ -48,6 +48,9 @@ namespace Adler.Combat
         /// <summary>내구도가 0이 될 때 한 번만.</summary>
         public event Action<Health, DamageInfo> Died;
 
+        /// <summary>되살아났을 때. 피해와 달리 신호 없이 값만 바뀌면 화면 표시가 옛 값에 머문다.</summary>
+        public event Action<Health> Revived;
+
         public bool IsAlive => _current > 0f;
         public float Current => _current;
         public float Max => _maxHealth;
@@ -126,6 +129,8 @@ namespace Adler.Combat
             {
                 gameObject.SetActive(true);
             }
+
+            Revived?.Invoke(this);
         }
     }
 }
