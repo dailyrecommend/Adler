@@ -19,7 +19,7 @@ MonoBehaviour:
   MuzzleVelocity: 120
   GravityScale: 0.3
   Range: 600
-  Damage: 50
+  Damage: 1
   Penetration: 2
   Demolition: 0
   SpreadDegrees: 0.6
