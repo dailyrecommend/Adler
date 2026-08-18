@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e64760dd47a6b149822eed894f4f04c, type: 3}
-  m_Name: TestGun
+  m_Name: AntiAir
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GunDefinition
-  DisplayName: TestGun
-  RoundsPerMinute: 1500
-  AmmoCapacity: 1500
-  Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
+  DisplayName: AntiAir
+  RoundsPerMinute: 1400
+  AmmoCapacity: 9999
+  Prefab: {fileID: 2335809881998593426, guid: e036154bf48c97f4d8a963089c5610e4, type: 3}
   MuzzleVelocity: 120
   GravityScale: 0.3
-  Range: 300
-  Damage: 12
+  Range: 600
+  Damage: 50
   Penetration: 2
   Demolition: 0
-  SpreadDegrees: 0.2
-  HitRadius: 1
+  SpreadDegrees: 0.6
+  HitRadius: 0.25
