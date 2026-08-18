@@ -26,6 +26,7 @@ namespace Adler.Flight
         private float _remaining;
         private float _rechargeAt;
         private bool _lockedOut;
+        private bool _awaitingRelease;
 
         /// <summary>남은 연료가 바뀔 때마다. 화면 표시가 구독한다.</summary>
         public event Action<BoostFuel> Changed;
@@ -83,7 +84,14 @@ namespace Adler.Flight
             // 정비로 용량이 바뀔 수 있으므로 매번 확인한다.
             Capacity = stats.BoostCapacity;
 
-            bool allowed = wanted && !_lockedOut && _remaining > 0f;
+            // 바닥난 뒤로는 한 번 손을 떼야 다시 켜진다. 누른 채로 두면 차오르는 족족
+            // 다시 빨려 들어가 짧게 켜졌다 꺼지기를 반복한다.
+            if (!wanted)
+            {
+                _awaitingRelease = false;
+            }
+
+            bool allowed = wanted && !_awaitingRelease && !_lockedOut && _remaining > 0f;
 
             if (allowed)
             {
@@ -91,7 +99,7 @@ namespace Adler.Flight
             }
             else
             {
-                Recover(stats, deltaTime, wanted);
+                Recover(stats, deltaTime);
             }
 
             return allowed;
@@ -110,14 +118,20 @@ namespace Adler.Flight
             }
 
             _lockedOut = true;
+            _awaitingRelease = true;
             Depleted?.Invoke(this);
         }
 
-        private void Recover(AircraftStatSheet stats, float deltaTime, bool stillHeld)
+        /// <summary>
+        /// 회복은 손을 떼고 있는지와 무관하다.
+        /// <para>
+        /// 누르고 있는 동안 막아두면 바닥난 채로 계속 누른 사람은 영영 회복하지 못한다.
+        /// 다시 켜지는 것을 막는 일은 손을 뗐는지와 잔량 임계가 맡는다.
+        /// </para>
+        /// </summary>
+        private void Recover(AircraftStatSheet stats, float deltaTime)
         {
-            // 누르고 있는 동안에는 차지 않는다. 바닥난 채로 계속 누르면
-            // 조금 차자마자 다시 빨려 들어가 덜덜거린다.
-            if (stillHeld || _remaining >= Capacity || Time.time < _rechargeAt)
+            if (_remaining >= Capacity || Time.time < _rechargeAt)
             {
                 return;
             }
@@ -143,6 +157,7 @@ namespace Adler.Flight
         {
             _remaining = Capacity;
             _rechargeAt = 0f;
+            _awaitingRelease = false;
 
             if (_lockedOut)
             {
