@@ -15,6 +15,8 @@ MonoBehaviour:
   DisplayName: DN-02
   Icon: {fileID: 21300000, guid: 5aa3e76dd2d117448a374337a9305eeb, type: 3}
   Command: 00000000030000000200000001000000
+  Cooldown: 90
+  UsesPerSortie: 0
   Prefab: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
   ArmingDelay: 0
   InnerRadius: 3

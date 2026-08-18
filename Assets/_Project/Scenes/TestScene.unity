@@ -358,6 +358,8 @@ MonoBehaviour:
   _slotPrefab: {fileID: 2048752005125739745, guid: 27a35dd39de322c4ba4e84493d6328ea, type: 3}
   _arrowPrefab: {fileID: 3546928181431903623, guid: 724e51a3b02f3534282e595c48b87149, type: 3}
   _slotRoot: {fileID: 317987486}
+  _panel: {fileID: 0}
+  _fadeSpeed: 14
 --- !u!114 &99851326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2867,7 +2869,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
   NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
   PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 0.000000001133583
+  AmplitudeGain: 1.464421e-29
   FrequencyGain: 1.4
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &972978315
@@ -4877,6 +4879,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d23327169c014ce4eb408905966b4876, type: 2}
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
   _inputTimeout: 1.5
+  _gamepadOpensOnInput: 1
 --- !u!114 &1812182294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4939,6 +4942,7 @@ MonoBehaviour:
   _wreck: {fileID: 1812182290}
   _ammo: {fileID: 1812182295}
   _boostFuel: {fileID: 0}
+  _stratagemBay: {fileID: 0}
   _freeLook: {fileID: 0}
   _onlyWhenDead: 0
 --- !u!114 &1812182297
