@@ -62,6 +62,7 @@ namespace Adler.UI
             _health.Damaged += OnChanged;
             _health.Died += OnChanged;
             _health.Revived += OnRevived;
+            _health.Healed += OnHealed;
         }
 
         private void OnDisable()
@@ -69,6 +70,7 @@ namespace Adler.UI
             _health.Damaged -= OnChanged;
             _health.Died -= OnChanged;
             _health.Revived -= OnRevived;
+            _health.Healed -= OnHealed;
         }
 
         /// <summary>
@@ -84,6 +86,8 @@ namespace Adler.UI
         private void OnChanged(Health health, DamageInfo damage) => Refresh();
 
         private void OnRevived(Health health) => Refresh();
+
+        private void OnHealed(Health health, float amount) => Refresh();
 
         /// <summary>
         /// 값이 바뀔 때만 부른다. 되살아났을 때는 신호가 없으므로 밖에서 부를 수 있게 열어둔다.

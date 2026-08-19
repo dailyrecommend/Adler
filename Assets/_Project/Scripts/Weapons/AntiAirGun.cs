@@ -80,10 +80,11 @@ namespace Adler.Weapons
         [Min(0f)]
         [SerializeField] private float _burstCooldown = 1.8f;
 
-        [Tooltip("예측 지점을 어긋내는 정도. 거리에 비례해 빗나간다.\n" +
+        [Tooltip("예측 지점을 어긋내는 정도. 표적까지의 실제 거리에 곱해진다.\n" +
+                 "0.05면 100m 밖 표적을 최대 5m 빗나간다 — 가까울수록 정확해진다.\n" +
                  "0이면 이론상 완벽하게 맞혀서 피할 방법이 없어진다.")]
         [Range(0f, 0.5f)]
-        [SerializeField] private float _leadError = 0.12f;
+        [SerializeField] private float _leadError = 0.05f;
 
         private Transform _target;
         private Rigidbody _targetBody;
@@ -359,7 +360,11 @@ namespace Adler.Weapons
 
             // 사격을 시작할 때 한 번만 어긋냄을 정한다. 매 발 새로 뽑으면 탄이 사방으로
             // 흩어져 그냥 부정확해 보이고, 이렇게 두면 한 줄기가 빗나가는 것으로 읽힌다.
-            _aimOffset = Random.onUnitSphere * (_range * _leadError * Random.value);
+            //
+            // 사거리가 아니라 지금 거리에 비례한다. 사거리로 재면 코앞을 스쳐 지나가도
+            // 멀리 도는 것과 똑같이 빗나가서, 저공 근접 통과가 공짜가 된다.
+            float distance = Vector3.Distance(transform.position, _target.position);
+            _aimOffset = Random.onUnitSphere * (distance * _leadError * Random.value);
         }
 
         private void FireWhileReady()

@@ -37,6 +37,8 @@ namespace Adler.Flight
 
         public StratagemBay Stratagems { get; private set; }
 
+        public AircraftRepair Repair { get; private set; }
+
         /// <summary>지금 비행 상태. 속도와 부스터 여부를 화면 표시와 연출이 읽어 간다.</summary>
         public IFlightModel Model => Control != null ? Control.Model : null;
 
@@ -59,6 +61,7 @@ namespace Adler.Flight
             Gun = GetComponentInChildren<AircraftGun>(includeInactive: true);
             Ammo = GetComponentInChildren<GunAmmo>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
+            Repair = GetComponentInChildren<AircraftRepair>(includeInactive: true);
         }
 
         /// <summary>

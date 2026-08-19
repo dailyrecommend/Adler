@@ -188,6 +188,9 @@ namespace Adler.Flight
             _aircraft.Boost?.Refill();
             _aircraft.Stratagems?.ResetRestrictions();
 
+            // 죽기 전에 걸어둔 수리가 남아 있으면 가득 찬 기체를 계속 채우게 된다.
+            _aircraft.Repair?.Stop(completed: false);
+
             if (_freeLook != null)
             {
                 _freeLook.SnapToCenter();

@@ -51,6 +51,9 @@ namespace Adler.Combat
         /// <summary>되살아났을 때. 피해와 달리 신호 없이 값만 바뀌면 화면 표시가 옛 값에 머문다.</summary>
         public event Action<Health> Revived;
 
+        /// <summary>회복됐을 때. 실제로 채워진 양이 함께 온다.</summary>
+        public event Action<Health, float> Healed;
+
         public bool IsAlive => _current > 0f;
         public float Current => _current;
         public float Max => _maxHealth;
@@ -119,6 +122,31 @@ namespace Adler.Combat
             }
 
             return DamageRejection.None;
+        }
+
+        /// <summary>
+        /// 내구도를 채운다. 실제로 채워진 양을 돌려준다.
+        /// <para>
+        /// 이미 쓰러진 것은 회복시키지 않는다. 되살리는 일은 <see cref="Revive"/>의 몫이고,
+        /// 둘을 섞으면 수리 스킬이 격추된 기체를 공중에서 일으켜 세우게 된다.
+        /// </para>
+        /// </summary>
+        public float Heal(float amount)
+        {
+            if (!IsAlive || amount <= 0f)
+            {
+                return 0f;
+            }
+
+            float applied = Mathf.Min(amount, _maxHealth - _current);
+            if (applied <= 0f)
+            {
+                return 0f;
+            }
+
+            _current += applied;
+            Healed?.Invoke(this, applied);
+            return applied;
         }
 
         /// <summary>표적을 재사용할 때 되살린다.</summary>

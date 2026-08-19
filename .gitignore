@@ -36,6 +36,10 @@
 # Jetbrains IDE project settings
 .idea/
 
+# Unity crash recovery copies
+/[Aa]ssets/_[Rr]ecovery/
+/[Aa]ssets/_[Rr]ecovery.meta
+
 # Visual Studio cache directory
 .vs/
 
