@@ -146,7 +146,7 @@ namespace Adler.Flight
         private void SetControlEnabled(bool enabled)
         {
             Toggle(_aircraft.Control, enabled);
-            Toggle(_aircraft.Gun, enabled);
+            Toggle(_aircraft.Weapons, enabled);
             Toggle(_aircraft.Stratagems, enabled);
 
             foreach (Behaviour behaviour in _alsoDisableOnDeath)
@@ -184,7 +184,7 @@ namespace Adler.Flight
             // 남은 채로 되살아나지 않는다.
             _aircraft.Control.ResetFlight();
 
-            _aircraft.Ammo?.Restock();
+            _aircraft.Weapons?.RestockAll();
             _aircraft.Boost?.Refill();
             _aircraft.Stratagems?.ResetRestrictions();
 

@@ -191,9 +191,22 @@ namespace Adler.Weapons
             return false;
         }
 
+        /// <summary>
+        /// 물리 충돌로도 받는다. 다만 경로를 훑는 쪽과 같은 레이어 조건을 지켜야 한다.
+        /// <para>
+        /// 충돌 콜백은 레이어를 가리지 않고 들어오므로, 여기서 걸러내지 않으면 투하 순간
+        /// 기체를 스친 폭탄이 그 자리에 박혀 버린다. 마스크는 제대로 설정돼 있는데
+        /// 코드가 보지 않는 셈이라 원인을 짐작하기 어려운 종류의 고장이다.
+        /// </para>
+        /// </summary>
         private void OnCollisionEnter(Collision collision)
         {
             if (_detonated)
+            {
+                return;
+            }
+
+            if ((_impactMask.value & (1 << collision.gameObject.layer)) == 0)
             {
                 return;
             }

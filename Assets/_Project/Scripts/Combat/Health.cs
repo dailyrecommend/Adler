@@ -27,9 +27,9 @@ namespace Adler.Combat
         [SerializeField] private float _armor;
 
         [Header("구조 (건물)")]
-        [Tooltip("무기의 철거력이 이 값보다 낮으면 부술 수 없다.\n" +
-                 "건물이 아닌 표적은 0으로 둔다. 기총에는 철거력이 없으므로,\n" +
-                 "이 값을 올리면 폭탄으로만 파괴되는 표적이 된다.")]
+        [Tooltip("철거력이 이 값에 못 미치면 피해가 그 비율만큼 줄어든다.\n" +
+                 "장갑과 달리 완전히 막지는 않는다 — 철거력 30으로 60짜리 건물을 때리면 절반이 들어간다.\n" +
+                 "건물이 아닌 표적은 0으로 둔다.")]
         [Min(0f)]
         [SerializeField] private float _requiredDemolition;
 
@@ -72,15 +72,22 @@ namespace Adler.Combat
                 return DamageResult.None;
             }
 
-            DamageRejection rejection = Evaluate(damage);
-            if (rejection != DamageRejection.None)
+            // 장갑은 관문이라 못 뚫으면 아무것도 들어가지 않는다.
+            if (_armor > 0f && damage.Penetration < _armor)
             {
-                // 맞았지만 통하지 않았다. 이것도 플레이어에게 알려야 무기를 바꿀 판단이 선다.
-                Blocked?.Invoke(this, damage, rejection);
-                return new DamageResult(rejection, 0f, killed: false);
+                Blocked?.Invoke(this, damage, DamageRejection.Armor);
+                return new DamageResult(DamageRejection.Armor, 0f, killed: false);
             }
 
-            float applied = Mathf.Min(_current, damage.Amount);
+            // 구조는 방패라 모자란 만큼 깎아낸다.
+            float scale = DemolitionScale(damage.Demolition);
+            if (scale <= 0f)
+            {
+                Blocked?.Invoke(this, damage, DamageRejection.Demolition);
+                return new DamageResult(DamageRejection.Demolition, 0f, killed: false);
+            }
+
+            float applied = Mathf.Min(_current, damage.Amount * scale);
             _current -= applied;
             Damaged?.Invoke(this, damage);
 
@@ -100,28 +107,28 @@ namespace Adler.Combat
         }
 
         /// <summary>
-        /// 두 관문을 모두 통과해야 피해가 들어간다. 어느 쪽에 막혔는지 구분해 돌려주는 이유는,
-        /// "튕겨 나감"과 "건물이 끄떡없음"이 플레이어에게 전혀 다른 행동을 요구하기 때문이다.
-        /// 앞은 관통력이 높은 무기를, 뒤는 폭탄을 가져오라는 뜻이다.
+        /// 철거력이 모자란 만큼 피해를 깎는 배율.
         /// <para>
-        /// 수치가 똑같으면 공격하는 쪽이 이긴다. 그래서 비교가 &lt;= 가 아니라 &lt; 다.
-        /// 장갑 30을 뚫으려고 관통력 30짜리 무기를 골라온 플레이어가 튕겨 나가면,
-        /// 표기된 숫자를 믿을 수 없게 된다.
+        /// 장갑과 성격이 다르다. 장갑은 관문이라 못 뚫으면 튕겨 나가지만, 구조는 방패라
+        /// 모자란 채로도 흠집은 낸다. 철거력 30으로 60짜리 건물을 때리면 절반이 들어간다.
+        /// </para>
+        /// <para>
+        /// 그래서 철거력이 낮은 무기로도 시간을 들이면 부술 수는 있다. 다만 그동안 대공포
+        /// 사거리 안에 머물러야 하므로, 맞는 폭탄을 가져오는 편이 여전히 낫다.
+        /// </para>
+        /// <para>
+        /// 수치가 똑같으면 공격하는 쪽이 이긴다. 철거력 60으로 60짜리 건물을 때리면
+        /// 온전히 들어간다 — 표기된 숫자를 믿을 수 있어야 한다.
         /// </para>
         /// </summary>
-        private DamageRejection Evaluate(in DamageInfo damage)
+        private float DemolitionScale(float demolition)
         {
-            if (_requiredDemolition > 0f && damage.Demolition < _requiredDemolition)
+            if (_requiredDemolition <= 0f)
             {
-                return DamageRejection.Demolition;
+                return 1f;
             }
 
-            if (_armor > 0f && damage.Penetration < _armor)
-            {
-                return DamageRejection.Armor;
-            }
-
-            return DamageRejection.None;
+            return Mathf.Clamp01(demolition / _requiredDemolition);
         }
 
         /// <summary>

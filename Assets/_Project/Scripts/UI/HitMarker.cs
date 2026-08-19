@@ -22,7 +22,7 @@ namespace Adler.UI
         [Header("읽어올 대상")]
         [SerializeField] private AircraftRig _aircraft;
 
-        private AircraftGun _gun;
+        private WeaponBay _bay;
         private StratagemBay _stratagemBay;
 
 
@@ -46,12 +46,12 @@ namespace Adler.UI
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _gun = _aircraft != null ? _aircraft.Gun : null;
+            _bay = _aircraft != null ? _aircraft.Weapons : null;
             _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
 
-            if (_gun == null)
+            if (_bay == null)
             {
-                Debug.LogError($"{nameof(HitMarker)}: 기체의 기총을 찾지 못했습니다.", this);
+                Debug.LogError($"{nameof(HitMarker)}: 기체의 무기를 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }
@@ -60,9 +60,21 @@ namespace Adler.UI
             Hide(_blockedMarker);
         }
 
+        /// <summary>
+        /// 손에 들지 않은 무기의 명중도 받는다. 미사일은 쏘고 나서 무기를 바꿔도
+        /// 계속 날아가고, 맞았을 때 표식이 안 뜨면 어디로 갔는지 알 수 없다.
+        /// </summary>
         private void OnEnable()
         {
-            _gun.Hit += OnHit;
+            foreach (AircraftWeapon weapon in _bay.Weapons)
+            {
+                weapon.Hit += OnHit;
+
+                if (weapon is MissileLauncher launcher)
+                {
+                    launcher.Detonated += OnMissileDetonated;
+                }
+            }
 
             if (_stratagemBay != null)
             {
@@ -72,7 +84,15 @@ namespace Adler.UI
 
         private void OnDisable()
         {
-            _gun.Hit -= OnHit;
+            foreach (AircraftWeapon weapon in _bay.Weapons)
+            {
+                weapon.Hit -= OnHit;
+
+                if (weapon is MissileLauncher launcher)
+                {
+                    launcher.Detonated -= OnMissileDetonated;
+                }
+            }
 
             if (_stratagemBay != null)
             {
@@ -85,7 +105,11 @@ namespace Adler.UI
         /// 전부 막혔을 때만 막힘 표시를 띄워야, 장갑 차량 옆의 보병을 잡은 것을
         /// 실패로 알리는 일이 없다.
         /// </summary>
-        private void OnDetonated(BombDefinition bomb, BlastReport report)
+        private void OnDetonated(BombDefinition bomb, BlastReport report) => ShowBlast(report);
+
+        private void OnMissileDetonated(MissileDefinition missile, BlastReport report) => ShowBlast(report);
+
+        private void ShowBlast(BlastReport report)
         {
             if (report.MissedEverything)
             {

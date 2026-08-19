@@ -19,7 +19,14 @@ namespace Adler.UI
         [Header("읽어올 대상")]
         [SerializeField] private AircraftRig _aircraft;
 
-        private GunAmmo _ammo;
+        [Tooltip("손에 든 무기의 아이콘을 넣을 곳. 비워둬도 된다.")]
+        [SerializeField] private Image _weaponIcon;
+
+        [Tooltip("손에 든 무기의 이름을 넣을 곳. 비워둬도 된다.")]
+        [SerializeField] private TMP_Text _weaponLabel;
+
+        private WeaponBay _bay;
+        private AircraftWeapon _weapon;
 
         [Header("숫자")]
         [SerializeField] private TMP_Text _label;
@@ -48,7 +55,7 @@ namespace Adler.UI
         [Min(1f)]
         [SerializeField] private float _punchScale = 1.12f;
 
-        [Tooltip("재보급으로 채워졌을 때의 배율. 한 발과는 다른 사건이라 크게 준다.")]
+        [Tooltip("탄이 한 번에 크게 늘었을 때의 배율. 재보급처럼 한 발과는 다른 사건에 쓴다.")]
         [Min(1f)]
         [SerializeField] private float _resupplyPunchScale = 1.4f;
 
@@ -58,6 +65,7 @@ namespace Adler.UI
 
         private bool _wasLow;
         private bool _initialized;
+        private int _shownRemaining;
 
         private RectTransform _labelRect;
         private Vector3 _labelBaseScale = Vector3.one;
@@ -67,11 +75,11 @@ namespace Adler.UI
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _ammo = _aircraft != null ? _aircraft.Ammo : null;
+            _bay = _aircraft != null ? _aircraft.Weapons : null;
 
-            if (_ammo == null)
+            if (_bay == null)
             {
-                Debug.LogError($"{nameof(AmmoReadout)}: 기체의 탄약을 찾지 못했습니다.", this);
+                Debug.LogError($"{nameof(AmmoReadout)}: 기체의 무기를 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }
@@ -83,31 +91,67 @@ namespace Adler.UI
             }
         }
 
-        private void OnEnable()
-        {
-            _ammo.Changed += Refresh;
-            _ammo.Resupplied += OnResupplied;
-
-            // 구독하기 전의 값으로 시작하지 않도록 한 번 그려둔다.
-            // 이 첫 갱신은 사건이 아니므로 연출을 붙이지 않는다.
-            _initialized = false;
-            Refresh(_ammo);
-            _initialized = true;
-        }
+        private void OnEnable() => _bay.WeaponChanged += OnWeaponChanged;
 
         private void OnDisable()
         {
-            _ammo.Changed -= Refresh;
-            _ammo.Resupplied -= OnResupplied;
+            _bay.WeaponChanged -= OnWeaponChanged;
+            Unsubscribe();
         }
 
-        private void OnResupplied(GunAmmo ammo) => Punch(_resupplyPunchScale);
+        /// <summary>
+        /// 첫 표시는 Start에서 한다. 무기가 자기 Awake에서 탄을 채우는데, 오브젝트가
+        /// 다르면 그 순서가 보장되지 않아 OnEnable에서 읽으면 0을 가져올 수 있다.
+        /// </summary>
+        private void Start() => OnWeaponChanged(_bay.Active);
+
+        /// <summary>
+        /// 손에 든 무기를 따라간다. 표시가 무기 하나에 붙어 있으면 교체한 뒤에도
+        /// 이전 무기의 잔탄을 보여주게 된다.
+        /// </summary>
+        private void OnWeaponChanged(AircraftWeapon weapon)
+        {
+            Unsubscribe();
+            _weapon = weapon;
+
+            if (_weapon == null)
+            {
+                return;
+            }
+
+            _weapon.AmmoChanged += Refresh;
+
+            if (_weaponIcon != null)
+            {
+                _weaponIcon.sprite = _weapon.Definition != null ? _weapon.Definition.Icon : null;
+                _weaponIcon.enabled = _weaponIcon.sprite != null;
+            }
+
+            if (_weaponLabel != null)
+            {
+                _weaponLabel.SetText(_weapon.Definition != null ? _weapon.Definition.DisplayName : string.Empty);
+            }
+
+            // 교체는 사건이 아니므로 숫자가 튀는 연출을 붙이지 않는다.
+            _initialized = false;
+            Refresh(_weapon);
+            _initialized = true;
+        }
+
+        private void Unsubscribe()
+        {
+            if (_weapon != null)
+            {
+                _weapon.AmmoChanged -= Refresh;
+                _weapon = null;
+            }
+        }
 
         /// <summary>
         /// 매 프레임이 아니라 값이 바뀔 때만 갱신한다. 초당 스물다섯 발이 나가지만
         /// 그래도 프레임 수보다는 적고, 쏘지 않는 동안에는 아무 일도 하지 않는다.
         /// </summary>
-        private void Refresh(GunAmmo ammo)
+        private void Refresh(AircraftWeapon ammo)
         {
             if (_label != null)
             {
@@ -116,10 +160,10 @@ namespace Adler.UI
 
             if (_fill != null)
             {
-                _fill.fillAmount = ammo.Normalized;
+                _fill.fillAmount = ammo.AmmoNormalized;
             }
 
-            bool low = _lowThreshold > 0f && ammo.Normalized <= _lowThreshold;
+            bool low = _lowThreshold > 0f && ammo.AmmoNormalized <= _lowThreshold;
             if (low != _wasLow)
             {
                 _wasLow = low;
@@ -140,10 +184,14 @@ namespace Adler.UI
                 _emptyWarning.SetActive(ammo.IsEmpty);
             }
 
+            // 한 발 쏜 것과 재보급으로 확 늘어난 것은 다른 사건이다. 무엇이 일어났는지
+            // 따로 듣지 않고 잔탄이 늘었는지로 가른다 — 늘어나는 길은 보급뿐이다.
             if (_initialized)
             {
-                Punch(_punchScale);
+                Punch(ammo.Remaining > _shownRemaining ? _resupplyPunchScale : _punchScale);
             }
+
+            _shownRemaining = ammo.Remaining;
         }
 
         /// <summary>

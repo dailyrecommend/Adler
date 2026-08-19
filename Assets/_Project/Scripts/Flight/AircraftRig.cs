@@ -31,9 +31,11 @@ namespace Adler.Flight
 
         public BoostFuel Boost { get; private set; }
 
-        public AircraftGun Gun { get; private set; }
+        /// <summary>들고 있는 무기들. 지금 손에 든 것은 <c>Weapons.Active</c>로 읽는다.</summary>
+        public WeaponBay Weapons { get; private set; }
 
-        public GunAmmo Ammo { get; private set; }
+        /// <summary>미사일 조준. 무기와 나뉘어 있어 기총을 들고 있을 때도 읽을 수 있다.</summary>
+        public LockOnTargeting Targeting { get; private set; }
 
         public StratagemBay Stratagems { get; private set; }
 
@@ -58,8 +60,8 @@ namespace Adler.Flight
             Lifecycle = GetComponentInChildren<AircraftLifecycle>(includeInactive: true);
             Health = GetComponentInChildren<Health>(includeInactive: true);
             Boost = GetComponentInChildren<BoostFuel>(includeInactive: true);
-            Gun = GetComponentInChildren<AircraftGun>(includeInactive: true);
-            Ammo = GetComponentInChildren<GunAmmo>(includeInactive: true);
+            Weapons = GetComponentInChildren<WeaponBay>(includeInactive: true);
+            Targeting = GetComponentInChildren<LockOnTargeting>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
             Repair = GetComponentInChildren<AircraftRepair>(includeInactive: true);
         }

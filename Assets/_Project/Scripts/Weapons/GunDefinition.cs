@@ -5,30 +5,14 @@ namespace Adler.Weapons
     /// <summary>
     /// 기총 한 종류의 성능.
     /// <para>
-    /// 지금은 무기 스탯이 기체 스탯과 분리돼 있다. 나중에 무기도 정비 대상이 되면
-    /// <c>AircraftStatSheet</c>로 옮겨 부품 보정을 받게 하면 되고, 그때 이 에셋은
-    /// 기본값 역할만 남는다 — 기체 스탯이 이미 그 구조다.
+    /// 탄이 표적을 쫓지 않으므로 맞히는 일이 온전히 조준에 달려 있다. 대신 쏘는 즉시
+    /// 나가고 탄이 많다 — 미사일과 반대편에 있는 무기다.
     /// </para>
     /// </summary>
     [CreateAssetMenu(fileName = "Gun", menuName = "Adler/Weapons/Gun Definition")]
-    public sealed class GunDefinition : ScriptableObject
+    public sealed class GunDefinition : WeaponDefinition
     {
-        [Header("표시")]
-        public string DisplayName = "Unnamed Gun";
-
-        [Header("발사")]
-        [Tooltip("분당 발사 수.")]
-        [Min(1f)]
-        public float RoundsPerMinute = 900f;
-
-        [Tooltip("가득 채웠을 때 실을 수 있는 탄 수.")]
-        [Min(1)]
-        public int AmmoCapacity = 600;
-
-        [Tooltip("날아갈 탄환 프리팹. Projectile 컴포넌트가 있어야 한다.\n" +
-                 "Rigidbody는 필요 없다 — 탄도는 Projectile이 직접 계산한다.")]
-        public GameObject Prefab;
-
+        [Header("탄도")]
         [Tooltip("탄이 총구를 떠나는 속도 (m/s). 여기에 기체 속도가 더해진다.")]
         [Min(1f)]
         public float MuzzleVelocity = 120f;
@@ -36,24 +20,6 @@ namespace Adler.Weapons
         [Tooltip("탄이 받는 중력의 비율. 0이면 직선, 1이면 온전히 떨어진다.")]
         [Range(0f, 1f)]
         public float GravityScale = 0.3f;
-
-        [Tooltip("이만큼 날아가면 사라진다 (m).")]
-        [Min(1f)]
-        public float Range = 300f;
-
-        [Header("위력")]
-        [Tooltip("관문을 통과했을 때 들어가는 피해량.")]
-        public float Damage = 12f;
-
-        [Tooltip("관통력. 표적의 장갑 이상이어야 피해가 들어간다.\n" +
-                 "보병은 장갑이 0이라 지금은 영향이 없다.")]
-        [Min(0f)]
-        public float Penetration = 5f;
-
-        [Tooltip("철거력. 건물이 요구하는 수준 이상이어야 부술 수 있다.\n" +
-                 "기총은 건물을 부수지 못하므로 0이 정상이다. 철거는 폭탄의 몫이다.")]
-        [Min(0f)]
-        public float Demolition;
 
         [Header("정확도")]
         [Tooltip("탄이 흩어지는 각도. 0이면 정확히 조준선으로 나간다.")]
@@ -64,12 +30,6 @@ namespace Adler.Weapons
                  "보병처럼 작은 표적을 비행 중에 맞히려면 이 관용이 필요하다.")]
         [Min(0f)]
         public float HitRadius = 0.25f;
-
-        /// <summary>한 발과 다음 발 사이의 간격(초).</summary>
-        public float ShotInterval => 60f / RoundsPerMinute;
-
-        /// <summary>가득 채운 탄을 쉬지 않고 쏟아부었을 때 버티는 시간(초).</summary>
-        public float SustainedFireSeconds => AmmoCapacity * ShotInterval;
 
         /// <summary>총구를 떠난 탄이 사거리 끝까지 가는 데 걸리는 시간(초).</summary>
         public float TimeOfFlight => Range / MuzzleVelocity;

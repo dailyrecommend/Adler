@@ -61,15 +61,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Missile",
-                    "type": "Button",
-                    "id": "11000000-0000-4000-8000-000000000007",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "SwitchTarget",
                     "type": "Button",
                     "id": "11000000-0000-4000-8000-000000000008",
@@ -154,6 +145,15 @@
                     "name": "ToggleCommands",
                     "type": "Button",
                     "id": "11000000-0000-4000-8000-000000000011",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SwitchWeapon",
+                    "type": "Button",
+                    "id": "11000000-0000-4000-8000-000000000012",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -427,17 +427,6 @@
                 },
                 {
                     "name": "",
-                    "id": "20000000-0000-4000-8000-00000000001a",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Missile",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "20000000-0000-4000-8000-00000000001c",
                     "path": "<Keyboard>/r",
                     "interactions": "",
@@ -466,6 +455,39 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "ToggleCommands",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20000000-0000-4000-8000-000000000030",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SwitchWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20000000-0000-4000-8000-000000000031",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SwitchWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20000000-0000-4000-8000-000000000032",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "SwitchWeapon",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
