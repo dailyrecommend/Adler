@@ -22,5 +22,5 @@ MonoBehaviour:
   InnerRadius: 4
   BlastRadius: 12
   Damage: 3000
-  Penetration: 10
+  Penetration: 8
   Demolition: 50

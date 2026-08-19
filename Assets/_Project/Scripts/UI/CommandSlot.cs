@@ -63,6 +63,33 @@ namespace Adler.UI
         [Tooltip("이미 누른 화살표.")]
         [SerializeField] private Color _enteredColor = Color.white;
 
+        [Header("봉인")]
+        [Tooltip("재머에 걸렸을 때 모든 칸이 함께 쓸 아이콘.\n" +
+                 "무엇이 막혔는지가 아니라 전부 막혔다는 사실이 읽혀야 한다.\n" +
+                 "비워두면 원래 아이콘을 그대로 쓴다.")]
+        [SerializeField] private Sprite _jammedIcon;
+
+        [Tooltip("봉인 중에 이름 자리에 대신 넣을 글자.")]
+        [SerializeField] private string _jammedText = "JAMMED";
+
+        [SerializeField] private Color _jammedTextColor = new Color(1f, 0.35f, 0.3f, 1f);
+
+        [Tooltip("봉인 중 아이콘에 곱할 색.")]
+        [SerializeField] private Color _jammedIconColor = new Color(1f, 0.45f, 0.4f, 1f);
+
+        [Tooltip("봉인 중 아이콘에 씌울 머티리얼. Adler/UI Glitch 쉐이더를 쓴다.\n" +
+                 "칸마다 복제해 다른 씨앗을 넣으므로, 하나를 모두가 나눠 써도 된다.\n" +
+                 "비워두면 아이콘만 바뀌고 지지직거리지는 않는다.")]
+        [SerializeField] private Material _jammedMaterial;
+
+        [Tooltip("화살표가 떨리는 폭(px). 읽을 수 없을 만큼 흔들면 안 된다.")]
+        [Min(0f)]
+        [SerializeField] private float _shakePixels = 2.5f;
+
+        [Tooltip("떨리는 빠르기. 높을수록 잘게 떤다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _shakeSpeed = 26f;
+
         [Header("칸 흐리기")]
         [Tooltip("지금 입력과 맞지 않는 것의 투명도.")]
         [Range(0f, 1f)]
@@ -73,6 +100,10 @@ namespace Adler.UI
         [SerializeField] private float _fadeSpeed = 12f;
 
         private readonly List<Image> _arrows = new();
+
+        // 떨리기 전의 제자리. 여기에 흔들림을 얹지 않으면 흔들린 자리에 또 얹혀 밀려난다.
+        private readonly List<Vector2> _arrowHome = new();
+        private readonly List<float> _shakeSeeds = new();
 
         // 초 단위로만 표시하므로 그 자릿수가 바뀔 때만 문자열을 다시 만든다.
         private int _shownSeconds = -1;
@@ -85,19 +116,54 @@ namespace Adler.UI
         private bool _shownArmed;
         private bool _armed;
 
+        private bool _jammed;
+        private bool _shownJammed;
+        private bool _homePending;
+        private Sprite _normalIcon;
+        private Color _iconBaseColor = Color.white;
+
+        private Material _iconBaseMaterial;
+        private Material _glitchInstance;
+
+        private static readonly int UvRectId = Shader.PropertyToID("_UVRect");
+        private static readonly int SeedId = Shader.PropertyToID("_Seed");
+
         /// <summary>이 칸이 나타내는 스트라타젬.</summary>
         public StratagemDefinition Stratagem { get; private set; }
+
+        private void Awake()
+        {
+            if (_icon != null)
+            {
+                _iconBaseColor = _icon.color;
+                _iconBaseMaterial = _icon.material;
+            }
+
+            if (_jammedMaterial == null)
+            {
+                return;
+            }
+
+            // 칸마다 복제한다. 하나를 나눠 쓰면 모든 아이콘이 같은 무늬로 같은 순간에
+            // 망가져서, 망가진 화면이 아니라 반복되는 무늬로 보인다.
+            _glitchInstance = new Material(_jammedMaterial);
+            _glitchInstance.SetFloat(SeedId, Random.Range(0f, 100f));
+        }
+
+        private void OnDestroy()
+        {
+            if (_glitchInstance != null)
+            {
+                Destroy(_glitchInstance);
+            }
+        }
 
         /// <summary>스트라타젬을 붙이고 커맨드 길이만큼 화살표를 만든다.</summary>
         public void Bind(StratagemDefinition stratagem, Image arrowPrefab)
         {
             Stratagem = stratagem;
-
-            if (_icon != null)
-            {
-                _icon.sprite = stratagem.Icon;
-                _icon.enabled = stratagem.Icon != null;
-            }
+            _normalIcon = stratagem.Icon;
+            ApplyIcon();
 
             BuildArrows(stratagem, arrowPrefab);
             SetMatchedCount(0);
@@ -131,7 +197,8 @@ namespace Adler.UI
             // 올림해서 보여준다. 0.4초 남았는데 0으로 뜨면 눌러도 안 되는 순간이 생긴다.
             int seconds = Mathf.CeilToInt(remainingSeconds);
 
-            if (seconds == _shownSeconds && exhausted == _shownExhausted && _armed == _shownArmed)
+            if (seconds == _shownSeconds && exhausted == _shownExhausted
+                && _armed == _shownArmed && _jammed == _shownJammed)
             {
                 return;
             }
@@ -139,6 +206,16 @@ namespace Adler.UI
             _shownSeconds = seconds;
             _shownExhausted = exhausted;
             _shownArmed = _armed;
+            _shownJammed = _jammed;
+
+            // 봉인이 모든 것을 덮는다. 장전됐든 쿨타임이 남았든 지금은 쓸 수 없고,
+            // 그 사실 하나만 알면 되는 상황이다.
+            if (_jammed)
+            {
+                _label.SetText(_jammedText);
+                _label.color = _jammedTextColor;
+                return;
+            }
 
             if (_armed)
             {
@@ -173,6 +250,8 @@ namespace Adler.UI
             }
 
             _arrows.Clear();
+            _arrowHome.Clear();
+            _shakeSeeds.Clear();
 
             if (_arrowRoot == null || arrowPrefab == null)
             {
@@ -184,6 +263,164 @@ namespace Adler.UI
                 Image arrow = Instantiate(arrowPrefab, _arrowRoot);
                 arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, RotationFor(direction));
                 _arrows.Add(arrow);
+
+                // 화살표마다 다른 자리에서 소음을 읽는다. 같은 값을 쓰면 줄 전체가
+                // 한 덩어리로 움직여서, 떠는 것이 아니라 미끄러지는 것처럼 보인다.
+                _shakeSeeds.Add(Random.Range(0f, 100f));
+            }
+
+            if (_jammed)
+            {
+                _homePending = true;
+            }
+        }
+
+        /// <summary>
+        /// 재머 범위 안이라 아무것도 부를 수 없는 상태를 표시한다.
+        /// <para>
+        /// 칸을 지우거나 흐리게 만들지 않는다. 목록이 그대로 있어야 무엇을 잃은 것이 아니라
+        /// 지금 막혀 있을 뿐임이 드러나고, 재머를 처리한 뒤에 돌아온다는 것도 함께 읽힌다.
+        /// </para>
+        /// </summary>
+        public void SetJammed(bool jammed)
+        {
+            if (_jammed == jammed)
+            {
+                return;
+            }
+
+            _jammed = jammed;
+            ApplyIcon();
+
+            if (jammed)
+            {
+                // 제자리를 지금 읽으면 안 된다. 레이아웃은 Update 뒤에 계산되므로
+                // 만들어진 직후에는 화살표가 아직 전부 원점에 겹쳐 있다.
+                _homePending = true;
+            }
+            else
+            {
+                RestoreArrows();
+            }
+        }
+
+        /// <summary>
+        /// 봉인 여부에 맞춰 아이콘의 그림과 머티리얼을 갈아 끼운다.
+        /// <para>
+        /// 지지직거림은 쉐이더가 알아서 계속 돌아간다. 여기서는 씌우고 벗기기만 하면 된다.
+        /// </para>
+        /// </summary>
+        private void ApplyIcon()
+        {
+            if (_icon == null)
+            {
+                return;
+            }
+
+            Sprite sprite = _jammed && _jammedIcon != null ? _jammedIcon : _normalIcon;
+
+            _icon.sprite = sprite;
+            _icon.enabled = sprite != null;
+            _icon.color = _jammed ? _jammedIconColor : _iconBaseColor;
+
+            if (_glitchInstance == null)
+            {
+                return;
+            }
+
+            if (_jammed)
+            {
+                // 그림이 아틀라스 어디에 놓였는지 알려준다. 이게 없으면 줄을 밀 때
+                // 옆에 묶인 다른 그림이 딸려 나온다.
+                _glitchInstance.SetVector(UvRectId, UvRectOf(sprite));
+                _icon.material = _glitchInstance;
+            }
+            else
+            {
+                _icon.material = _iconBaseMaterial;
+            }
+        }
+
+        /// <summary>
+        /// 스프라이트가 텍스처 안에서 차지하는 UV 범위. xy가 왼쪽아래, zw가 오른쪽위.
+        /// 아틀라스에 묶이지 않은 그림이면 그대로 (0,0,1,1)이 된다.
+        /// </summary>
+        private static Vector4 UvRectOf(Sprite sprite)
+        {
+            if (sprite == null || sprite.texture == null)
+            {
+                return new Vector4(0f, 0f, 1f, 1f);
+            }
+
+            Rect rect = sprite.textureRect;
+            float width = sprite.texture.width;
+            float height = sprite.texture.height;
+
+            return new Vector4(
+                rect.xMin / width,
+                rect.yMin / height,
+                rect.xMax / width,
+                rect.yMax / height);
+        }
+
+        /// <summary>
+        /// 화살표를 잘게 떤다.
+        /// <para>
+        /// 흔들림은 글자보다 먼저 눈에 들어온다. JAMMED를 읽기 전에 이미 뭔가 잘못됐다는
+        /// 것을 알아채고, 커맨드를 치려던 손을 멈추게 된다.
+        /// </para>
+        /// <para>
+        /// 무작위 대신 이어지는 소음을 쓴다. 매 프레임 새 값을 뽑으면 떠는 것이 아니라
+        /// 지직거리는 화면처럼 보여서 고장 난 UI로 읽힌다.
+        /// </para>
+        /// </summary>
+        private void ShakeArrows()
+        {
+            float time = Time.unscaledTime * _shakeSpeed;
+
+            for (int i = 0; i < _arrows.Count; i++)
+            {
+                float seed = _shakeSeeds[i];
+
+                Vector2 offset = new Vector2(
+                    Mathf.PerlinNoise(time, seed) - 0.5f,
+                    Mathf.PerlinNoise(seed, time) - 0.5f) * (2f * _shakePixels);
+
+                _arrows[i].rectTransform.anchoredPosition = _arrowHome[i] + offset;
+            }
+        }
+
+        /// <summary>
+        /// 흔들기 전의 제자리를 읽어둔다.
+        /// <para>
+        /// 읽기 전에 레이아웃을 직접 한 번 돌린다. 줄 세우기는 Update가 모두 끝난 뒤에
+        /// 계산되므로, 그냥 읽으면 아직 자리를 잡지 않은 값 — 대개 전부 원점 — 을 제자리로
+        /// 기억한다. 그러면 봉인되는 순간 화살표가 한 점에 겹쳐서 떨게 된다.
+        /// </para>
+        /// </summary>
+        private void CaptureHome()
+        {
+            _homePending = false;
+            _arrowHome.Clear();
+
+            if (_arrowRoot != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_arrowRoot);
+            }
+
+            foreach (Image arrow in _arrows)
+            {
+                _arrowHome.Add(arrow.rectTransform.anchoredPosition);
+            }
+        }
+
+        private void RestoreArrows()
+        {
+            _homePending = false;
+
+            for (int i = 0; i < _arrows.Count && i < _arrowHome.Count; i++)
+            {
+                _arrows[i].rectTransform.anchoredPosition = _arrowHome[i];
             }
         }
 
@@ -257,6 +494,20 @@ namespace Adler.UI
         /// </summary>
         private void Update()
         {
+            if (_jammed)
+            {
+                // 제자리를 읽는 프레임에는 아직 흔들지 않는다. 레이아웃을 방금 돌려놓고
+                // 같은 프레임에 밀어버리면 읽어둔 값이 무엇이었는지 알 수 없게 된다.
+                if (_homePending)
+                {
+                    CaptureHome();
+                }
+                else if (_shakePixels > 0f)
+                {
+                    ShakeArrows();
+                }
+            }
+
             if (_group == null || Mathf.Approximately(_group.alpha, _targetAlpha))
             {
                 return;

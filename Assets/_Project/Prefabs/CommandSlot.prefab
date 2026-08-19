@@ -569,7 +569,15 @@ MonoBehaviour:
   _readyTextColor: {r: 1, g: 1, b: 1, a: 1}
   _pendingColor: {r: 1, g: 1, b: 1, a: 0.35}
   _enteredColor: {r: 1, g: 1, b: 1, a: 1}
+  _jammedIcon: {fileID: 0}
+  _jammedText: JAMMED
+  _jammedTextColor: {r: 1, g: 0.35, b: 0.3, a: 1}
+  _jammedIconColor: {r: 1, g: 1, b: 1, a: 1}
+  _jammedMaterial: {fileID: 2100000, guid: 348bb9e5a90def747969aa8b0762383d, type: 2}
+  _shakePixels: 5
+  _shakeSpeed: 26
   _dimmedAlpha: 0.25
+  _fadeSpeed: 12
 --- !u!225 &5119428663003133740
 CanvasGroup:
   m_ObjectHideFlags: 0

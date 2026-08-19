@@ -41,6 +41,9 @@ namespace Adler.Flight
 
         public AircraftRepair Repair { get; private set; }
 
+        /// <summary>지금 걸려 있는 나쁜 상태들. 무엇이 걸리는지는 각 시스템이 알린다.</summary>
+        public AircraftDebuffs Debuffs { get; private set; }
+
         /// <summary>지금 비행 상태. 속도와 부스터 여부를 화면 표시와 연출이 읽어 간다.</summary>
         public IFlightModel Model => Control != null ? Control.Model : null;
 
@@ -64,6 +67,7 @@ namespace Adler.Flight
             Targeting = GetComponentInChildren<LockOnTargeting>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
             Repair = GetComponentInChildren<AircraftRepair>(includeInactive: true);
+            Debuffs = GetComponentInChildren<AircraftDebuffs>(includeInactive: true);
         }
 
         /// <summary>

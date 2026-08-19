@@ -68,6 +68,10 @@ namespace Adler.UI
 
             BuildSlots();
 
+            // 이미 재머 범위 안에서 시작할 수도 있다. 신호는 상태가 바뀔 때만 오므로
+            // 여기서 한 번 맞춰두지 않으면 범위를 벗어났다 다시 들어와야 표시가 붙는다.
+            OnJammedChanged(_stratagemBay.IsJammed);
+
             // 닫힌 상태로 시작한다. Tab을 눌러야 열린다.
             RefreshVisibility();
 
@@ -83,7 +87,9 @@ namespace Adler.UI
             _stratagemBay.CommandReset += OnCommandReset;
             _stratagemBay.Authorized += OnAuthorized;
             _stratagemBay.Dropped += OnDropped;
+            _stratagemBay.Disarmed += OnDropped;
             _stratagemBay.CommandModeChanged += OnCommandModeChanged;
+            _stratagemBay.JammedChanged += OnJammedChanged;
         }
 
         private void OnDisable()
@@ -92,7 +98,29 @@ namespace Adler.UI
             _stratagemBay.CommandReset -= OnCommandReset;
             _stratagemBay.Authorized -= OnAuthorized;
             _stratagemBay.Dropped -= OnDropped;
+            _stratagemBay.Disarmed -= OnDropped;
             _stratagemBay.CommandModeChanged -= OnCommandModeChanged;
+            _stratagemBay.JammedChanged -= OnJammedChanged;
+        }
+
+        /// <summary>
+        /// 봉인이 걸리고 풀리는 것을 모든 칸에 알린다.
+        /// <para>
+        /// 창을 닫지 않는다. 열어서 전부 JAMMED로 바뀐 목록을 보여주는 것이, 열리지 않는
+        /// 것보다 무엇이 벌어졌는지를 분명히 알려준다.
+        /// </para>
+        /// </summary>
+        private void OnJammedChanged(bool jammed)
+        {
+            foreach (CommandSlot slot in _slots)
+            {
+                slot.SetJammed(jammed);
+
+                // 치던 커맨드는 봉인과 함께 버려졌다. 화살표가 채워진 채로 떨면
+                // 아직 이어서 칠 수 있는 것처럼 보인다.
+                slot.SetMatchedCount(0);
+                slot.SetDimmed(false);
+            }
         }
 
         private void OnCommandModeChanged(bool active)
@@ -222,6 +250,10 @@ namespace Adler.UI
             RefreshVisibility();
         }
 
+        /// <summary>
+        /// 장전이 끝났을 때. 떨궈서든 봉인에 풀려서든 표시는 똑같이 내린다 —
+        /// 어느 쪽이든 이제 쓸 수 없다는 사실은 하나다.
+        /// </summary>
         private void OnDropped(BombDefinition bomb)
         {
             _armed = null;

@@ -1,3 +1,4 @@
+using Adler.Combat;
 using Adler.Flight;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Adler.Weapons
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class StratagemBay : MonoBehaviour
+    public sealed class StratagemBay : MonoBehaviour, IDebuffSource
     {
         [Header("참조")]
         [SerializeField] private InputActionAsset _controls;
@@ -28,6 +29,10 @@ namespace Adler.Weapons
 
         [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
+
+        [Tooltip("봉인당했을 때 디버프 목록에 올릴 것. JAMMED로 만들어 둔 에셋.\n" +
+                 "비워두면 봉인은 그대로 걸리되 목록에는 뜨지 않는다.")]
+        [SerializeField] private DebuffDefinition _jammedDebuff;
 
         [Header("요청 가능 목록")]
         [Tooltip("각자 다른 커맨드를 가진다. 입력이 맞아떨어진 것이 승인된다.")]
@@ -78,6 +83,9 @@ namespace Adler.Weapons
         /// <summary>폭탄을 투하했을 때.</summary>
         public event Action<BombDefinition> Dropped;
 
+        /// <summary>떨구지 못한 채 장전이 풀렸을 때. 지금은 봉인에 걸린 경우뿐이다.</summary>
+        public event Action<BombDefinition> Disarmed;
+
         /// <summary>
         /// 투하한 폭탄이 터졌을 때. 폭탄은 던져지고 나면 사라지는 물건이라
         /// 화면 표시가 직접 구독할 수 없으므로, 여기서 대신 받아 전달한다.
@@ -97,6 +105,33 @@ namespace Adler.Weapons
 
         /// <summary>커맨드가 맞아도 제한에 걸려 승인되지 않았을 때.</summary>
         public event Action<StratagemDefinition> Refused;
+
+        /// <summary>봉인 상태가 바뀔 때. 화면 표시가 구독한다.</summary>
+        public event Action<bool> JammedChanged;
+
+        /// <summary>
+        /// 재머 범위 안이라 스트라타젬을 쓸 수 없는 상태인지.
+        /// 장전해 둔 폭탄도 이때 풀린다.
+        /// </summary>
+        public bool IsJammed { get; private set; }
+
+        /// <summary>봉인하고 있는 재머. 없으면 null. 어느 쪽을 처리해야 하는지 알려준다.</summary>
+        public StratagemJammer Jammer { get; private set; }
+
+        /// <summary>
+        /// 봉인을 디버프 목록에 내놓는다.
+        /// <para>
+        /// 명시적으로 구현해 겉으로 드러내지 않는다. 이건 화면에 줄 하나를 띄우기 위한
+        /// 것이지, 다른 코드가 봉인 여부를 물어볼 창구가 아니다 — 그건 <see cref="IsJammed"/>다.
+        /// </para>
+        /// </summary>
+        void IDebuffSource.CollectDebuffs(List<DebuffDefinition> into)
+        {
+            if (IsJammed && _jammedDebuff != null)
+            {
+                into.Add(_jammedDebuff);
+            }
+        }
 
         /// <summary>남은 쿨타임(초). 쓸 수 있으면 0.</summary>
         public float RemainingCooldown(StratagemDefinition stratagem)
@@ -195,18 +230,25 @@ namespace Adler.Weapons
 
         private void Update()
         {
+            UpdateJamming();
+
+            // 봉인 중에도 창은 열린다. 열리지 않으면 눌러도 아무 일이 없는 것과 같아서
+            // 봉인당한 것인지 키가 안 먹는 것인지 구분이 안 된다. 열어서 봉인당한 목록을
+            // 보여주는 편이 무엇이 벌어졌는지 한 번에 알려준다.
             if (_toggleAction.WasPressedThisFrame())
             {
                 _autoOpened = false;
                 SetCommandMode(!CommandModeActive);
             }
-            else if (!CommandModeActive && ShouldAutoOpen())
+            else if (!IsJammed && !CommandModeActive && ShouldAutoOpen())
             {
                 _autoOpened = true;
                 SetCommandMode(true);
             }
 
-            if (CommandModeActive)
+            // 다만 커맨드는 한 칸도 들어가지 않는다. 화살표가 채워지지 않는 것 자체가
+            // 지금 통하지 않는다는 답이 된다.
+            if (CommandModeActive && !IsJammed)
             {
                 // 같은 프레임에 이어서 읽는다. 창을 연 그 십자키 입력이 커맨드의 첫 칸이 된다.
                 ExpireStaleInput();
@@ -214,10 +256,50 @@ namespace Adler.Weapons
             }
 
             // 투하는 커맨드 창과 무관하다. 장전해 둔 폭탄은 창을 닫은 뒤에 떨구게 된다.
-            if (_dropAction.WasPressedThisFrame())
+            if (!IsJammed && _dropAction.WasPressedThisFrame())
             {
                 TryDrop();
             }
+        }
+
+        /// <summary>
+        /// 재머 범위에 들고 나는 것을 살핀다.
+        /// <para>
+        /// 봉인에 걸리면 치던 커맨드를 버린다. 창은 닫지 않는다 — 열려 있던 것이 저절로
+        /// 닫히면 무엇 때문에 닫혔는지 알 수 없고, 봉인당한 목록을 보여줄 자리도 사라진다.
+        /// </para>
+        /// <para>
+        /// 장전해 둔 폭탄도 함께 풀린다. 남겨두면 재머 밖에서 미리 불러 두었다가 안으로
+        /// 날아 들어와 떨구는 길이 열려서, 봉인이 있으나 마나 해진다. 재머를 먼저
+        /// 처리해야 한다는 것이 이 표적의 전부다.
+        /// </para>
+        /// <para>
+        /// 대신 쿨타임과 출격 횟수는 걸리지 않는다. 그것들은 실제로 떨군 시점에만 세므로,
+        /// 풀려도 잃는 것은 커맨드를 다시 치는 수고뿐이다.
+        /// </para>
+        /// </summary>
+        private void UpdateJamming()
+        {
+            StratagemJammer jammer = StratagemJammer.NearestJammer(transform.position);
+            bool jammed = jammer != null;
+
+            Jammer = jammer;
+
+            if (jammed == IsJammed)
+            {
+                return;
+            }
+
+            IsJammed = jammed;
+
+            if (jammed)
+            {
+                _autoOpened = false;
+                ResetCommand();
+                Disarm();
+            }
+
+            JammedChanged?.Invoke(jammed);
         }
 
         /// <summary>커맨드 입력 모드를 켜고 끈다.</summary>
@@ -401,6 +483,25 @@ namespace Adler.Weapons
             // 화면에 남지 않는다.
             _autoOpened = false;
             SetCommandMode(false);
+        }
+
+        /// <summary>
+        /// 떨구지 못한 장전을 푼다.
+        /// <para>
+        /// 쿨타임을 걸지 않는다. 쓰지 못한 것에 값을 물리면 재머 근처를 지나가기만 해도
+        /// 손해라, 지도의 절반이 다가가면 안 되는 곳이 된다.
+        /// </para>
+        /// </summary>
+        private void Disarm()
+        {
+            if (!IsArmed)
+            {
+                return;
+            }
+
+            BombDefinition bomb = ArmedBomb;
+            ArmedBomb = null;
+            Disarmed?.Invoke(bomb);
         }
 
         /// <summary>쿨타임을 걸고 사용 횟수를 센다. 실제로 쓰인 시점에 부른다.</summary>
