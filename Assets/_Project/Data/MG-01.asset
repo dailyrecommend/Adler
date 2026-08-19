@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e64760dd47a6b149822eed894f4f04c, type: 3}
-  m_Name: TestGun
+  m_Name: MG-01
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GunDefinition
-  DisplayName: TestGun
-  Icon: {fileID: 21300000, guid: 40a06512687f9d04d8279d1d099b6797, type: 3}
+  DisplayName: MG-01
+  Icon: {fileID: 21300000, guid: fc80c932694585846a771a5fe58e46b8, type: 3}
   RoundsPerMinute: 1500
-  AmmoCapacity: 1500
+  AmmoCapacity: 1000
   Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
   Range: 300
-  Damage: 12
+  Damage: 25
   Penetration: 2
   Demolition: 0
   MuzzleVelocity: 120
