@@ -2163,14 +2163,14 @@ MonoBehaviour:
   _targetMask:
     serializedVersion: 2
     m_Bits: 1024
-  _aimTolerance: 6
+  _aimTolerance: 3
   _requireLineOfSight: 1
   _sightBlockers:
     serializedVersion: 2
     m_Bits: 2176
   _burstSeconds: 1.2
-  _burstCooldown: 0
-  _leadError: 0.12
+  _burstCooldown: 5
+  _leadError: 0.03
 --- !u!65 &583552699
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2376,6 +2376,55 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.69589615, y: 1.4391499, z: 0.6091175}
   m_Center: {x: -0.008702755, y: 0.7195749, z: 0.031884193}
+--- !u!1 &656095956
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 656095958}
+  - component: {fileID: 656095957}
+  m_Layer: 0
+  m_Name: HealVolume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &656095957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 656095956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 1
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 4794c55155ff9af448371ed524de0a02, type: 2}
+--- !u!4 &656095958
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 656095956}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &664776154 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2aa1f66e613915040ade26b2e11dc649, type: 3}
@@ -3079,7 +3128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
   NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
   PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 0
+  AmplitudeGain: 1.92345e-13
   FrequencyGain: 1.4
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &972978315
@@ -3343,7 +3392,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 9e16076126986f34497a8da4b0f0e0a1, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 5794535818358e94b9ad82af2e9d0137, type: 2}
+      objectReference: {fileID: 2100000, guid: 881a6df9b3c535b45a690d0cf0bf6a79, type: 2}
     - target: {fileID: 919132149155446097, guid: 9e16076126986f34497a8da4b0f0e0a1, type: 3}
       propertyPath: m_Name
       value: Marker
@@ -4665,7 +4714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 1
-  priority: 1
+  priority: 2
   blendDistance: 0
   weight: 0
   sharedProfile: {fileID: 11400000, guid: 9ab6271973b76db4a8276d0619921ef6, type: 2}
@@ -4678,7 +4727,7 @@ Transform:
   m_GameObject: {fileID: 1701901516}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1915.3007, y: 1045.3411, z: -16.281084}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5002,6 +5051,9 @@ GameObject:
   - component: {fileID: 1812182298}
   - component: {fileID: 1812182299}
   - component: {fileID: 1812182300}
+  - component: {fileID: 1812182301}
+  - component: {fileID: 1812182302}
+  - component: {fileID: 1812182303}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -5141,11 +5193,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombBay
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
   _dropPoint: {fileID: 1812182287}
-  _aircraft: {fileID: 0}
+  _aircraft: {fileID: 1812182299}
   _loadout:
   - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
   - {fileID: 11400000, guid: d23327169c014ce4eb408905966b4876, type: 2}
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
+  - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   _inputTimeout: 1.5
   _gamepadOpensOnInput: 1
 --- !u!114 &1812182294
@@ -5250,6 +5303,50 @@ MonoBehaviour:
   _tumbleTorque: 4
   _alsoDisableOnDeath: []
   _onlyWhenDead: 0
+--- !u!114 &1812182301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a31dcd90714a8884eb7cb226c6610bbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.RepairPostFx
+  _aircraft: {fileID: 1812182299}
+  _volume: {fileID: 656095957}
+  _repairWeight: 1
+  _idleWeight: 0
+  _rampUpSpeed: 5
+  _rampDownSpeed: 2
+--- !u!114 &1812182302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ace0dece7528a14cb0aa77d2d123d27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.DevTools.DamageTester
+  _aircraft: {fileID: 1812182299}
+  _damage: 10
+--- !u!114 &1812182303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99b98506affaa0d44918345f13bc2b16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRepair
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -6196,3 +6293,4 @@ SceneRoots:
   - {fileID: 583552690}
   - {fileID: 520946580}
   - {fileID: 1701901518}
+  - {fileID: 656095958}
