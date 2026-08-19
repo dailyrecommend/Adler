@@ -471,8 +471,7 @@ MonoBehaviour:
   _slotPrefab: {fileID: 2048752005125739745, guid: 27a35dd39de322c4ba4e84493d6328ea, type: 3}
   _arrowPrefab: {fileID: 3546928181431903623, guid: 724e51a3b02f3534282e595c48b87149, type: 3}
   _slotRoot: {fileID: 317987486}
-  _panel: {fileID: 0}
-  _fadeSpeed: 14
+  _confirmSeconds: 0.6
 --- !u!114 &99851326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2406,9 +2405,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 1
-  priority: 1
+  priority: 2
   blendDistance: 0
-  weight: 1
+  weight: 0
   sharedProfile: {fileID: 11400000, guid: 4794c55155ff9af448371ed524de0a02, type: 2}
 --- !u!4 &656095958
 Transform:
@@ -3073,7 +3072,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.SpeedFieldOfView
   _aircraft: {fileID: 1812182299}
-  _fieldOfViewGain: 30
+  _fieldOfViewGain: 50
   _useBoostSpeedAsReference: 1
   _maxSpeed: 0
   _responsiveness: 3
@@ -4714,7 +4713,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 1
-  priority: 2
+  priority: 1
   blendDistance: 0
   weight: 0
   sharedProfile: {fileID: 11400000, guid: 9ab6271973b76db4a8276d0619921ef6, type: 2}

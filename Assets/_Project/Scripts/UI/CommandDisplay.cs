@@ -33,17 +33,21 @@ namespace Adler.UI
         [SerializeField] private RectTransform _slotRoot;
 
         [Header("여닫기")]
-        [Tooltip("보이고 숨길 대상. 비워두면 칸들이 늘어선 자리를 쓴다.\n" +
-                 "오브젝트를 끄지 않고 투명도로 감춘다 — 이 스크립트가 그 안에 있으면 " +
-                 "함께 멈춰 다시 열 수 없게 된다.")]
-        [SerializeField] private CanvasGroup _panel;
-
-        [Tooltip("여닫히는 속도. 클수록 즉각적이다.")]
-        [Min(0.1f)]
-        [SerializeField] private float _fadeSpeed = 14f;
+        [Tooltip("승인된 뒤 그것만 남겨 보여주는 시간(초).\n" +
+                 "장전되는 것이 아니라면 이 시간이 지나고 사라진다.")]
+        [Min(0f)]
+        [SerializeField] private float _confirmSeconds = 0.6f;
 
         private readonly List<CommandSlot> _slots = new();
-        private float _targetAlpha;
+
+        // 창이 닫혀도 남아 있어야 하는 칸. 장전된 폭탄은 쓸 때까지 화면에 붙어 있는다.
+        private StratagemDefinition _armed;
+
+        // 승인 직후 잠시 혼자 남는 칸. 장전되지 않는 것도 확인할 시간은 준다.
+        private StratagemDefinition _confirming;
+
+        private float _confirmRemaining;
+        private bool _commandModeActive;
 
         private void Awake()
         {
@@ -62,23 +66,14 @@ namespace Adler.UI
                 _slotRoot = transform as RectTransform;
             }
 
-            if (_panel == null && _slotRoot != null)
-            {
-                _panel = _slotRoot.GetComponent<CanvasGroup>();
-                if (_panel == null)
-                {
-                    _panel = _slotRoot.gameObject.AddComponent<CanvasGroup>();
-                }
-            }
-
             BuildSlots();
 
             // 닫힌 상태로 시작한다. Tab을 눌러야 열린다.
-            _targetAlpha = 0f;
-            if (_panel != null)
+            RefreshVisibility();
+
+            foreach (CommandSlot slot in _slots)
             {
-                _panel.alpha = 0f;
-                _panel.blocksRaycasts = false;
+                slot.SnapAlpha();
             }
         }
 
@@ -102,11 +97,38 @@ namespace Adler.UI
 
         private void OnCommandModeChanged(bool active)
         {
-            _targetAlpha = active ? 1f : 0f;
+            _commandModeActive = active;
 
-            if (_panel != null)
+            if (active)
             {
-                _panel.blocksRaycasts = active;
+                _confirming = null;
+                _confirmRemaining = 0f;
+
+                foreach (CommandSlot slot in _slots)
+                {
+                    slot.SetDimmed(false);
+                }
+            }
+
+            RefreshVisibility();
+        }
+
+        /// <summary>
+        /// 어느 칸이 보일지 한 곳에서 정한다.
+        /// <para>
+        /// 창이 열려 있으면 전부, 승인 직후에는 그것만, 그 뒤로는 장전된 것만 남는다.
+        /// 이 세 경우를 각자 처리하면 한쪽에서 치운 칸을 다른 쪽이 되살리게 된다.
+        /// </para>
+        /// </summary>
+        private void RefreshVisibility()
+        {
+            foreach (CommandSlot slot in _slots)
+            {
+                bool visible = _commandModeActive
+                               || (_confirming != null && slot.Stratagem == _confirming)
+                               || (_armed != null && slot.Stratagem == _armed);
+
+                slot.SetHidden(!visible);
             }
         }
 
@@ -131,9 +153,16 @@ namespace Adler.UI
         /// </summary>
         private void Update()
         {
-            if (_panel != null && !Mathf.Approximately(_panel.alpha, _targetAlpha))
+            if (_confirmRemaining > 0f)
             {
-                _panel.alpha = Mathf.MoveTowards(_panel.alpha, _targetAlpha, _fadeSpeed * Time.deltaTime);
+                _confirmRemaining -= Time.deltaTime;
+
+                if (_confirmRemaining <= 0f)
+                {
+                    _confirmRemaining = 0f;
+                    _confirming = null;
+                    RefreshVisibility();
+                }
             }
 
             foreach (CommandSlot slot in _slots)
@@ -173,9 +202,15 @@ namespace Adler.UI
         /// 폭탄만 장전 상태로 남는다. 재보급처럼 즉시 처리되는 것은 승인과 동시에 끝나므로
         /// 켜둘 표시가 없다.
         /// </summary>
+        /// <summary>
+        /// 장전되는 것은 쓸 때까지 화면에 남고, 즉시 끝나는 것은 잠깐 보였다 사라진다.
+        /// </summary>
         private void OnAuthorized(StratagemDefinition stratagem)
         {
             bool arms = stratagem is BombDefinition;
+            _armed = arms ? stratagem : null;
+            _confirming = stratagem;
+            _confirmRemaining = _confirmSeconds;
 
             foreach (CommandSlot slot in _slots)
             {
@@ -183,14 +218,20 @@ namespace Adler.UI
                 slot.SetDimmed(false);
                 slot.SetArmed(arms && slot.Stratagem == stratagem);
             }
+
+            RefreshVisibility();
         }
 
         private void OnDropped(BombDefinition bomb)
         {
+            _armed = null;
+
             foreach (CommandSlot slot in _slots)
             {
                 slot.SetArmed(false);
             }
+
+            RefreshVisibility();
         }
 
         private static bool Matches(StratagemDefinition stratagem, IReadOnlyList<CommandDirection> entered)

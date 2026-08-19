@@ -64,15 +64,24 @@ namespace Adler.UI
         [SerializeField] private Color _enteredColor = Color.white;
 
         [Header("칸 흐리기")]
-        [Tooltip("지금 입력과 맞지 않는 폭탄의 투명도.")]
+        [Tooltip("지금 입력과 맞지 않는 것의 투명도.")]
         [Range(0f, 1f)]
         [SerializeField] private float _dimmedAlpha = 0.25f;
+
+        [Tooltip("나타나고 사라지는 속도. 클수록 즉각적이다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _fadeSpeed = 12f;
 
         private readonly List<Image> _arrows = new();
 
         // 초 단위로만 표시하므로 그 자릿수가 바뀔 때만 문자열을 다시 만든다.
         private int _shownSeconds = -1;
         private bool _shownExhausted;
+
+        private bool _dimmed;
+        private bool _hidden;
+        private float _targetAlpha = 1f;
+        private LayoutElement _layout;
         private bool _shownArmed;
         private bool _armed;
 
@@ -187,13 +196,91 @@ namespace Adler.UI
             }
         }
 
-        /// <summary>지금 입력으로는 더 이상 가능하지 않은 폭탄을 흐리게 만든다.</summary>
+        /// <summary>지금 입력으로는 더 이상 가능하지 않은 것을 흐리게 만든다.</summary>
         public void SetDimmed(bool dimmed)
+        {
+            _dimmed = dimmed;
+            ApplyAlpha();
+        }
+
+        /// <summary>승인 직후처럼 이 칸만 남기고 나머지를 치울 때 쓴다.</summary>
+        public void SetHidden(bool hidden)
+        {
+            _hidden = hidden;
+            ApplyAlpha();
+        }
+
+        /// <summary>
+        /// 감춤과 흐림을 한 곳에서 합친다. 각자 투명도를 건드리면 나중에 불린 쪽이
+        /// 앞의 결정을 지워서, 치워둔 칸이 도로 나타나는 일이 생긴다.
+        /// </summary>
+        private void ApplyAlpha()
+        {
+            _targetAlpha = _hidden ? 0f : (_dimmed ? _dimmedAlpha : 1f);
+
+            // 나타날 때는 곧바로 자리를 되찾는다. 다 나타난 뒤에 자리를 잡으면
+            // 다른 칸들이 뒤늦게 밀려나면서 목록이 한 번 더 움직인다.
+            if (_targetAlpha > 0f)
+            {
+                SetOccupiesLayout(true);
+            }
+        }
+
+        /// <summary>
+        /// 감춰진 칸이 자리를 비우게 한다.
+        /// <para>
+        /// 투명하게만 만들면 레이아웃에서는 그대로 남아, 장전된 칸 하나만 보일 때
+        /// 위쪽에 빈 자리가 생긴다. 자리를 비우면 순서를 바꾸지 않고도 남은 칸이
+        /// 자연스럽게 맨 위로 올라온다.
+        /// </para>
+        /// </summary>
+        private void SetOccupiesLayout(bool occupies)
+        {
+            if (_layout == null)
+            {
+                _layout = GetComponent<LayoutElement>();
+                if (_layout == null)
+                {
+                    _layout = gameObject.AddComponent<LayoutElement>();
+                }
+            }
+
+            _layout.ignoreLayout = !occupies;
+        }
+
+        /// <summary>
+        /// 칸마다 따로 나타나고 사라진다.
+        /// <para>
+        /// 창 전체를 한꺼번에 여닫지 않는 이유는, 장전된 칸만 남아야 하기 때문이다.
+        /// 담고 있는 쪽의 투명도로 감추면 그 안의 어떤 칸도 남길 수 없다.
+        /// </para>
+        /// </summary>
+        private void Update()
+        {
+            if (_group == null || Mathf.Approximately(_group.alpha, _targetAlpha))
+            {
+                return;
+            }
+
+            _group.alpha = Mathf.MoveTowards(_group.alpha, _targetAlpha, _fadeSpeed * Time.deltaTime);
+
+            // 다 사라진 뒤에 자리를 비운다. 사라지는 도중에 비우면 남은 칸들이
+            // 먼저 밀려 올라와서 이 칸이 그 위에 겹쳐 보인다.
+            if (_targetAlpha <= 0f && _group.alpha <= 0f)
+            {
+                SetOccupiesLayout(false);
+            }
+        }
+
+        /// <summary>기다리지 않고 지금 상태로 맞춘다. 창을 만들 때처럼 처음 그릴 때 쓴다.</summary>
+        public void SnapAlpha()
         {
             if (_group != null)
             {
-                _group.alpha = dimmed ? _dimmedAlpha : 1f;
+                _group.alpha = _targetAlpha;
             }
+
+            SetOccupiesLayout(_targetAlpha > 0f);
         }
 
         public void SetArmed(bool armed)

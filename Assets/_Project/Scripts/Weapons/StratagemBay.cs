@@ -396,11 +396,11 @@ namespace Adler.Weapons
 
             Authorized?.Invoke(stratagem);
 
-            // 요청이 끝났으니 저절로 열린 창은 물러난다.
-            if (_autoOpened)
-            {
-                CloseAutoOpened();
-            }
+            // 요청이 끝났으니 창은 물러난다. Tab으로 열었든 십자키로 열렸든 마찬가지다 —
+            // 승인된 뒤에도 열려 있으면 방향키가 계속 커맨드로 먹히고, 무엇을 받았는지도
+            // 화면에 남지 않는다.
+            _autoOpened = false;
+            SetCommandMode(false);
         }
 
         /// <summary>쿨타임을 걸고 사용 횟수를 센다. 실제로 쓰인 시점에 부른다.</summary>
