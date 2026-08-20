@@ -40,6 +40,9 @@ namespace Adler.Weapons
         private float _straightRemaining;
         private bool _spent;
 
+        // 마지막 접근에 들어섰는지. 여기서부터 스쳐 지나가면 놓친 것으로 본다.
+        private bool _terminal;
+
         /// <summary>터졌을 때. 쏜 쪽이 받아 화면 표시로 넘긴다.</summary>
         public event Action<BlastReport> Detonated;
 
@@ -110,6 +113,14 @@ namespace Adler.Weapons
                 return;
             }
 
+            if (HasOverShot())
+            {
+                // 유도만 끈다. 없애지 않는 이유는 스쳐 지나가는 것이 보여야
+                // 피했다는 사실이 전달되기 때문이다.
+                _target = null;
+                return;
+            }
+
             Vector3 desired = (_target.position - transform.position).normalized;
             if (desired.sqrMagnitude < 0.0001f)
             {
@@ -124,6 +135,37 @@ namespace Adler.Weapons
                 0f);
 
             _velocity = heading * speed;
+        }
+
+        /// <summary>
+        /// 표적을 스쳐 지나갔는지 본다.
+        /// <para>
+        /// 마지막 접근에 들어선 뒤로, 표적이 진행 방향의 뒤쪽으로 넘어가면 지나친 것이다.
+        /// 거리로 재지 않고 방향으로 재는 이유는 프레임마다 움직인 거리가 달라도 판정이
+        /// 흔들리지 않기 때문이다.
+        /// </para>
+        /// <para>
+        /// 멀리서부터 보지 않고 <see cref="MissileDefinition.MissRange"/> 안에 들어온
+        /// 뒤에만 본다. 먼 거리에서는 표적이 옆으로 크게 움직이기만 해도 잠깐 뒤로
+        /// 넘어가는데, 그것까지 놓친 것으로 치면 미사일이 아무 데서나 포기한다.
+        /// </para>
+        /// </summary>
+        private bool HasOverShot()
+        {
+            if (_definition.MissRange <= 0f)
+            {
+                return false;
+            }
+
+            Vector3 toTarget = _target.position - transform.position;
+
+            if (!_terminal)
+            {
+                _terminal = toTarget.magnitude <= _definition.MissRange;
+                return false;
+            }
+
+            return Vector3.Dot(_velocity, toTarget) <= 0f;
         }
 
         private void Accelerate(float deltaTime)

@@ -62,6 +62,14 @@ namespace Adler.Weapons
         [Min(0f)]
         public float BlastRadius = 6f;
 
+        [Tooltip("이 거리 안으로 들어온 뒤 표적을 스쳐 지나가면 놓친 것으로 보고 유도를 끈다 (m).\n" +
+                 "0이면 포기하지 않고 끝까지 쫓는다.\n\n" +
+                 "이것이 없으면 급선회로 지나치게 만들어도 크게 돌아 다시 온다. 사거리가 다할\n" +
+                 "때까지 반복되므로, 잘 피한 것이 시간을 버는 것에 그치고 결국 같은 결말이 된다.\n" +
+                 "피할 수 있으려면 피했다는 판정이 있어야 한다.")]
+        [Min(0f)]
+        public float MissRange;
+
         [Tooltip("표적에 이만큼까지 다가가면 터진다 (m). 스치듯 지나가도 터지게 한다.")]
         [Min(0f)]
         public float ProximityRadius = 1.5f;

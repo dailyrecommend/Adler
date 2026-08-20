@@ -41,6 +41,19 @@ namespace Adler.Flight
         [Tooltip("격추됐을 때만 되돌린다. 끄면 살아 있어도 언제든 처음으로 돌아간다.")]
         [SerializeField] private bool _onlyWhenDead;
 
+        [Tooltip("격추되면 키를 누르지 않아도 저절로 되돌아간다.\n" +
+                 "무기 균형을 볼 때처럼 같은 상황을 반복해야 하는 동안 켜둔다.")]
+        [SerializeField] private bool _autoRespawn;
+
+        [Tooltip("저절로 되돌아가기까지 기다리는 시간(초).\n" +
+                 "0이어도 한 프레임은 지난 뒤에 되살린다 — 격추 처리가 끝나기 전에 되살리면\n" +
+                 "그 처리가 되살린 것을 도로 덮어써서 기체가 사라진 채로 남는다.")]
+        [Min(0f)]
+        [SerializeField] private float _autoRespawnDelay = 1.5f;
+
+        // 음수면 기다리는 중이 아니다. 0은 이번 프레임에 되살린다는 뜻이라 쓸 수 없다.
+        private float _autoRespawnRemaining = -1f;
+
         private AircraftRig _aircraft;
         private InputAction _respawnAction;
         private Vector3 _startPosition;
@@ -95,6 +108,8 @@ namespace Adler.Flight
 
         private void Update()
         {
+            UpdateAutoRespawn();
+
             if (_respawnAction == null || !_respawnAction.WasPressedThisFrame())
             {
                 return;
@@ -120,6 +135,11 @@ namespace Adler.Flight
         {
             SetControlEnabled(false);
             Destroyed?.Invoke();
+
+            if (_autoRespawn)
+            {
+                _autoRespawnRemaining = _autoRespawnDelay;
+            }
 
             if (!_restorePhysics)
             {
@@ -167,9 +187,37 @@ namespace Adler.Flight
         // 리스폰
         // ------------------------------------------------------------------
 
+        /// <summary>
+        /// 저절로 되돌아가기를 기다린다.
+        /// <para>
+        /// 격추된 그 자리에서 되살리지 않고 다음 프레임까지 미룬다. <see cref="Health"/>는
+        /// 죽었다고 알린 <b>뒤에</b> 오브젝트를 끄므로, 알림 안에서 되살리면 그 처리가
+        /// 되살린 것을 도로 덮어써 기체가 사라진 채로 남는다.
+        /// </para>
+        /// </summary>
+        private void UpdateAutoRespawn()
+        {
+            if (_autoRespawnRemaining < 0f)
+            {
+                return;
+            }
+
+            _autoRespawnRemaining -= Time.deltaTime;
+
+            if (_autoRespawnRemaining <= 0f)
+            {
+                _autoRespawnRemaining = -1f;
+                Respawn();
+            }
+        }
+
         /// <summary>밖에서도 부를 수 있다. 임무 실패 화면 같은 데서 쓴다.</summary>
         public void Respawn()
         {
+            // 기다리던 것이 있으면 접는다. 키를 눌러 먼저 돌아갔는데 뒤늦게 한 번 더
+            // 되살아나면, 그 사이에 날던 기체가 출발 지점으로 끌려간다.
+            _autoRespawnRemaining = -1f;
+
             // 조종을 먼저 되살린다. 꺼진 채로 위치만 옮기면 기체가 그 자리에서 떨어진다.
             SetControlEnabled(true);
 
