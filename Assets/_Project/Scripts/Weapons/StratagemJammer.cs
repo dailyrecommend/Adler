@@ -23,10 +23,16 @@ namespace Adler.Weapons
         private static readonly List<StratagemJammer> Active = new();
 
         [Header("범위")]
-        [Tooltip("이 안에서는 스트라타젬을 부를 수 없다 (m).\n" +
-                 "구체이므로 충분히 높이 날면 벗어난다 — 대신 대공포에 훤히 드러난다.")]
+        [Tooltip("이 안에서는 스트라타젬을 부를 수 없다 (m). 가로 거리만 본다.")]
         [Min(1f)]
         [SerializeField] private float _radius = 150f;
+
+        [Tooltip("봉인이 미치는 높이(m). 0이면 하늘까지 이어진다.\n" +
+                 "구가 아니라 기둥인 이유는, 구로 두면 위로 빠져나갈 수 있기 때문이다.\n" +
+                 "폭탄은 원래 높은 곳에서 떨구는 것이라, 반경 밖 고도까지 올라가 그대로\n" +
+                 "수직으로 떨구면 안테나를 건드리지 않고 끝난다.")]
+        [Min(0f)]
+        [SerializeField] private float _height;
 
         [Header("본체")]
         [Tooltip("이것이 부서지면 봉인이 영구히 풀린다. 비워두면 자기 내구도를 쓴다.")]
@@ -97,13 +103,15 @@ namespace Adler.Weapons
 
             foreach (StratagemJammer jammer in Active)
             {
-                if (!jammer.IsOperational)
+                if (!jammer.IsOperational || !jammer.Contains(point))
                 {
                     continue;
                 }
 
-                float distance = Vector3.Distance(point, jammer.transform.position);
-                if (distance <= jammer._radius && distance < closest)
+                // 가로 거리로 잰다. 높이를 섞으면 바로 위를 지날 때 가장 먼 재머로 읽혀서,
+                // 어느 쪽으로 빠져나가야 하는지를 엉뚱하게 가리킨다.
+                float distance = HorizontalDistance(point, jammer.transform.position);
+                if (distance < closest)
                 {
                     closest = distance;
                     nearest = jammer;
@@ -111,6 +119,35 @@ namespace Adler.Weapons
             }
 
             return nearest;
+        }
+
+        /// <summary>
+        /// 이 지점이 봉인 기둥 안에 있는지.
+        /// <para>
+        /// 구가 아니라 기둥인 것이 요점이다. 구로 두면 반경만큼 올라가는 것으로 벗어나는데,
+        /// 폭탄은 어차피 높은 곳에서 떨구는 것이라 그 길이 곧 정답이 되어버린다. 그러면
+        /// 안테나를 긁어 창을 여는 순서를 아무도 쓰지 않는다.
+        /// </para>
+        /// </summary>
+        public bool Contains(Vector3 point)
+        {
+            Vector3 origin = transform.position;
+
+            if (HorizontalDistance(point, origin) > _radius)
+            {
+                return false;
+            }
+
+            // 아래쪽은 막지 않는다. 골짜기로 내려가 숨는 것까지 벗어남으로 치면,
+            // 지형이 낮은 곳에서는 봉인이 저절로 풀린다.
+            return _height <= 0f || point.y - origin.y <= _height;
+        }
+
+        private static float HorizontalDistance(Vector3 a, Vector3 b)
+        {
+            float x = a.x - b.x;
+            float z = a.z - b.z;
+            return Mathf.Sqrt(x * x + z * z);
         }
 
         private void Awake()
@@ -261,7 +298,39 @@ namespace Adler.Weapons
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0.5f, 0.3f, 1f, 0.35f);
-            Gizmos.DrawWireSphere(transform.position, _radius);
+
+            Vector3 origin = transform.position;
+
+            // 하늘까지 이어질 때는 끝이 없으므로, 눈에 보이라고 넉넉한 높이만 그린다.
+            float drawHeight = _height > 0f ? _height : _radius * 4f;
+
+            DrawRing(origin, _radius);
+            DrawRing(origin + Vector3.up * drawHeight, _radius);
+
+            // 기둥이라는 것이 드러나도록 옆면을 세운다. 고리만 두 개 그리면
+            // 사이가 비어 있는 것처럼 보인다.
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI * 0.5f;
+                var offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _radius;
+                Gizmos.DrawLine(origin + offset, origin + offset + Vector3.up * drawHeight);
+            }
+        }
+
+        private static void DrawRing(Vector3 center, float radius)
+        {
+            const int Segments = 48;
+            Vector3 previous = center + new Vector3(radius, 0f, 0f);
+
+            for (int i = 1; i <= Segments; i++)
+            {
+                float angle = i / (float)Segments * Mathf.PI * 2f;
+                Vector3 next = center + new Vector3(
+                    Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+
+                Gizmos.DrawLine(previous, next);
+                previous = next;
+            }
         }
     }
 }
