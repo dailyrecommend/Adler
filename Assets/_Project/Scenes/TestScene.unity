@@ -150,6 +150,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1611672221}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &57205299
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 57205301}
+  - component: {fileID: 57205300}
+  m_Layer: 0
+  m_Name: FrozenVolume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &57205300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57205299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 9
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: 4794c55155ff9af448371ed524de0a02, type: 2}
+--- !u!4 &57205301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57205299}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &68064078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2323,7 +2372,7 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -3250,7 +3299,7 @@ GameObject:
   - component: {fileID: 703675316}
   - component: {fileID: 703675318}
   - component: {fileID: 703675319}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: FogZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3281,9 +3330,9 @@ Transform:
   m_GameObject: {fileID: 703675315}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -203.4, y: 86, z: 210.9}
+  m_LocalPosition: {x: -203.4, y: 100, z: 210.9}
   m_LocalScale: {x: 400, y: 200, z: 400}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3322,7 +3371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 0
   priority: 10
-  blendDistance: 0
+  blendDistance: 20
   weight: 1
   sharedProfile: {fileID: 11400000, guid: cbc72dc9bc167494a9efff2710a14e2c, type: 2}
 --- !u!1 &732408288
@@ -3503,7 +3552,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IsGlobal: 1
-  priority: 0
+  priority: 1
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: ab09877e2e707104187f6f83e2f62510, type: 2}
@@ -4747,6 +4796,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.StratagemJammer
   _radius: 200
+  _height: 0
   _body: {fileID: 1926917761}
   _antenna: {fileID: 1009082879}
   _suspendSeconds: 6
@@ -6294,6 +6344,8 @@ GameObject:
   - component: {fileID: 1812182305}
   - component: {fileID: 1812182304}
   - component: {fileID: 1812182308}
+  - component: {fileID: 1812182309}
+  - component: {fileID: 1812182310}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -6317,6 +6369,7 @@ MonoBehaviour:
   _airframe: {fileID: 11400000, guid: 2ba22bcf339a66649b8b2538082452eb, type: 2}
   _initialParts: []
   _invertPitch: 1
+  _frozenDebuff: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
 --- !u!54 &1812182286
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6623,6 +6676,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13e59e001ca3113449cd7ebd35478a95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftDebuffs
+--- !u!114 &1812182309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1d80baf1297f174384e405e87a130ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AltitudeFreeze
+  _freezeAltitude: 250
+  _thawMargin: 150
+  _definition: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
+  _chillAltitude: 175
+  _volume: {fileID: 57205300}
+  _fadeOutSpeed: 2
+--- !u!114 &1812182310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e40aac6f4f524c34298c62566b02a9de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.DebuffPostFx
+  _aircraft: {fileID: 1812182299}
+  _debuff: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
+  _volume: {fileID: 57205300}
+  _activeWeight: 1
+  _idleWeight: 0
+  _rampUpSpeed: 3
+  _rampDownSpeed: 1
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -7707,7 +7797,8 @@ SceneRoots:
   - {fileID: 520946580}
   - {fileID: 1701901518}
   - {fileID: 656095958}
+  - {fileID: 57205301}
+  - {fileID: 703675317}
   - {fileID: 2058334827}
   - {fileID: 176395362}
   - {fileID: 1325888069}
-  - {fileID: 703675317}

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Adler.Aircraft;
+using Adler.Combat;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -32,11 +33,18 @@ namespace Adler.Flight
         [Tooltip("스틱을 밀 때 기수가 올라간다.")]
         [SerializeField] private bool _invertPitch;
 
+        [Tooltip("이 디버프가 걸려 있으면 조종과 추력이 끊긴다.\n" +
+                 "고도든 다른 무엇이든, 이것을 목록에 올리는 쪽이면 모두 같은 결과를 낸다.")]
+        [SerializeField] private DebuffDefinition _frozenDebuff;
+
         private Rigidbody _body;
         private ArcadeFlightModel _model;
 
         // 같은 오브젝트에 있으면 연료 제한이 걸리고, 없으면 무제한이다.
         private BoostFuel _boostFuel;
+
+        // 없으면 얼어붙는 일도 없다.
+        private AircraftDebuffs _debuffs;
 
         private InputActionMap _flightMap;
         private InputAction _pitchAction;
@@ -59,6 +67,7 @@ namespace Adler.Flight
             _body = GetComponent<Rigidbody>();
 
             _boostFuel = GetComponent<BoostFuel>();
+            _debuffs = GetComponent<AircraftDebuffs>();
 
             if (_airframe == null)
             {
@@ -137,6 +146,12 @@ namespace Adler.Flight
 
         private void FixedUpdate()
         {
+            // 무엇이 얼렸는지는 묻지 않는다. 고도든 적의 무기든 목록에 이것이 올라와
+            // 있으면 결과는 같고, 새로 얼리는 것이 생겨도 여기는 그대로다.
+            _model.SetFrozen(_frozenDebuff != null
+                             && _debuffs != null
+                             && _debuffs.IsActive(_frozenDebuff));
+
             FlightInput input = ReadInput();
             _model.Tick(in input, Time.fixedDeltaTime);
         }
@@ -145,7 +160,10 @@ namespace Adler.Flight
         {
             // 연료 쪽은 누르지 않을 때도 불러야 한다. 회복을 그쪽에서 함께 처리하므로,
             // 쓰지 않는 동안 부르지 않으면 연료가 영영 차지 않는다.
-            bool wantsBoost = _boostAction.IsPressed();
+            //
+            // 얼어붙은 동안에는 누르지 않은 것으로 넘긴다. 엔진이 죽었는데 연료만
+            // 타들어가면, 녹은 뒤에 쓸 것이 남아 있지 않아 두 번 벌을 받는다.
+            bool wantsBoost = !_model.IsFrozen && _boostAction.IsPressed();
             bool boosting = _boostFuel != null
                 ? _boostFuel.RequestBoost(wantsBoost, Time.fixedDeltaTime)
                 : wantsBoost;

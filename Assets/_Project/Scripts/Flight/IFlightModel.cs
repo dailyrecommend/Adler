@@ -21,6 +21,18 @@ namespace Adler.Flight
         /// <summary>부스터를 쓰는 중인지. 화면 표시와 효과음이 참조한다.</summary>
         bool IsBoosting { get; }
 
+        /// <summary>조종과 추력이 끊긴 상태인지.</summary>
+        bool IsFrozen { get; }
+
+        /// <summary>
+        /// 조종과 추력을 끊거나 되돌린다.
+        /// <para>
+        /// 끊긴 동안 기체는 물리에 맡겨진다. 입력도 스로틀도 받지 않고 중력에 떨어지며,
+        /// 되돌리면 그때의 속도와 자세를 이어받아 다시 날기 시작한다.
+        /// </para>
+        /// </summary>
+        void SetFrozen(bool frozen);
+
         /// <summary>
         /// 물리 시뮬레이션 시작 전에 한 번 호출. 구현체가 Rigidbody 설정을
         /// 자신에게 맞게 강제하는 자리이기도 하다.
