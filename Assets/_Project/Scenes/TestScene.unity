@@ -183,7 +183,7 @@ MonoBehaviour:
   priority: 9
   blendDistance: 0
   weight: 0
-  sharedProfile: {fileID: 11400000, guid: 4794c55155ff9af448371ed524de0a02, type: 2}
+  sharedProfile: {fileID: 11400000, guid: e48ba125560fc8841a5cd069c7baa505, type: 2}
 --- !u!4 &57205301
 Transform:
   m_ObjectHideFlags: 0
@@ -197,7 +197,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1031982401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &68064078
 GameObject:
@@ -3095,7 +3095,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1031982401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &664776154 stripped
 GameObject:
@@ -3330,7 +3330,7 @@ Transform:
   m_GameObject: {fileID: 703675315}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -203.4, y: 100, z: 210.9}
+  m_LocalPosition: {x: -203.4, y: 49.6, z: 210.9}
   m_LocalScale: {x: 400, y: 200, z: 400}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -4338,6 +4338,41 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2231
   _gun: {fileID: 11400000, guid: fef53baf189157d449652a117a2c7106, type: 2}
+--- !u!1 &1031982400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1031982401}
+  m_Layer: 0
+  m_Name: Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1031982401
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031982400}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1701901518}
+  - {fileID: 656095958}
+  - {fileID: 57205301}
+  - {fileID: 1696491829}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1057091887 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2aa1f66e613915040ade26b2e11dc649, type: 3}
@@ -5043,7 +5078,7 @@ GameObject:
   - component: {fileID: 1389705167}
   - component: {fileID: 1389705166}
   m_Layer: 7
-  m_Name: Plane
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5972,6 +6007,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2746223470960694839, guid: 34b103a760cf810408493ebebff3e175, type: 3}
   m_PrefabInstance: {fileID: 501147094}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1696491827
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1696491829}
+  - component: {fileID: 1696491828}
+  m_Layer: 0
+  m_Name: JammedVolume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1696491828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1696491827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 20
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: 01f82931aa67f5d41801f2348cfa9af0, type: 2}
+--- !u!4 &1696491829
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1696491827}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1031982401}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1701901516
 GameObject:
   m_ObjectHideFlags: 0
@@ -5983,7 +6067,7 @@ GameObject:
   - component: {fileID: 1701901518}
   - component: {fileID: 1701901517}
   m_Layer: 0
-  m_Name: BoostBolume
+  m_Name: BoostVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6019,7 +6103,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1031982401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1707024021
 GameObject:
@@ -6473,6 +6557,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   _inputTimeout: 1.5
   _gamepadOpensOnInput: 1
+  _openGuardSeconds: 0.1
 --- !u!114 &1812182294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6707,8 +6792,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.DebuffPostFx
   _aircraft: {fileID: 1812182299}
-  _debuff: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
-  _volume: {fileID: 57205300}
+  _debuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
+  _volume: {fileID: 1696491828}
   _activeWeight: 1
   _idleWeight: 0
   _rampUpSpeed: 3
@@ -7780,25 +7865,23 @@ SceneRoots:
   m_Roots:
   - {fileID: 99851322}
   - {fileID: 330585546}
+  - {fileID: 898042525}
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 1128048974}
   - {fileID: 1812182287}
   - {fileID: 1389705169}
-  - {fileID: 898042525}
   - {fileID: 1279401472}
   - {fileID: 134741785}
   - {fileID: 6240447987958706454}
-  - {fileID: 1128048974}
   - {fileID: 6932584240465851262}
   - {fileID: 819950027}
   - {fileID: 583552690}
   - {fileID: 501147094}
   - {fileID: 1380182827}
   - {fileID: 520946580}
-  - {fileID: 1701901518}
-  - {fileID: 656095958}
-  - {fileID: 57205301}
   - {fileID: 703675317}
   - {fileID: 2058334827}
   - {fileID: 176395362}
   - {fileID: 1325888069}
+  - {fileID: 1031982401}

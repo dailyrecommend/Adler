@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Adler.Aircraft;
 using Adler.Combat;
+using Adler.Weapons;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -46,6 +47,9 @@ namespace Adler.Flight
         // 없으면 얼어붙는 일도 없다.
         private AircraftDebuffs _debuffs;
 
+        // 커맨드 창이 열렸는지 알아야 WASD를 조종에서 뗄 수 있다.
+        private StratagemBay _stratagems;
+
         private InputActionMap _flightMap;
         private InputAction _pitchAction;
         private InputAction _rollAction;
@@ -68,6 +72,7 @@ namespace Adler.Flight
 
             _boostFuel = GetComponent<BoostFuel>();
             _debuffs = GetComponent<AircraftDebuffs>();
+            _stratagems = GetComponent<StratagemBay>();
 
             if (_airframe == null)
             {
@@ -170,12 +175,36 @@ namespace Adler.Flight
 
             return new FlightInput
             {
-                Pitch = _pitchAction.ReadValue<float>(),
-                Roll = _rollAction.ReadValue<float>(),
+                Pitch = ReadStick(_pitchAction),
+                Roll = ReadStick(_rollAction),
                 Yaw = _yawAction.ReadValue<float>(),
                 Throttle = _throttleAction.ReadValue<float>(),
                 Boost = boosting,
             };
+        }
+
+        /// <summary>
+        /// 커맨드 창이 열려 있으면 키보드 쪽 조종면 입력을 버린다.
+        /// <para>
+        /// WASD가 조종과 커맨드를 함께 맡으므로, 창이 열린 채로 커맨드를 치면 기수가
+        /// 같이 움직인다. 커맨드는 몇 초를 잡아먹는 일이라 그동안 기체가 제멋대로
+        /// 꺾이면, 입력을 마치고 났을 때 어디를 향하고 있을지 알 수 없다.
+        /// </para>
+        /// <para>
+        /// 패드는 그대로 둔다. 그쪽은 커맨드가 십자키라 스틱과 겹치지 않으므로,
+        /// 함께 막으면 겪지도 않는 문제 때문에 조종을 빼앗기는 셈이 된다.
+        /// </para>
+        /// </summary>
+        private float ReadStick(InputAction action)
+        {
+            float value = action.ReadValue<float>();
+
+            if (value == 0f || _stratagems == null || !_stratagems.CommandModeActive)
+            {
+                return value;
+            }
+
+            return action.activeControl?.device is Keyboard ? 0f : value;
         }
 
 #if UNITY_EDITOR

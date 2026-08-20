@@ -48,6 +48,12 @@ namespace Adler.Weapons
                  "키보드 방향키는 해당하지 않는다 — 그쪽은 Tab으로 연다.")]
         [SerializeField] private bool _gamepadOpensOnInput = true;
 
+        [Tooltip("Tab으로 창을 연 직후 이 시간 동안 커맨드를 받지 않는다(초).\n" +
+                 "WASD가 조종과 커맨드를 겸하므로, 창을 여는 순간 손은 이미 그 위에 있다.\n" +
+                 "누르고 있던 조종 입력이 커맨드 첫 칸으로 먹히는 것을 막는다.")]
+        [Min(0f)]
+        [SerializeField] private float _openGuardSeconds = 0.1f;
+
         private InputAction _dropAction;
         private InputAction _toggleAction;
         private readonly InputAction[] _directionActions = new InputAction[4];
@@ -58,6 +64,9 @@ namespace Adler.Weapons
 
         // 십자키로 저절로 열린 창인지. 그렇게 열린 것만 저절로 닫는다.
         private bool _autoOpened;
+
+        // 이 시각까지는 커맨드를 받지 않는다. 창을 연 그 손가락이 첫 칸이 되지 않게 한다.
+        private float _inputGuardUntil;
 
         // 스트라타젬별 재사용 시각과 쓴 횟수. 요청 절차를 여기서 다루므로 제한도 함께 맡는다.
         private readonly Dictionary<StratagemDefinition, float> _readyAt = new();
@@ -239,6 +248,13 @@ namespace Adler.Weapons
             {
                 _autoOpened = false;
                 SetCommandMode(!CommandModeActive);
+
+                // 십자키로 저절로 열린 창에는 걸지 않는다. 그쪽은 창을 연 그 입력이
+                // 커맨드의 첫 칸이 되는 것이 규칙이고, 겹치는 키도 없다.
+                if (CommandModeActive)
+                {
+                    _inputGuardUntil = Time.time + _openGuardSeconds;
+                }
             }
             else if (!IsJammed && !CommandModeActive && ShouldAutoOpen())
             {
@@ -248,7 +264,7 @@ namespace Adler.Weapons
 
             // 다만 커맨드는 한 칸도 들어가지 않는다. 화살표가 채워지지 않는 것 자체가
             // 지금 통하지 않는다는 답이 된다.
-            if (CommandModeActive && !IsJammed)
+            if (CommandModeActive && !IsJammed && Time.time >= _inputGuardUntil)
             {
                 // 같은 프레임에 이어서 읽는다. 창을 연 그 십자키 입력이 커맨드의 첫 칸이 된다.
                 ExpireStaleInput();
