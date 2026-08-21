@@ -98,53 +98,12 @@ namespace Adler.Weapons
         private readonly Collider[] _scanBuffer = new Collider[8];
         private readonly List<Missile> _inFlight = new();
 
-        /// <summary>조준이 완성되어 미사일이 나갈 때. 경고 표시가 구독한다.</summary>
-        public event Action<SamSite> Launched;
-
         /// <summary>지금 노리고 있는 대상. 없으면 null.</summary>
         public Transform Target => _target;
-
-        /// <summary>조준 진행도. 1이 되면 쏜다.</summary>
-        public float LockProgress => _lockProgress;
-
-        /// <summary>조준을 쌓고 있는 중인지.</summary>
-        public bool IsLocking => _target != null && _lockProgress > 0f;
-
-        /// <summary>이 발사대가 쏜 미사일이 아직 날고 있는지.</summary>
-        public bool HasMissilesInFlight => _inFlight.Count > 0;
 
         public float Range => _range;
 
         public bool IsOperational => isActiveAndEnabled && (_health == null || _health.IsAlive);
-
-        /// <summary>
-        /// 이 기체를 노리고 있는 발사대 중 가장 위협적인 것. 없으면 null.
-        /// <para>
-        /// 조준이 많이 찬 쪽을 고른다. 가까운 쪽이 아니다 — 먼저 쏘는 것이 먼저 대응해야
-        /// 하는 것이고, 거리는 그 순서와 맞아떨어지지 않는다.
-        /// </para>
-        /// </summary>
-        public static SamSite MostUrgent(Transform target)
-        {
-            SamSite worst = null;
-            float highest = 0f;
-
-            foreach (SamSite site in Active)
-            {
-                if (site._target != target || !site.IsOperational)
-                {
-                    continue;
-                }
-
-                if (site._lockProgress > highest)
-                {
-                    highest = site._lockProgress;
-                    worst = site;
-                }
-            }
-
-            return worst;
-        }
 
         /// <summary>
         /// 이 기체가 어느 발사대의 교전 범위 안에 있는지.
@@ -296,7 +255,6 @@ namespace Adler.Weapons
             _lockProgress = 0f;
             _salvoLeft = _salvoCount;
             _salvoRemaining = 0f;
-            Launched?.Invoke(this);
         }
 
         private void UpdateSalvo()

@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Adler.Combat;
 using UnityEngine;
 
-namespace Adler.Flight
+namespace Adler.Combat
 {
     /// <summary>
     /// 기체가 지금 받고 있는 나쁜 상태들을 모아 둔다.

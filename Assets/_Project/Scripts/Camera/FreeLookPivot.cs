@@ -1,3 +1,4 @@
+using Adler.Flight;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,6 +21,9 @@ namespace Adler.CameraRig
     {
         [Header("참조")]
         [SerializeField] private InputActionAsset _controls;
+
+        [Tooltip("재출격할 때 정면으로 돌아가려고 지켜본다. 비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRig _aircraft;
 
         [Header("커서")]
         [Tooltip("커서를 화면 중앙에 묶고 숨긴다.\n" +
@@ -74,8 +78,28 @@ namespace Adler.CameraRig
         /// <summary>지금 정면을 보고 있는지. 조준 보조나 HUD 표시가 참조할 수 있다.</summary>
         public bool IsCentered => Mathf.Approximately(_yaw, 0f) && Mathf.Approximately(_pitch, 0f);
 
+        private AircraftLifecycle _lifecycle;
+
+        /// <summary>
+        /// 지켜볼 기체를 찾아둔다.
+        /// <para>
+        /// 재출격이 카메라를 되돌리게 하지 않고 카메라가 재출격을 지켜본다. 반대로 두면
+        /// 기체가 카메라를 알아야 해서, 연출을 하나 붙일 때마다 기체 쪽 목록이 늘어난다.
+        /// </para>
+        /// </summary>
+        private void Awake()
+        {
+            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _lifecycle = _aircraft != null ? _aircraft.Lifecycle : null;
+        }
+
         private void OnEnable()
         {
+            if (_lifecycle != null)
+            {
+                _lifecycle.Respawned += SnapToCenter;
+            }
+
             if (_controls == null)
             {
                 Debug.LogError($"{nameof(FreeLookPivot)}: Controls 에셋이 비어 있습니다.", this);
@@ -98,6 +122,11 @@ namespace Adler.CameraRig
 
         private void OnDisable()
         {
+            if (_lifecycle != null)
+            {
+                _lifecycle.Respawned -= SnapToCenter;
+            }
+
             _lookAction?.Disable();
             _recenterAction?.Disable();
             ApplyCursorLock(false);

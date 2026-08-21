@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Combat
