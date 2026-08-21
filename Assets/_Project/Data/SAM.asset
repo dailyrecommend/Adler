@@ -25,10 +25,12 @@ MonoBehaviour:
   LockRange: 600
   LockSeconds: 1.2
   LockGraceSeconds: 0.5
+  Guidance: 1
+  NavigationConstant: 4
   LaunchSpeed: 40
   MaxSpeed: 70
   Acceleration: 120
-  TurnRate: 90
+  TurnRate: 30
   StraightFlightSeconds: 0.25
   InnerRadius: 4
   BlastRadius: 8

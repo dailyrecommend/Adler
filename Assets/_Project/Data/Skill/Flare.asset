@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e8379277959488498a8658230e9f391, type: 3}
+  m_Name: Flare
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.FlareDefinition
+  DisplayName: Flare
+  Icon: {fileID: 21300000, guid: 3ccd8773be5fb6441a3de5259ffc213c, type: 3}
+  Command: 030000000300000003000000
+  Cooldown: 20
+  UsesPerSortie: 0
+  Prefab: {fileID: 8977438553476998395, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+  Count: 16
+  Interval: 0.07
+  SpawnRadius: 2
+  EjectSpeed: 4
+  BackwardBias: 0.45
+  DownwardBias: 0.1
+  SpreadAngle: 35
+  Scatter: 8
+  Spin: 12
+  GravityScale: 0.1
+  BurnSeconds: 4
+  SeduceRange: 80
+  SeduceAngle: 45

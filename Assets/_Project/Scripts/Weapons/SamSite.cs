@@ -146,14 +146,55 @@ namespace Adler.Weapons
             return worst;
         }
 
-        /// <summary>이 기체를 향해 날고 있는 미사일이 있는지.</summary>
+        /// <summary>
+        /// 이 기체가 어느 발사대의 교전 범위 안에 있는지.
+        /// <para>
+        /// 조준이 얼마나 찼는지는 보지 않는다. 조준은 지형에 가리면 빠지고 나오면 다시
+        /// 차는데, 그때마다 경고가 켜졌다 꺼지면 깜빡이는 글자가 되어 오히려 안 읽힌다.
+        /// 여기 있는 동안은 언제든 조준이 시작될 수 있다는 사실 자체가 알려야 할 것이다.
+        /// </para>
+        /// <para>
+        /// 쏘지 못하는 안쪽은 뺀다. 그 자리가 안전하다는 것도 알려줘야 하는 정보고,
+        /// 파고들었을 때 경고가 꺼지는 것보다 분명한 방법은 없다.
+        /// </para>
+        /// </summary>
+        public static bool AnyCovering(Transform target)
+        {
+            foreach (SamSite site in Active)
+            {
+                if (!site.IsOperational)
+                {
+                    continue;
+                }
+
+                float distance = Vector3.Distance(target.position, site.transform.position);
+
+                if (distance <= site._range && distance >= site._minRange)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 이 기체를 아직 쫓고 있는 미사일이 있는지.
+        /// <para>
+        /// 발사대가 아니라 미사일에게 묻는다. 발사대는 쏜 뒤 다른 표적으로 옮겨갈 수 있고,
+        /// 미사일은 스쳐 지나가면 쫓기를 그만두므로, 지금 위협인지는 미사일만 안다.
+        /// </para>
+        /// </summary>
         public static bool AnyIncoming(Transform target)
         {
             foreach (SamSite site in Active)
             {
-                if (site._target == target && site.HasMissilesInFlight)
+                foreach (Missile missile in site._inFlight)
                 {
-                    return true;
+                    if (missile != null && missile.Target == target)
+                    {
+                        return true;
+                    }
                 }
             }
 

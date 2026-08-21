@@ -695,9 +695,10 @@ MonoBehaviour:
   _aircraft: {fileID: 1812182299}
   _slotPrefab: {fileID: 1615651186832046776, guid: 920e9cbaf86a16b4ba3f0ebd64362954, type: 3}
   _slotRoot: {fileID: 1079101734}
+  _incomingText: MISSILE
+  _incomingColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   _lockText: SAM LOCK
   _lockColor: {r: 1, g: 0.75, b: 0.2, a: 1}
-  _lockWarnThreshold: 0.15
 --- !u!1 &134741782
 GameObject:
   m_ObjectHideFlags: 0
@@ -3579,11 +3580,11 @@ MonoBehaviour:
   _sightBlockers:
     serializedVersion: 2
     m_Bits: 128
-  _lockSeconds: 5
+  _lockSeconds: 3
   _lockDecayRate: 2
   _salvoCount: 1
   _salvoInterval: 0.5
-  _reloadSeconds: 10
+  _reloadSeconds: 30
   _turret: {fileID: 810816390}
   _traverseSpeed: 30
 --- !u!65 &810816393
@@ -4614,6 +4615,67 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.69589615, y: 1.4391499, z: 0.6091175}
   m_Center: {x: -0.008702755, y: 0.7195749, z: 0.031884193}
+--- !u!1001 &1064367985
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.5041642
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -12.820001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.3882043
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2388508159360511657, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8977438553476998395, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_Name
+      value: Flare
+      objectReference: {fileID: 0}
+    - target: {fileID: 8977438553476998395, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9212dc7d72c714d4d961f1967733cbfa, type: 3}
 --- !u!1 &1079101733
 GameObject:
   m_ObjectHideFlags: 0
@@ -6688,6 +6750,7 @@ GameObject:
   - component: {fileID: 1812182309}
   - component: {fileID: 1812182310}
   - component: {fileID: 1812182311}
+  - component: {fileID: 1812182312}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -6813,6 +6876,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
   - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
+  - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
   _inputTimeout: 1.5
   _gamepadOpensOnInput: 1
   _openGuardSeconds: 0.1
@@ -7077,6 +7141,20 @@ MonoBehaviour:
   _onlyWhenDead: 0
   _autoRespawn: 1
   _autoRespawnDelay: 5
+--- !u!114 &1812182312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5c1c9c5dc859c042ade4acab6209a76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.FlareDispenser
+  _aircraft: {fileID: 1812182299}
+  _dispensePoint: {fileID: 1812182287}
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -8263,3 +8341,4 @@ SceneRoots:
   - {fileID: 1031982401}
   - {fileID: 810816388}
   - {fileID: 3680500419423976509}
+  - {fileID: 1064367985}

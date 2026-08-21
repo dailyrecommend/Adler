@@ -43,8 +43,26 @@ namespace Adler.Weapons
         // 마지막 접근에 들어섰는지. 여기서부터 스쳐 지나가면 놓친 것으로 본다.
         private bool _terminal;
 
+        // 조명탄에 속았는지. 한 번 속으면 되돌아오지 않는다.
+        private bool _seduced;
+
+        // 표적의 속도를 읽는 통로. 없으면 위치 변화로 대신 잰다.
+        private Rigidbody _targetBody;
+        private Vector3 _lastTargetPosition;
+        private bool _hasLastTargetPosition;
+
         /// <summary>터졌을 때. 쏜 쪽이 받아 화면 표시로 넘긴다.</summary>
         public event Action<BlastReport> Detonated;
+
+        /// <summary>
+        /// 아직 쫓고 있는 표적. 스쳐 지나가 놓친 뒤에는 null이다.
+        /// <para>
+        /// 날고 있는 것과 쫓고 있는 것은 다르다. 놓친 미사일도 사거리가 다할 때까지
+        /// 계속 날아가지만, 그것을 위협으로 알리면 이미 지나간 것을 두고 계속 선회하게
+        /// 만든다 — 경고가 거짓말을 하기 시작하면 다음부터는 믿지 않는다.
+        /// </para>
+        /// </summary>
+        public Transform Target => _spent ? null : _target;
 
         /// <summary>쏜 쪽이 성능과 표적을 넘겨준다.</summary>
         public void Launch(
@@ -60,6 +78,9 @@ namespace Adler.Weapons
             _velocity = velocity;
             _blastMask = blastMask;
             _straightRemaining = definition.StraightFlightSeconds;
+
+            _targetBody = target != null ? target.GetComponentInParent<Rigidbody>() : null;
+            _hasLastTargetPosition = false;
 
             AlignToTravel();
         }
@@ -108,6 +129,8 @@ namespace Adler.Weapons
                 return;
             }
 
+            TryTakeBait();
+
             if (_target == null || !_target.gameObject.activeInHierarchy)
             {
                 return;
@@ -121,12 +144,18 @@ namespace Adler.Weapons
                 return;
             }
 
-            Vector3 desired = (_target.position - transform.position).normalized;
+            Vector3 desired = _definition.Guidance == GuidanceLaw.ProportionalNavigation
+                ? ProportionalNavigationHeading(deltaTime)
+                : (_target.position - transform.position).normalized;
+
             if (desired.sqrMagnitude < 0.0001f)
             {
                 return;
             }
 
+            // 유도는 어디를 향할지만 정하고, 실제로 꺾이는 양은 여기서 잘린다.
+            // 둘을 나눠두면 선회율이 "기체 성능"이라는 뜻을 그대로 유지한다 —
+            // 유도를 좋게 만들어도 피할 여지가 사라지지 않는다.
             float speed = _velocity.magnitude;
             Vector3 heading = Vector3.RotateTowards(
                 _velocity.normalized,
@@ -135,6 +164,131 @@ namespace Adler.Weapons
                 0f);
 
             _velocity = heading * speed;
+        }
+
+        /// <summary>
+        /// 비례항법유도가 가리키는 방향.
+        /// <para>
+        /// 두 물체가 서로를 보는 각도가 변하지 않으면 반드시 충돌한다. 배가 서로를
+        /// 피하는 데 쓰는 것과 같은 성질이다. 그래서 시선각이 도는 것은 곧 빗나가고
+        /// 있다는 뜻이고, 도는 만큼 반대로 꺾어주면 충돌 경로로 돌아온다.
+        /// </para>
+        /// <para>
+        /// 표적을 향하지 않는다는 것이 요점이다. 표적이 있는 곳이 아니라 만나게 될
+        /// 곳으로 가므로 리드가 저절로 잡히고, 마지막 순간에 몰아서 꺾을 일이 없다.
+        /// 순수추적이 종말 구간에서 요구하는 선회량은 거리가 0에 가까워질수록 무한히
+        /// 커지는데, 그것이 빗나가는 진짜 이유였다.
+        /// </para>
+        /// </summary>
+        private Vector3 ProportionalNavigationHeading(float deltaTime)
+        {
+            Vector3 toTarget = _target.position - transform.position;
+            float rangeSquared = toTarget.sqrMagnitude;
+
+            if (rangeSquared < 0.0001f)
+            {
+                return _velocity.normalized;
+            }
+
+            Vector3 relativeVelocity = TargetVelocity(deltaTime) - _velocity;
+
+            // 시선이 도는 속도. 표적이 정확히 다가오거나 멀어지기만 하면 0이 되고,
+            // 그때는 이미 충돌 경로라 꺾을 이유가 없다.
+            Vector3 lineOfSightRate = Vector3.Cross(toTarget, relativeVelocity) / rangeSquared;
+
+            // 시선이 도는 축을 기준으로 진행 방향을 밀어낸다. 결과는 진행 방향에
+            // 수직이라 속도를 잃지 않고 방향만 바뀐다.
+            Vector3 acceleration =
+                Vector3.Cross(lineOfSightRate, _velocity) * _definition.NavigationConstant;
+
+            return (_velocity + (acceleration * deltaTime)).normalized;
+        }
+
+        /// <summary>
+        /// 표적의 속도. 없으면 위치 변화로 재서 쓴다.
+        /// <para>
+        /// Rigidbody를 먼저 보는 이유는 그쪽이 정확해서다. 위치 차이로 재면 보간된
+        /// 좌표를 읽게 되어 값이 떨리고, 그 떨림이 그대로 시선각 변화로 들어가
+        /// 미사일이 잔떨림을 쫓느라 경로가 출렁인다.
+        /// </para>
+        /// </summary>
+        private Vector3 TargetVelocity(float deltaTime)
+        {
+            if (_targetBody != null)
+            {
+                return _targetBody.linearVelocity;
+            }
+
+            Vector3 position = _target.position;
+
+            if (!_hasLastTargetPosition)
+            {
+                _hasLastTargetPosition = true;
+                _lastTargetPosition = position;
+                return Vector3.zero;
+            }
+
+            Vector3 velocity = (position - _lastTargetPosition) / deltaTime;
+            _lastTargetPosition = position;
+            return velocity;
+        }
+
+        /// <summary>
+        /// 조명탄에 속는지 본다.
+        /// <para>
+        /// 한 번 속으면 되돌아오지 않는다. 잠시 뒤 다시 원래 표적을 찾게 만들면 조명탄이
+        /// 시간벌기밖에 되지 않고, 그러면 언제 뿌릴지 계획할 수가 없다. 하나에 하나가
+        /// 확실히 걸려야 몇 발 남았는지가 판단거리가 된다.
+        /// </para>
+        /// <para>
+        /// 거리뿐 아니라 각도를 본다. 미사일이 <b>앞으로 보고 있는 쪽</b>에 있어야 속으므로,
+        /// 이미 지나간 뒤에 뿌리면 통하지 않는다. 그 조건이 없으면 아무 때나 눌러도 되는
+        /// 버튼이 되어 던질 타이밍이 사라진다.
+        /// </para>
+        /// </summary>
+        private void TryTakeBait()
+        {
+            if (_seduced)
+            {
+                return;
+            }
+
+            Vector3 heading = _velocity.normalized;
+            Flare nearest = null;
+            float closest = float.MaxValue;
+
+            foreach (Flare flare in Flare.Burning)
+            {
+                Vector3 toFlare = flare.transform.position - transform.position;
+                float distance = toFlare.magnitude;
+
+                if (distance > flare.SeduceRange || distance > closest || distance < 0.01f)
+                {
+                    continue;
+                }
+
+                if (Vector3.Angle(heading, toFlare) > flare.SeduceAngle)
+                {
+                    continue;
+                }
+
+                closest = distance;
+                nearest = flare;
+            }
+
+            if (nearest == null)
+            {
+                return;
+            }
+
+            _seduced = true;
+            _target = nearest.transform;
+
+            // 새 표적이니 지금까지 쌓은 판단을 버린다. 남겨두면 기체를 향해 재던 값으로
+            // 조명탄을 쫓게 되어, 엉뚱하게 이미 지나쳤다고 판정한다.
+            _terminal = false;
+            _targetBody = nearest.GetComponent<Rigidbody>();
+            _hasLastTargetPosition = false;
         }
 
         /// <summary>

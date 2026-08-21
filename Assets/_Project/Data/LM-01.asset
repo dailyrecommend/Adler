@@ -17,7 +17,7 @@ MonoBehaviour:
   RoundsPerMinute: 1
   AmmoCapacity: 8
   Prefab: {fileID: 3364867573603955381, guid: dcbc93032bcaa1547bcd20057f33fc0f, type: 3}
-  Range: 200
+  Range: 300
   Damage: 250
   Penetration: 5
   Demolition: 20
@@ -25,6 +25,8 @@ MonoBehaviour:
   LockRange: 150
   LockSeconds: 1.2
   LockGraceSeconds: 0.5
+  Guidance: 1
+  NavigationConstant: 4
   LaunchSpeed: 40
   MaxSpeed: 160
   Acceleration: 120
@@ -32,4 +34,5 @@ MonoBehaviour:
   StraightFlightSeconds: 0.25
   InnerRadius: 2
   BlastRadius: 6
+  MissRange: 0
   ProximityRadius: 1.5

@@ -2,6 +2,30 @@ using UnityEngine;
 
 namespace Adler.Weapons
 {
+    /// <summary>미사일이 표적을 쫓는 방식.</summary>
+    public enum GuidanceLaw
+    {
+        /// <summary>
+        /// 순수추적. 표적이 지금 있는 자리를 향해 계속 방향을 꺾는다.
+        /// <para>
+        /// 표적을 따라다니므로 언제나 꼬리를 물게 된다. 옆으로 지나가는 표적을 만나면
+        /// 가까워질수록 시선이 빠르게 돌아가서, 마지막에 감당할 수 없는 선회를 요구받고
+        /// 그대로 빗나간다. 선회율을 아무리 올려도 근본은 그대로다.
+        /// </para>
+        /// </summary>
+        PurePursuit = 0,
+
+        /// <summary>
+        /// 비례항법유도. 시선각이 도는 속도에 비례해 방향을 꺾는다.
+        /// <para>
+        /// 서로 마주 보는 각도가 변하지 않으면 그대로 충돌한다는 성질을 쓴다. 표적이
+        /// 있는 곳이 아니라 <b>만나게 될 곳</b>으로 향하므로 저절로 리드가 잡히고,
+        /// 마지막에 필요한 선회량이 훨씬 적다.
+        /// </para>
+        /// </summary>
+        ProportionalNavigation = 1,
+    }
+
     /// <summary>
     /// 미사일 한 종류의 성능.
     /// <para>
@@ -30,6 +54,16 @@ namespace Adler.Weapons
         [Tooltip("조준이 벗어나도 이만큼은 버틴다(초). 잠깐 시야에서 놓쳐도 풀리지 않게.")]
         [Min(0f)]
         public float LockGraceSeconds = 0.5f;
+
+        [Header("유도")]
+        [Tooltip("표적을 쫓는 방식.")]
+        public GuidanceLaw Guidance = GuidanceLaw.ProportionalNavigation;
+
+        [Tooltip("비례항법유도의 항법상수(N). 시선각이 도는 만큼의 몇 배로 꺾을지.\n" +
+                 "3보다 낮으면 리드가 모자라 뒤를 쫓고, 5를 넘으면 표적이 조금만 움직여도\n" +
+                 "크게 반응해 경로가 출렁이면서 오히려 속도를 잃는다.")]
+        [Range(1f, 8f)]
+        public float NavigationConstant = 4f;
 
         [Header("비행")]
         [Tooltip("발사 직후 속도 (m/s). 여기에 기체 속도가 더해진다.")]

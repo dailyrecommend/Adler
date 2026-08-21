@@ -14,8 +14,11 @@ namespace Adler.UI
     /// </summary>
     public enum WarningKind
     {
-        /// <summary>발사대가 조준을 쌓고 있다.</summary>
-        SamLock = 0,
+        /// <summary>미사일이 날아오고 있다. 선회를 걸고 유지해야 한다.</summary>
+        MissileIncoming = 0,
+
+        /// <summary>발사대가 조준을 쌓고 있다. 아직 숨을 시간이 있다.</summary>
+        SamLock = 1,
     }
 
     /// <summary>
@@ -42,15 +45,15 @@ namespace Adler.UI
         [Tooltip("줄이 늘어설 자리. 비워두면 이 오브젝트 아래에 붙인다.")]
         [SerializeField] private RectTransform _slotRoot;
 
+        [Header("미사일")]
+        [SerializeField] private string _incomingText = "LOCK ON";
+
+        [SerializeField] private Color _incomingColor = new Color(1f, 0.25f, 0.2f, 1f);
+
         [Header("조준")]
         [SerializeField] private string _lockText = "SAM LOCK";
 
         [SerializeField] private Color _lockColor = new Color(1f, 0.75f, 0.2f, 1f);
-
-        [Tooltip("조준이 이만큼 쌓여야 알린다. 0이면 노려지는 순간부터 뜬다.\n" +
-                 "너무 낮게 잡으면 사거리를 스칠 때마다 떠서 경고가 배경이 된다.")]
-        [Range(0f, 1f)]
-        [SerializeField] private float _lockWarnThreshold = 0.15f;
 
         private readonly Dictionary<WarningKind, WarningSlot> _slots = new();
         private readonly List<WarningKind> _active = new();
@@ -93,8 +96,12 @@ namespace Adler.UI
 
             Transform self = _aircraft.transform;
 
-            SamSite locking = SamSite.MostUrgent(self);
-            if (locking != null && locking.LockProgress >= _lockWarnThreshold)
+            if (SamSite.AnyIncoming(self))
+            {
+                _active.Add(WarningKind.MissileIncoming);
+            }
+
+            if (SamSite.AnyCovering(self))
             {
                 _active.Add(WarningKind.SamLock);
             }
@@ -159,6 +166,7 @@ namespace Adler.UI
         {
             return kind switch
             {
+                WarningKind.MissileIncoming => _incomingText,
                 WarningKind.SamLock => _lockText,
                 _ => string.Empty,
             };
@@ -168,6 +176,7 @@ namespace Adler.UI
         {
             return kind switch
             {
+                WarningKind.MissileIncoming => _incomingColor,
                 WarningKind.SamLock => _lockColor,
                 _ => Color.white,
             };
