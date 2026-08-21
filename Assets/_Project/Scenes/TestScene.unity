@@ -7134,7 +7134,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftLifecycle
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
   _spawnPoint: {fileID: 819950027}
-  _freeLook: {fileID: 2075592592}
   _restorePhysics: 1
   _tumbleTorque: 4
   _alsoDisableOnDeath: []
@@ -8089,6 +8088,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.FreeLookPivot
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
+  _aircraft: {fileID: 0}
   _lockCursor: 1
   _mouseSensitivity: 0.12
   _maxStepDegrees: 20
