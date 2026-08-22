@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74d1ee1bd208556468fa536d9c7ea146, type: 3}
+  m_Name: Enemy
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Aircraft.AirframeDefinition
+  DisplayName: Enemy
+  MinSpeed: 10
+  CruiseSpeed: 20
+  MaxSpeed: 25
+  BoostSpeed: 40
+  Acceleration: 45
+  Deceleration: 30
+  ThrottleResponse: 3
+  PitchRate: 90
+  RollRate: 110
+  YawRate: 40
+  ControlResponse: 5
+  LowSpeedAgility: 0.7
+  BankTurnRate: 50
+  BoostCapacity: 100
+  BoostDrain: 25
+  BoostRecharge: 12
+  BoostRechargeDelay: 1.5
+  BoostReengageFraction: 0.25
+  GravityInfluence: 0.4
+  BoostMultiplier: 1.8
+  Grip: 4
