@@ -27,6 +27,7 @@ namespace Adler.Flight
         private float _rechargeAt;
         private bool _lockedOut;
         private bool _awaitingRelease;
+        private bool _wasDenied;
 
         /// <summary>남은 연료가 바뀔 때마다. 화면 표시가 구독한다.</summary>
         public event Action<BoostFuel> Changed;
@@ -36,6 +37,15 @@ namespace Adler.Flight
 
         /// <summary>바닥났다가 다시 쓸 수 있게 됐을 때.</summary>
         public event Action<BoostFuel> Restored;
+
+        /// <summary>
+        /// 밟았는데 거절당했을 때. 누르고 있는 동안 한 번만 온다.
+        /// <para>
+        /// 거절은 화면에 드러나지 않는다. 밟았는데 아무 일도 없으면 키가 안 먹은 것인지
+        /// 연료가 없는 것인지 알 수 없으므로, 거절당했다는 사실 자체를 알려야 한다.
+        /// </para>
+        /// </summary>
+        public event Action<BoostFuel> Denied;
 
         public float Remaining => _remaining;
 
@@ -89,6 +99,16 @@ namespace Adler.Flight
             }
 
             bool allowed = wanted && !_awaitingRelease && !_lockedOut && _remaining > 0f;
+
+            // 누르고 있는 내내 알리면 소리가 이어져 울린다. 밟는 시도마다 한 번씩만
+            // 알리고, 손을 떼야 다음 시도로 친다.
+            bool denied = wanted && !allowed;
+            if (denied && !_wasDenied)
+            {
+                Denied?.Invoke(this);
+            }
+
+            _wasDenied = denied;
 
             if (allowed)
             {

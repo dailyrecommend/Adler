@@ -57,8 +57,10 @@ namespace Adler.Weapons
         private InputAction _dropAction;
         private InputAction _toggleAction;
         private readonly InputAction[] _directionActions = new InputAction[4];
-        private readonly List<CommandDirection> _entered = new();
-        private readonly List<StratagemDefinition> _candidates = new();
+
+        // 어느 커맨드를 치고 있는지 알아내는 일은 이쪽이 맡는다. 여기는 입력을 읽어
+        // 넘기고 결과를 알릴 뿐이다.
+        private CommandRecognizer _recognizer;
 
         private float _lastInputTime;
 
@@ -107,7 +109,7 @@ namespace Adler.Weapons
         public bool IsArmed => ArmedBomb != null;
 
         /// <summary>지금까지 입력된 커맨드.</summary>
-        public IReadOnlyList<CommandDirection> EnteredCommand => _entered;
+        public IReadOnlyList<CommandDirection> EnteredCommand => _recognizer.Entered;
 
         /// <summary>요청 가능한 목록. 화면에 커맨드를 늘어놓는 데 쓴다.</summary>
         public IReadOnlyList<StratagemDefinition> Loadout => _loadout;
@@ -193,6 +195,9 @@ namespace Adler.Weapons
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
+
+            // 쿨타임과 횟수는 여기서 세고, 인식기는 그 결과만 물어본다.
+            _recognizer = new CommandRecognizer(_loadout, IsReady);
 
             if (_dropPoint == null)
             {
@@ -363,7 +368,7 @@ namespace Adler.Weapons
         /// <summary>입력이 끊긴 채로 시간이 지나면 처음부터 다시 받는다.</summary>
         private void ExpireStaleInput()
         {
-            if (_entered.Count == 0 || Time.time - _lastInputTime < _inputTimeout)
+            if (_recognizer.Entered.Count == 0 || Time.time - _lastInputTime < _inputTimeout)
             {
                 return;
             }
@@ -397,79 +402,42 @@ namespace Adler.Weapons
             }
         }
 
+        /// <summary>
+        /// 방향 하나를 인식기에 넘기고, 그 결과를 화면에 알린다.
+        /// <para>
+        /// 무엇이 맞았는지 판단하는 일은 이제 인식기의 몫이다. 여기 남은 것은 언제
+        /// 입력이 들어왔는지 기록하고 결과에 맞는 신호를 보내는 것뿐이다.
+        /// </para>
+        /// </summary>
         private void Accept(CommandDirection direction)
         {
             _lastInputTime = Time.time;
-            _entered.Add(direction);
 
-            if (!RefreshCandidates())
+            switch (_recognizer.Accept(direction))
             {
-                // 틀렸다. 다만 방금 누른 것을 새 커맨드의 첫 입력으로 다시 본다.
-                // 완전히 버리면 한 번 어긋났을 때 손을 멈췄다 다시 시작해야 한다.
-                _entered.Clear();
-                _entered.Add(direction);
-                CommandReset?.Invoke();
-
-                if (!RefreshCandidates())
-                {
-                    _entered.Clear();
+                case CommandInput.Rejected:
                     return;
-                }
-            }
 
-            CommandProgressed?.Invoke(_entered);
-
-            foreach (StratagemDefinition candidate in _candidates)
-            {
-                if (candidate.Command.Length == _entered.Count)
-                {
-                    Authorize(candidate);
+                case CommandInput.Restarted:
+                    // 어긋났다는 것과 새로 시작했다는 것을 함께 알린다. 앞의 것만
+                    // 보내면 화면이 빈 상태로 남아 첫 칸이 들어간 것이 안 보인다.
+                    CommandReset?.Invoke();
+                    CommandProgressed?.Invoke(_recognizer.Entered);
                     return;
-                }
+
+                case CommandInput.Progressed:
+                    CommandProgressed?.Invoke(_recognizer.Entered);
+                    return;
+
+                case CommandInput.Accepted:
+                    Authorize(_recognizer.Completed);
+                    return;
             }
-        }
-
-        /// <summary>
-        /// 지금까지의 입력으로 아직 가능한 것들을 추린다.
-        /// <para>
-        /// 쿨타임 중이거나 다 쓴 것은 후보에서 빠진다. 그래서 그 커맨드를 치기 시작하면
-        /// 곧바로 어긋난 입력으로 처리되고, 끝까지 다 친 뒤에 거절당하는 일이 없다.
-        /// </para>
-        /// </summary>
-        private bool RefreshCandidates()
-        {
-            _candidates.Clear();
-
-            foreach (StratagemDefinition stratagem in _loadout)
-            {
-                if (stratagem == null || stratagem.Command.Length < _entered.Count || !IsReady(stratagem))
-                {
-                    continue;
-                }
-
-                bool matches = true;
-                for (int i = 0; i < _entered.Count; i++)
-                {
-                    if (stratagem.Command[i] != _entered[i])
-                    {
-                        matches = false;
-                        break;
-                    }
-                }
-
-                if (matches)
-                {
-                    _candidates.Add(stratagem);
-                }
-            }
-
-            return _candidates.Count > 0;
         }
 
         private void Authorize(StratagemDefinition stratagem)
         {
-            _entered.Clear();
-            _candidates.Clear();
+            _recognizer.Reset();
 
             // 커맨드는 맞았지만 아직 부를 수 없는 경우다. 조용히 넘기지 않고 알린다 —
             // 입력이 틀린 것과 쿨타임에 걸린 것은 플레이어에게 다른 이야기다.
@@ -536,8 +504,7 @@ namespace Adler.Weapons
 
         private void ResetCommand()
         {
-            _entered.Clear();
-            _candidates.Clear();
+            _recognizer.Reset();
             CommandReset?.Invoke();
         }
 

@@ -109,7 +109,9 @@ namespace Adler.UI
 
         private void UpdateThrottle(IFlightModel model)
         {
-            float throttle = model.ThrottleNormalized;
+            // 스로틀 레버가 없어져서 이 게이지는 이제 실제 속도를 보여준다. 게이지가
+            // 하던 일 — 지금 얼마나 밀어붙이고 있는지 — 은 그대로다.
+            float throttle = model.SpeedNormalized;
 
             if (_throttleLabel != null)
             {

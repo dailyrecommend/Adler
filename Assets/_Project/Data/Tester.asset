@@ -17,18 +17,20 @@ MonoBehaviour:
   CruiseSpeed: 20
   MaxSpeed: 25
   BoostSpeed: 40
-  Acceleration: 30
-  Deceleration: 22
-  ThrottleResponse: 0.6
-  PitchRate: 70
-  RollRate: 120
-  YawRate: 25
-  ControlResponse: 13
-  LowSpeedAgility: 0.7
-  BankTurnRate: 45
+  Acceleration: 60
+  Deceleration: 40
+  ThrottleResponse: 3
+  PitchRate: 120
+  RollRate: 160
+  YawRate: 40
+  ControlResponse: 8
+  LowSpeedAgility: 0.85
+  BankTurnRate: 60
   BoostCapacity: 100
   BoostDrain: 20
   BoostRecharge: 15
   BoostRechargeDelay: 1
   BoostReengageFraction: 0.25
-  GravityInfluence: 0.7
+  GravityInfluence: 0.3
+  BoostMultiplier: 2
+  Grip: 5

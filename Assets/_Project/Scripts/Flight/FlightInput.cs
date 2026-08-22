@@ -13,13 +13,7 @@ namespace Adler.Flight
         /// <summary>+1 = 오른쪽으로 롤, -1 = 왼쪽으로 롤.</summary>
         public float Roll;
 
-        /// <summary>+1 = 기수를 오른쪽으로, -1 = 왼쪽으로.</summary>
-        public float Yaw;
-
-        /// <summary>+1 = 가속, -1 = 감속, 0 = 현재 속도 유지.</summary>
-        public float Throttle;
-
-        /// <summary>부스터 사용 여부.</summary>
+        /// <summary>부스터 사용 여부. 빨라지는 수단은 이것뿐이다.</summary>
         public bool Boost;
 
         public static FlightInput None => default;

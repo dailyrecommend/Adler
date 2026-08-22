@@ -15,8 +15,8 @@ namespace Adler.Flight
         /// <summary>기체 속도(m/s). HUD 표시와 카메라 연출이 참조한다.</summary>
         float Speed { get; }
 
-        /// <summary>현재 스로틀 설정값. 0 = 최저 속도, 1 = 최고 속도.</summary>
-        float ThrottleNormalized { get; }
+        /// <summary>최저에서 부스터 속도 사이의 어디쯤인지. 0 = 최저, 1 = 부스터.</summary>
+        float SpeedNormalized { get; }
 
         /// <summary>부스터를 쓰는 중인지. 화면 표시와 효과음이 참조한다.</summary>
         bool IsBoosting { get; }

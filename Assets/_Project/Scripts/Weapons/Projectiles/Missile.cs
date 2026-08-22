@@ -144,9 +144,13 @@ namespace Adler.Weapons
                 return;
             }
 
-            Vector3 desired = _definition.Guidance == GuidanceLaw.ProportionalNavigation
-                ? ProportionalNavigationHeading(deltaTime)
-                : (_target.position - transform.position).normalized;
+            Vector3 desired = ProportionalNavigation.Heading(
+                transform.position,
+                _velocity,
+                _target.position,
+                TargetVelocity(deltaTime),
+                _definition.NavigationConstant,
+                deltaTime);
 
             if (desired.sqrMagnitude < 0.0001f)
             {
@@ -164,44 +168,6 @@ namespace Adler.Weapons
                 0f);
 
             _velocity = heading * speed;
-        }
-
-        /// <summary>
-        /// 비례항법유도가 가리키는 방향.
-        /// <para>
-        /// 두 물체가 서로를 보는 각도가 변하지 않으면 반드시 충돌한다. 배가 서로를
-        /// 피하는 데 쓰는 것과 같은 성질이다. 그래서 시선각이 도는 것은 곧 빗나가고
-        /// 있다는 뜻이고, 도는 만큼 반대로 꺾어주면 충돌 경로로 돌아온다.
-        /// </para>
-        /// <para>
-        /// 표적을 향하지 않는다는 것이 요점이다. 표적이 있는 곳이 아니라 만나게 될
-        /// 곳으로 가므로 리드가 저절로 잡히고, 마지막 순간에 몰아서 꺾을 일이 없다.
-        /// 순수추적이 종말 구간에서 요구하는 선회량은 거리가 0에 가까워질수록 무한히
-        /// 커지는데, 그것이 빗나가는 진짜 이유였다.
-        /// </para>
-        /// </summary>
-        private Vector3 ProportionalNavigationHeading(float deltaTime)
-        {
-            Vector3 toTarget = _target.position - transform.position;
-            float rangeSquared = toTarget.sqrMagnitude;
-
-            if (rangeSquared < 0.0001f)
-            {
-                return _velocity.normalized;
-            }
-
-            Vector3 relativeVelocity = TargetVelocity(deltaTime) - _velocity;
-
-            // 시선이 도는 속도. 표적이 정확히 다가오거나 멀어지기만 하면 0이 되고,
-            // 그때는 이미 충돌 경로라 꺾을 이유가 없다.
-            Vector3 lineOfSightRate = Vector3.Cross(toTarget, relativeVelocity) / rangeSquared;
-
-            // 시선이 도는 축을 기준으로 진행 방향을 밀어낸다. 결과는 진행 방향에
-            // 수직이라 속도를 잃지 않고 방향만 바뀐다.
-            Vector3 acceleration =
-                Vector3.Cross(lineOfSightRate, _velocity) * _definition.NavigationConstant;
-
-            return (_velocity + (acceleration * deltaTime)).normalized;
         }
 
         /// <summary>

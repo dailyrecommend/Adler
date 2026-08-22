@@ -29,11 +29,12 @@ namespace Adler.Flight
         // 조종면 입력을 보간한 값. 스틱을 튕겨도 기체가 즉시 꺾이지 않게 한다.
         private float _pitch;
         private float _roll;
-        private float _yaw;
 
-        private float _throttle = 0.5f;
         private float _speed;
         private bool _boosting;
+
+        // 실제로 나아가는 방향과 빠르기. 기수를 뒤따라가므로 둘이 어긋날 수 있다.
+        private Vector3 _velocity;
         private bool _frozen;
 
         // 얼어붙은 동안의 물리 저항. 앞으로 가던 힘이 빠져야 기수가 아래로 넘어간다.
@@ -53,7 +54,15 @@ namespace Adler.Flight
         }
 
         public float Speed => _speed;
-        public float ThrottleNormalized => _throttle;
+        /// <summary>
+        /// 최저에서 부스터 속도 사이의 어디쯤인지. 게이지가 이 값을 그대로 채운다.
+        /// <para>
+        /// 스로틀 자리를 이것이 대신한다. 레버 위치가 아니라 실제 속도라서, 상승하다
+        /// 느려지거나 급강하로 붙는 것까지 게이지에 나타난다.
+        /// </para>
+        /// </summary>
+        public float SpeedNormalized =>
+            Mathf.InverseLerp(_stats.MinSpeed, TopSpeed, _speed);
         public bool IsBoosting => _boosting;
         public bool IsFrozen => _frozen;
 
@@ -89,7 +98,11 @@ namespace Adler.Flight
 
             // 떨어지던 속도를 이어받는다. 얼기 전 값으로 돌아가면 녹는 순간 속도가
             // 툭 바뀌어, 되살아난 것이 아니라 순간이동한 것처럼 보인다.
-            _speed = Mathf.Clamp(_body.linearVelocity.magnitude, _stats.MinSpeed, _stats.MaxSpeed);
+            _speed = Mathf.Clamp(_body.linearVelocity.magnitude, _stats.MinSpeed, TopSpeed);
+
+            // 떨어지던 방향도 이어받는다. 여기서 맞추지 않으면 얼기 직전의 진행 방향으로
+            // 되돌아가면서, 추락하다 갑자기 옆으로 튄다.
+            _velocity = _body.linearVelocity;
         }
 
         /// <summary>스틱을 밀 때 기수가 올라가게 한다. 기체 성능이 아니라 플레이어 취향이다.</summary>
@@ -108,8 +121,6 @@ namespace Adler.Flight
 
             _pitch = 0f;
             _roll = 0f;
-            _yaw = 0f;
-            _throttle = 0.5f;
             _boosting = false;
 
             // 얼어붙은 채로 격추됐을 수 있다. 여기서 풀지 않으면 재출격한 기체가
@@ -127,7 +138,8 @@ namespace Adler.Flight
             // 스탯 상한(720도/초)을 넘도록 열어두고, 제한은 스탯 쪽에서만 건다.
             _body.maxAngularVelocity = 4f * Mathf.PI;
 
-            _speed = TargetSpeedFor(_throttle, boosting: false);
+            _speed = TargetSpeedFor(boosting: false);
+            _velocity = _body.transform.forward * _speed;
         }
 
         public void Tick(in FlightInput input, float deltaTime)
@@ -152,7 +164,7 @@ namespace Adler.Flight
             SmoothControls(input, deltaTime);
             UpdateSpeed(input, deltaTime);
             ApplyRotation(deltaTime);
-            ApplyVelocity();
+            ApplyVelocity(deltaTime);
         }
 
         /// <summary>
@@ -200,12 +212,22 @@ namespace Adler.Flight
                 _body.angularVelocity, target, 1f - Mathf.Exp(-FrozenAlignRate * deltaTime));
         }
 
-        private float TargetSpeedFor(float throttleNormalized, bool boosting)
-        {
-            return boosting
-                ? _stats.BoostSpeed
-                : Mathf.Lerp(_stats.MinSpeed, _stats.MaxSpeed, throttleNormalized);
-        }
+        /// <summary>
+        /// 지금 도달하려는 속도.
+        /// <para>
+        /// 순항 아니면 부스터, 둘뿐이다. 스로틀 레버를 없앤 이유는 그것이 관리할 것을
+        /// 하나 늘리면서 정작 판단은 만들지 않았기 때문이다 — 답이 언제나 "끝까지 밀기"라
+        /// 선택이 아니었고, 레버가 움직이는 동안의 지연만 남았다.
+        /// </para>
+        /// <para>
+        /// 빨라지는 수단이 부스터 하나뿐이면 연료를 언제 쓸지가 유일한 속도 판단이 된다.
+        /// </para>
+        /// </summary>
+        private float TargetSpeedFor(bool boosting)
+            => boosting ? _stats.CruiseSpeed * _stats.Airframe.BoostMultiplier : _stats.CruiseSpeed;
+
+        /// <summary>낼 수 있는 가장 빠른 속도. 게이지의 끝이자 얼었다 녹을 때의 상한이다.</summary>
+        private float TopSpeed => _stats.CruiseSpeed * _stats.Airframe.BoostMultiplier;
 
         /// <summary>날것의 입력을 조종면 위치로 서서히 옮겨 기체에 무게감을 준다.</summary>
         private void SmoothControls(in FlightInput input, float deltaTime)
@@ -215,17 +237,14 @@ namespace Adler.Flight
 
             _pitch = Mathf.MoveTowards(_pitch, Mathf.Clamp(pitchTarget, -1f, 1f), rate);
             _roll = Mathf.MoveTowards(_roll, Mathf.Clamp(input.Roll, -1f, 1f), rate);
-            _yaw = Mathf.MoveTowards(_yaw, Mathf.Clamp(input.Yaw, -1f, 1f), rate);
         }
 
         private void UpdateSpeed(in FlightInput input, float deltaTime)
         {
+            bool wasBoosting = _boosting;
             _boosting = input.Boost;
 
-            // 스로틀은 즉시 값이 아니라 레버다. 밀고 있는 동안 서서히 올라간다.
-            _throttle = Mathf.Clamp01(_throttle + (input.Throttle * _stats.ThrottleResponse * deltaTime));
-
-            float target = TargetSpeedFor(_throttle, input.Boost);
+            float target = _stats.CruiseSpeed;
 
             // 기수가 하늘을 향하면 속도가 깎이고 강하하면 붙는다. 공기역학은 아니지만
             // 상승과 급강하에 최소한의 대가와 보상을 붙여 비행이 밋밋해지지 않게 한다.
@@ -233,10 +252,28 @@ namespace Adler.Flight
             if (gravityInfluence > 0f)
             {
                 float climb = Vector3.Dot(_body.transform.forward, Vector3.up); // -1(강하) ~ +1(상승)
-                target -= climb * gravityInfluence * (_stats.MaxSpeed - _stats.MinSpeed) * 0.5f;
+
+                // 순항에서 최저까지가 흔들릴 수 있는 폭이다. 영향을 1로 두면 수직 상승이
+                // 정확히 최저 속도까지 떨어뜨린다.
+                target -= climb * gravityInfluence * (_stats.CruiseSpeed - _stats.MinSpeed);
             }
 
-            target = Mathf.Clamp(target, _stats.MinSpeed, _stats.BoostSpeed);
+            target = Mathf.Max(target, _stats.MinSpeed);
+
+            // 곱한다. 깎이거나 붙은 뒤의 속도에 곱하므로, 상승 중에 밟으면 그만큼
+            // 덜 나가고 강하 중에 밟으면 더 나간다 — 언제 밟느냐가 결과를 바꾼다.
+            if (_boosting)
+            {
+                target *= _stats.Airframe.BoostMultiplier;
+            }
+
+            // 밟는 순간에는 기다리지 않는다. 부스터는 유일한 가속 수단이라 눌렀는데
+            // 잠시 뒤에 빨라지면, 밟은 것이 통했는지를 소리와 화면으로만 짐작하게 된다.
+            if (_boosting && !wasBoosting)
+            {
+                _speed = target;
+                return;
+            }
 
             float accel = target > _speed ? _stats.Acceleration : _stats.Deceleration;
             _speed = Mathf.MoveTowards(_speed, target, accel * deltaTime);
@@ -250,8 +287,9 @@ namespace Adler.Flight
                 1f,
                 Mathf.InverseLerp(_stats.MinSpeed, _stats.CruiseSpeed, _speed));
 
-            // 기체가 기울어진 만큼 저절로 그쪽으로 돈다. 러더를 몰라도 선회가 되는
-            // 이 보정이 아케이드 조작감을 만든다.
+            // 기체가 기울어진 만큼 저절로 그쪽으로 돈다. 러더가 없는 이유가 이것이다 —
+            // 기울여서 도는 것으로 선회가 완결되므로, 방향을 따로 트는 조작은 키를 둘
+            // 더 쓰면서 아무것도 새로 할 수 있게 해주지 않았다.
             float bank = Vector3.Dot(_body.transform.right, Vector3.up); // 오른쪽으로 기울면 음수
             float bankTurn = -bank * _stats.BankTurnRate;
 
@@ -259,7 +297,7 @@ namespace Adler.Flight
             // FlightInput의 부호 규약(+ = 위/오른쪽)에 맞추려면 뒤집어야 한다.
             Vector3 localAngular = new Vector3(
                 -_pitch * _stats.PitchRate * agility,
-                (_yaw * _stats.YawRate * agility) + bankTurn,
+                bankTurn,
                 -_roll * _stats.RollRate * agility) * Mathf.Deg2Rad;
 
             // 회전을 직접 써넣지 않고 각속도로 넘긴다.
@@ -269,10 +307,28 @@ namespace Adler.Flight
             _body.angularVelocity = _body.transform.TransformDirection(localAngular);
         }
 
-        /// <summary>기체는 언제나 자신이 향한 방향으로 나아간다. 관성도 미끄러짐도 없다.</summary>
-        private void ApplyVelocity()
+        /// <summary>
+        /// 진행 방향이 기수를 뒤따라간다.
+        /// <para>
+        /// 기수 방향을 그대로 속도로 쓰면 기체가 레일 위를 달리는 것처럼 느껴진다.
+        /// 정확하지만 무게가 없고, 아무리 급하게 꺾어도 몸이 따라가는 느낌이 나지 않는다.
+        /// </para>
+        /// <para>
+        /// 그래서 목표를 향해 옮겨가게만 한다. 선회하는 동안 기수는 안쪽을 보는데 몸은
+        /// 아직 가던 쪽으로 밀리고, 그 어긋남이 곧 관성으로 읽힌다. 밀리는 만큼 실제
+        /// 속도도 줄어들어서, 무리하게 꺾으면 느려지는 대가까지 저절로 생긴다.
+        /// </para>
+        /// </summary>
+        private void ApplyVelocity(float deltaTime)
         {
-            _body.linearVelocity = _body.transform.forward * _speed;
+            Vector3 desired = _body.transform.forward * _speed;
+            float grip = _stats.Airframe.Grip;
+
+            _velocity = grip > 0f
+                ? Vector3.Lerp(_velocity, desired, 1f - Mathf.Exp(-grip * deltaTime))
+                : desired;
+
+            _body.linearVelocity = _velocity;
         }
     }
 }

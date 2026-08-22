@@ -80,6 +80,22 @@ namespace Adler.Aircraft
         [Range(0f, 1f)]
         public float GravityInfluence = 0.15f;
 
+        [Tooltip("부스터를 쓸 때 속도가 몇 배가 되는가.\n\n" +
+                 "정해진 속도로 가지 않고 지금 속도에 곱한다. 상승하다 느려진 상태에서\n" +
+                 "밟으면 그 느린 속도의 몇 배가 되므로, 언제 밟느냐가 결과를 바꾼다.\n" +
+                 "고정 속도로 두면 느릴 때 밟는 것이 언제나 이득이라 판단이 사라진다.")]
+        [Range(1.1f, 4f)]
+        public float BoostMultiplier = 2f;
+
+        [Tooltip("진행 방향이 기수를 따라잡는 빠르기.\n\n" +
+                 "낮을수록 선회할 때 기체가 바깥으로 밀려 미끄러진다 — 기수는 안쪽을 보는데\n" +
+                 "몸은 아직 가던 쪽으로 가는 상태다. 무게가 느껴지는 것도, 드리프트하듯\n" +
+                 "도는 것도 전부 여기서 나온다.\n\n" +
+                 "높이면 기수 방향으로만 정확히 날아 미끄러짐이 사라진다. 깔끔하지만\n" +
+                 "관성이 없어 레일 위를 달리는 것처럼 느껴진다.")]
+        [Range(0.5f, 30f)]
+        public float Grip = 5f;
+
         /// <summary>기본 수치를 스탯 배열에 옮겨 적는다. <see cref="AircraftStatSheet"/>가 호출한다.</summary>
         internal void WriteBaseValues(float[] values)
         {

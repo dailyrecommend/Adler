@@ -53,8 +53,6 @@ namespace Adler.Flight
         private InputActionMap _flightMap;
         private InputAction _pitchAction;
         private InputAction _rollAction;
-        private InputAction _yawAction;
-        private InputAction _throttleAction;
         private InputAction _boostAction;
 
         /// <summary>HUD와 카메라가 속도를 읽는 통로.</summary>
@@ -125,8 +123,6 @@ namespace Adler.Flight
             _flightMap = _controls.FindActionMap("Flight", throwIfNotFound: true);
             _pitchAction = _flightMap.FindAction("Pitch", throwIfNotFound: true);
             _rollAction = _flightMap.FindAction("Roll", throwIfNotFound: true);
-            _yawAction = _flightMap.FindAction("Yaw", throwIfNotFound: true);
-            _throttleAction = _flightMap.FindAction("Throttle", throwIfNotFound: true);
             _boostAction = _flightMap.FindAction("Boost", throwIfNotFound: true);
 
             _flightMap.Enable();
@@ -177,8 +173,6 @@ namespace Adler.Flight
             {
                 Pitch = ReadStick(_pitchAction),
                 Roll = ReadStick(_rollAction),
-                Yaw = _yawAction.ReadValue<float>(),
-                Throttle = _throttleAction.ReadValue<float>(),
                 Boost = boosting,
             };
         }

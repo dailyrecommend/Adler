@@ -26,6 +26,7 @@ namespace Adler.UI
         [Tooltip("흔들 화면. 비워두면 같은 오브젝트에서 찾는다.")]
         [SerializeField] private HudShake _hudShake;
 
+
         [Header("반응")]
         [Tooltip("이어지는 피격을 묶는 시간(초). 이 안에 들어온 피해는 한 번에 반영된다.")]
         [Min(0.05f)]
@@ -86,6 +87,8 @@ namespace Adler.UI
                 _hudShake.AddImpulse(Mathf.Max(_minimumShake, _shakeAtFullLoss * fraction));
             }
 
+            // 카메라 흔들림이나 소리는 이 신호를 듣는 쪽이 알아서 한다. 여기서 하나씩
+            // 불러주면 반응을 붙일 때마다 이 파일이 그것을 알아야 한다.
             Reacted?.Invoke(fraction);
         }
     }
