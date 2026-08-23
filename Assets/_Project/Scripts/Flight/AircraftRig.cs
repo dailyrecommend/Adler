@@ -37,6 +37,9 @@ namespace Adler.Flight
         /// <summary>미사일 조준. 무기와 나뉘어 있어 기총을 들고 있을 때도 읽을 수 있다.</summary>
         public LockOnTargeting Targeting { get; private set; }
 
+        /// <summary>기총 조준 보정. 없으면 탄이 겨눈 그대로 나간다.</summary>
+        public SoftLock Aim { get; private set; }
+
         public StratagemBay Stratagems { get; private set; }
 
         public AircraftRepair Repair { get; private set; }
@@ -65,6 +68,7 @@ namespace Adler.Flight
             Boost = GetComponentInChildren<BoostFuel>(includeInactive: true);
             Weapons = GetComponentInChildren<WeaponBay>(includeInactive: true);
             Targeting = GetComponentInChildren<LockOnTargeting>(includeInactive: true);
+            Aim = GetComponentInChildren<SoftLock>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
             Repair = GetComponentInChildren<AircraftRepair>(includeInactive: true);
             Debuffs = GetComponentInChildren<AircraftDebuffs>(includeInactive: true);

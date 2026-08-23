@@ -4,11 +4,11 @@ using UnityEngine;
 namespace Adler.Weapons
 {
     /// <summary>
-    /// 미사일 발사대. 조준이 완성돼야 쏜다.
+    /// 미사일 발사대. 표적이 잡혀 있어야 쏜다.
     /// <para>
-    /// 손에 들려 있는 동안에만 조준이 돌아간다. 무기를 바꾸면 조준도 함께 풀려서,
-    /// 기총을 쥔 채 조준을 쌓아두었다가 바꿔서 곧바로 쏘는 일이 생기지 않는다.
-    /// 겨누고 있던 시간이 이 무기의 값이기 때문이다.
+    /// 조준은 이 무기의 것이 아니다. 화면에 담기만 하면 걸리고, 무엇을 들고 있든
+    /// 돌아간다. 그래서 이 무기가 치르는 값은 겨누고 있던 시간이 아니라 사거리와
+    /// 발수다 — 멀리 있는 것은 못 쏘고, 쏠 수 있는 횟수가 적다.
     /// </para>
     /// </summary>
     public sealed class MissileLauncher : AircraftWeapon
@@ -21,8 +21,19 @@ namespace Adler.Weapons
 
         public override WeaponDefinition Definition => _missile;
 
-        /// <summary>조준이 걸려야 쏠 수 있다.</summary>
-        public override bool CanFire => base.CanFire && _targeting != null && _targeting.HasLock;
+        /// <summary>
+        /// 표적이 잡혀 있고, 사거리 안이어야 쏠 수 있다.
+        /// <para>
+        /// 거리를 여기서 보는 이유는 그것이 이 무기의 사정이기 때문이다. 조준은 화면에
+        /// 보이는 한 훨씬 멀리까지 잡히는데, 잡힌다고 다 쏠 수 있으면 미사일이 화면 끝의
+        /// 점까지 닿는 무기가 된다.
+        /// </para>
+        /// </summary>
+        public override bool CanFire =>
+            base.CanFire
+            && _targeting != null
+            && _targeting.HasLock
+            && Vector3.Distance(transform.position, _targeting.TargetPoint) <= _missile.LockRange;
 
         /// <summary>미사일이 터졌을 때. 폭발은 발사체가 사라진 뒤에 보고된다.</summary>
         public event Action<MissileDefinition, BlastReport> Detonated;
@@ -41,14 +52,6 @@ namespace Adler.Weapons
                 Debug.LogError($"{nameof(MissileLauncher)}: 조준을 맡을 컴포넌트를 찾지 못했습니다.", this);
                 enabled = false;
             }
-        }
-
-        public override void OnDrawn() => _targeting.SetRules(_missile);
-
-        public override void OnStowed()
-        {
-            base.OnStowed();
-            _targeting.SetRules(null);
         }
 
         protected override void FireOnce()

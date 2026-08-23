@@ -20,7 +20,14 @@ namespace Adler.Weapons
         {
             Transform muzzle = ResolveMuzzle();
             Vector3 origin = muzzle.position;
-            Vector3 direction = ProjectileLauncher.ApplySpread(muzzle.forward, _gun.SpreadDegrees);
+
+            // 조준 보정은 흩어짐보다 먼저 건다. 뒤에 걸면 보정이 흩어짐까지 없애버려
+            // 탄이 한 점으로 모이고, 기총이 저격총처럼 굴게 된다.
+            Vector3 aim = _aircraft != null && _aircraft.Aim != null
+                ? _aircraft.Aim.Adjust(origin, muzzle.forward, _gun)
+                : muzzle.forward;
+
+            Vector3 direction = ProjectileLauncher.ApplySpread(aim, _gun.SpreadDegrees);
 
             // 기체 속도를 얹는다. 이게 없으면 빠르게 날면서 쏠 때 탄이 뒤로 처지는
             // 것처럼 보이고, 기체가 자기 탄을 따라잡는 상황까지 나온다.

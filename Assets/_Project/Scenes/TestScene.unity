@@ -694,6 +694,7 @@ GameObject:
   - component: {fileID: 99851330}
   - component: {fileID: 99851331}
   - component: {fileID: 99851332}
+  - component: {fileID: 99851333}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -935,7 +936,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 99851318}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1c644201af05e542992ac7434fec859, type: 3}
   m_Name: 
@@ -984,6 +985,23 @@ MonoBehaviour:
   _incomingColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   _lockText: SAM LOCK
   _lockColor: {r: 1, g: 0.75, b: 0.2, a: 1}
+--- !u!114 &99851333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99851318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 810079b3c1ee8694ea5ac344cb812d17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.LockMarkDisplay
+  _aircraft: {fileID: 1812182299}
+  _camera: {fileID: 330585545}
+  _markPrefab: {fileID: 7298350418524237421, guid: de533cc487a6178489df6988cbeddf88, type: 3}
+  _markRoot: {fileID: 1608626950}
+  _maxMarks: 12
 --- !u!1 &134741782
 GameObject:
   m_ObjectHideFlags: 0
@@ -4327,7 +4345,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &690682217
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6777,6 +6795,135 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 01540d0807cd1364c857d115d709853b, type: 3}
   m_PrefabInstance: {fileID: 2063988865}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1213268840
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1213268841}
+  - component: {fileID: 1213268842}
+  m_Layer: 10
+  m_Name: Suistence
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1213268841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213268840}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1976869347}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &1213268842
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213268840}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 5
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1214332394
 GameObject:
   m_ObjectHideFlags: 0
@@ -9305,6 +9452,7 @@ GameObject:
   - component: {fileID: 1812182313}
   - component: {fileID: 1812182314}
   - component: {fileID: 1812182315}
+  - component: {fileID: 1812182316}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -9576,19 +9724,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.LockOnTargeting
   _aircraft: {fileID: 1812182299}
-  _boresight: {fileID: 1812182287}
+  _boresight: {fileID: 0}
   _targetMask:
     serializedVersion: 2
     m_Bits: 2048
+  _cone: 45
+  _range: 150
   _requireLineOfSight: 1
   _sightBlockers:
     serializedVersion: 2
     m_Bits: 128
-  _scanInterval: 0.2
-  _switchMargin: 3
-  _retainCompletedLock: 0
-  _manualHoldSeconds: 2.5
   _sightPadding: 0.5
+  _scanInterval: 0.2
+  _acquireSeconds: 0.8
+  _farAcquireMultiplier: 3
+  _forgetSeconds: 2
+  _switchMargin: 0.03
+  _holdSeconds: 0.4
+  _manualHoldSeconds: 2.5
 --- !u!114 &1812182306
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9742,7 +9895,7 @@ MonoBehaviour:
   _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
   _aircraft: {fileID: 1812182299}
   _origin: {fileID: 1812182287}
-  _closeRate: 10
+  _closeRate: 20
   _pathBend: 0.5
   _holdRange: 1.5
   _ignoreCollisionWhileHooked: 1
@@ -9778,6 +9931,24 @@ MonoBehaviour:
   _blastStopScale: 0.15
   _killStopSeconds: 0.09
   _killStopScale: 0.05
+--- !u!114 &1812182316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc7bc685b47d9a4ea52f9b48df0792f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.SoftLock
+  _aircraft: {fileID: 1812182299}
+  _targeting: {fileID: 1812182305}
+  _cone: 7
+  _range: 100
+  _assist: 0.6
+  _maxBend: 4
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -9950,7 +10121,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 15, y: 15}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1840385405
 MonoBehaviour:
@@ -9972,7 +10143,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: de38680a347845a40a5fd40e8d2ceae5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 99f338e1362eb5445b69590c36799cba, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -10370,6 +10541,7 @@ Transform:
   - {fileID: 31974037}
   - {fileID: 478951796}
   - {fileID: 829220199}
+  - {fileID: 1213268841}
   - {fileID: 1227013277}
   - {fileID: 212017415}
   - {fileID: 645464328}
@@ -10499,7 +10671,7 @@ MonoBehaviour:
   _pull: {fileID: 8300000, guid: 865e69091181d5f4695a2e28b610c9eb, type: 3}
   _release: {fileID: 8300000, guid: cb8d0b5d06661ae4b8ba3805846ddf98, type: 3}
   _volume: 0.7
-  _sustained: {fileID: 829220200}
+  _sustained: {fileID: 1213268842}
   _flightLoop: {fileID: 8300000, guid: 7f84eec9fb71d1749966225b560a7a65, type: 3}
   _flightVolume: 0.5
   _reelLoop: {fileID: 8300000, guid: 6a185bb264cb2314b9f8d6b42f4c4a30, type: 3}

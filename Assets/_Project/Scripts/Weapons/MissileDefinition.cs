@@ -5,31 +5,20 @@ namespace Adler.Weapons
     /// <summary>
     /// 미사일 한 종류의 성능.
     /// <para>
-    /// 기총과 반대편에 있다. 조준을 붙잡고 있어야 쏠 수 있고 발수도 적지만, 한 번 걸리면
-    /// 표적을 쫓아간다. 기총이 지금 겨눈 곳을 때린다면 미사일은 <em>겨누고 있던 시간</em>을
+    /// 기총과 반대편에 있다. 발수가 적고 사거리 안에 들어야 쏠 수 있지만, 한 번 나가면
+    /// 표적을 쫓아간다. 기총이 지금 겨눈 곳을 때린다면 미사일은 <em>거리를 좁히는 일</em>을
     /// 값으로 치른다.
     /// </para>
     /// </summary>
     [CreateAssetMenu(fileName = "Missile", menuName = "Adler/Weapons/Missile Definition")]
     public sealed class MissileDefinition : WeaponDefinition
     {
-        [Header("조준")]
-        [Tooltip("표적을 이 각도 안에 두어야 조준이 잡히기 시작한다.")]
-        [Range(1f, 90f)]
-        public float LockAngle = 20f;
-
-        [Tooltip("이 거리 안의 표적만 잡는다 (m).")]
+        [Header("교전")]
+        [Tooltip("이 거리 안의 표적에만 쏠 수 있다 (m).\n\n" +
+                 "표적을 잡는 일은 조준 쪽이 맡고 화면에 보이는 한 훨씬 멀리까지 잡히므로,\n" +
+                 "여기가 이 무기가 닿는 곳을 정하는 유일한 자리다.")]
         [Min(1f)]
         public float LockRange = 400f;
-
-        [Tooltip("조준이 완성되기까지 붙잡고 있어야 하는 시간(초).\n" +
-                 "이 시간이 곧 미사일의 값이다. 짧으면 기총과 다를 바 없어진다.")]
-        [Min(0f)]
-        public float LockSeconds = 1.2f;
-
-        [Tooltip("조준이 벗어나도 이만큼은 버틴다(초). 잠깐 시야에서 놓쳐도 풀리지 않게.")]
-        [Min(0f)]
-        public float LockGraceSeconds = 0.5f;
 
         [Header("유도")]
         [Tooltip("항법상수(N). 시선각이 도는 만큼의 몇 배로 꺾을지.\n" +
