@@ -20,12 +20,12 @@ MonoBehaviour:
   Acceleration: 45
   Deceleration: 30
   ThrottleResponse: 3
-  PitchRate: 90
-  RollRate: 110
+  PitchRate: 60
+  RollRate: 75
   YawRate: 40
-  ControlResponse: 5
+  ControlResponse: 4
   LowSpeedAgility: 0.7
-  BankTurnRate: 50
+  BankTurnRate: 38
   BoostCapacity: 100
   BoostDrain: 25
   BoostRecharge: 12

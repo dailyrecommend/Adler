@@ -21,11 +21,10 @@ MonoBehaviour:
   Damage: 250
   Penetration: 5
   Demolition: 20
-  LockAngle: 25
+  LockAngle: 40
   LockRange: 150
   LockSeconds: 1.2
   LockGraceSeconds: 0.5
-  Guidance: 1
   NavigationConstant: 4
   LaunchSpeed: 40
   MaxSpeed: 160

@@ -37,6 +37,9 @@ namespace Adler.Flight
         private Vector3 _velocity;
         private bool _frozen;
 
+        // 이번 스텝에 걸린 외부 견인. 쓰고 나면 비운다.
+        private Tether _tether = Tether.None;
+
         // 얼어붙은 동안의 물리 저항. 앞으로 가던 힘이 빠져야 기수가 아래로 넘어간다.
         private const float FrozenLinearDamping = 0.2f;
         private const float FrozenAngularDamping = 0.8f;
@@ -65,6 +68,9 @@ namespace Adler.Flight
             Mathf.InverseLerp(_stats.MinSpeed, TopSpeed, _speed);
         public bool IsBoosting => _boosting;
         public bool IsFrozen => _frozen;
+
+        /// <inheritdoc />
+        public void SetTether(in Tether tether) => _tether = tether;
 
         /// <summary>
         /// 조종과 추력을 끊거나 되돌린다.
@@ -165,6 +171,10 @@ namespace Adler.Flight
             UpdateSpeed(input, deltaTime);
             ApplyRotation(deltaTime);
             ApplyVelocity(deltaTime);
+
+            // 견인은 넣어준 스텝에만 듣는다. 끊긴 뒤에도 힘이 남아 있으면 줄을 놓고도
+            // 한동안 끌려간다.
+            _tether = Tether.None;
         }
 
         /// <summary>
@@ -267,6 +277,10 @@ namespace Adler.Flight
                 target *= _stats.Airframe.BoostMultiplier;
             }
 
+            // 끌려가는 동안은 아무리 느려도 이만큼은 낸다. 잡아둔 상대의 속도에서
+            // 계산해 넘어오므로, 상대가 부스터를 켜도 함께 빨라진다.
+            target = Mathf.Max(target, _tether.SpeedFloor);
+
             // 밟는 순간에는 기다리지 않는다. 부스터는 유일한 가속 수단이라 눌렀는데
             // 잠시 뒤에 빨라지면, 밟은 것이 통했는지를 소리와 화면으로만 짐작하게 된다.
             if (_boosting && !wasBoosting)
@@ -304,7 +318,44 @@ namespace Adler.Flight
             // MoveRotation과 rotation 대입은 비-kinematic 바디에서 보간을 건너뛰기 때문에,
             // 물리 주기(50Hz)와 렌더 주기가 어긋나 선회할 때 화면이 떨린다.
             // 각속도로 주면 물리 엔진이 적분하고 Interpolate가 그 사이를 메운다.
-            _body.angularVelocity = _body.transform.TransformDirection(localAngular);
+            Vector3 world = _body.transform.TransformDirection(localAngular);
+
+            _body.angularVelocity = ApplyAimAssist(world);
+        }
+
+        /// <summary>
+        /// 견인이 걸린 만큼 기수를 표적 쪽으로 끌어준다.
+        /// <para>
+        /// 조종간이 만든 회전을 지우지 않고 그쪽으로 섞는다. 통째로 갈아치우면 겨누는
+        /// 일에 실력이 필요 없어지고, 조종간이 먹지 않는 순간이 생겨 고장으로 느껴진다.
+        /// </para>
+        /// <para>
+        /// 끌어당기는 속도는 기체 자신의 선회율과 무관하다. 줄에 매달린 것이므로 혼자
+        /// 낼 수 없는 속도로 홱 돌아가는 것이 맞고, 기체 성능으로 막아두면 상대가
+        /// 급기동하는 순간 기수가 뒤처져 겨눌 수가 없다.
+        /// </para>
+        /// </summary>
+        private Vector3 ApplyAimAssist(Vector3 world)
+        {
+            if (!_tether.AssistsAim)
+            {
+                return world;
+            }
+
+            Vector3 forward = _body.transform.forward;
+            Vector3 axis = Vector3.Cross(forward, _tether.Direction);
+
+            if (axis.sqrMagnitude < 1e-6f)
+            {
+                return world;
+            }
+
+            float angle = Vector3.Angle(forward, _tether.Direction) * Mathf.Deg2Rad;
+            float maxRate = _tether.TurnRate * Mathf.Deg2Rad;
+
+            Vector3 assist = axis.normalized * Mathf.Min(angle * 6f, maxRate);
+
+            return Vector3.Lerp(world, assist, _tether.AimAssist);
         }
 
         /// <summary>
@@ -321,7 +372,16 @@ namespace Adler.Flight
         /// </summary>
         private void ApplyVelocity(float deltaTime)
         {
-            Vector3 desired = _body.transform.forward * _speed;
+            Vector3 heading = _body.transform.forward;
+
+            // 밖에서 끌어당기면 나아가는 방향이 그쪽으로 휜다. 기수는 그대로라
+            // 기체가 비스듬히 미끄러지는데, 줄에 매달려 끌려가는 모습이 그렇다.
+            if (_tether.BendsPath)
+            {
+                heading = Vector3.Slerp(heading, _tether.Direction, _tether.PathBend);
+            }
+
+            Vector3 desired = heading * _speed;
             float grip = _stats.Airframe.Grip;
 
             _velocity = grip > 0f

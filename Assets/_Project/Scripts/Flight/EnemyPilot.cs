@@ -17,8 +17,29 @@ namespace Adler.Flight
     {
         private enum Move
         {
+            /// <summary>표적을 향해 돈다.</summary>
             Pursue,
+
+            /// <summary>짧고 강하게 뿌리친다.</summary>
             Evade,
+
+            /// <summary>거의 직선으로 난다. 쫓는 쪽의 사격 기회다.</summary>
+            Steady,
+        }
+
+        /// <summary>
+        /// 뿌리치는 방식.
+        /// <para>
+        /// 난이도는 얼마나 자주 피하느냐가 아니라 몇 가지로 피하느냐에서 온다. 같은
+        /// 동작을 자주 하면 성가시기만 하고, 다른 동작을 가끔 하면 읽는 재미가 생긴다.
+        /// </para>
+        /// </summary>
+        private enum Escape
+        {
+            BreakLeft,
+            BreakRight,
+            ClimbOver,
+            DiveAway,
         }
 
         [Header("Airframe")]
@@ -46,11 +67,12 @@ namespace Adler.Flight
         [Min(0.1f)]
         [SerializeField] private float _bankGain = 2f;
 
-        [Tooltip("가장 크게 기울 수 있는 각도.\n" +
-                 "사람은 선회할 때 기울기를 정해두고 그 자세를 유지한다 — 매 순간 조금씩\n" +
-                 "넣었다 빼지 않는다. 그 유지가 없으면 기체가 계속 흔들리는 것처럼 보인다.")]
+        [Tooltip("가장 크게 기울 수 있는 각도.\n\n" +
+                 "회피 기동의 급함을 정하는 상한선이다. 크게 열어두면 홱홱 돌아 쫓기가\n" +
+                 "고돼지고, 좁히면 크고 느긋한 호를 그려 어디로 갈지 미리 보인다.\n" +
+                 "잘 피하는 적보다 읽히는 적이 쫓는 재미를 만든다.")]
         [Range(10f, 89f)]
-        [SerializeField] private float _maxBank = 70f;
+        [SerializeField] private float _maxBank = 50f;
 
         [Tooltip("기울기가 이만큼 어긋나면 조종간을 끝까지 민다 (도).\n" +
                  "작을수록 원하는 자세로 급하게 맞춘다.")]
@@ -92,15 +114,29 @@ namespace Adler.Flight
         [SerializeField] private float _breakOffRange = 40f;
 
         [Header("Evade")]
-        [Tooltip("뿌리치는 기동을 유지하는 시간(초).")]
+        [Tooltip("뿌리치는 기동을 유지하는 시간(초).\n\n" +
+                 "짧고 강해야 한다. 길게 끌면 쫓는 쪽은 그동안 계속 따라 돌아야 해서\n" +
+                 "화면이 내내 흔들리고, 무엇을 노릴지 정할 틈이 없다.")]
         [Min(0.1f)]
-        [SerializeField] private float _evadeSeconds = 2.5f;
+        [SerializeField] private float _evadeSeconds = 1.2f;
 
-        [Tooltip("뿌리칠 때 아래로 떨어뜨리는 정도.\n\n" +
-                 "옆으로만 꺾으면 같은 속도로 나란히 도는 그림이 되어 아무 일도 안 일어나는\n" +
-                 "것처럼 보인다. 아래로 내려가면 속도가 붙고 화면에서도 크게 움직인다.")]
-        [Range(0f, 1.5f)]
-        [SerializeField] private float _evadeDive = 0.6f;
+        [Tooltip("뿌리친 뒤 반드시 거의 직선으로 나는 시간(초).\n\n" +
+                 "이 구간이 쫓는 쪽의 사격 기회다. 없으면 회피가 끝나자마자 다시 회피로\n" +
+                 "들어가 영원히 꺾기만 하고, 겨눌 틈이 나지 않는다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _steadySeconds = 3f;
+
+        [Tooltip("연달아 뿌리칠 수 있는 횟수.\n\n" +
+                 "이만큼 쓰고 나면 안정 구간이 두 배로 길어진다. 뒤를 잡힌 채로 계속\n" +
+                 "피할 수 있으면 쫓는 쪽이 영영 기회를 못 잡는다.")]
+        [Min(1)]
+        [SerializeField] private int _maxConsecutiveEvades = 2;
+
+        [Tooltip("뿌리칠 때 위아래로 움직이는 정도.\n\n" +
+                 "낮게 두는 것이 중요하다. 쫓는 쪽은 표적을 화면 가운데 두려고 기수를\n" +
+                 "따라 올리고 내리는데, 그 위아래 움직임이 3D 멀미를 가장 크게 일으킨다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _evadeDive = 0.3f;
 
         [Tooltip("뒤쪽 이 각도 안에 표적이 있으면 위협으로 본다 (도).")]
         [Range(0f, 180f)]
@@ -128,8 +164,9 @@ namespace Adler.Flight
         private Rigidbody _targetBody;
         private ArcadeFlightModel _model;
         private Move _move;
-        private float _evadeRemaining;
-        private float _evadeSide = 1f;
+        private float _stateRemaining;
+        private int _consecutiveEvades;
+        private Escape _escape;
         private Vector3 _steerDirection;
         private float _clearance = Mathf.Infinity;
         private float _scanTimer;
@@ -184,9 +221,14 @@ namespace Adler.Flight
             float distance = Vector3.Distance(_target.position, transform.position);
             UpdateMove(distance, deltaTime);
 
-            Vector3 desired = _move == Move.Pursue
-                ? AimPoint() - transform.position
-                : EvadeDirection();
+            Vector3 desired = _move switch
+            {
+                // 안정 구간에서는 거의 직선으로 난다. 이 몇 초가 쫓는 쪽이 겨누고
+                // 쏘는 시간이고, 여기서 또 꺾으면 기회가 영영 오지 않는다.
+                Move.Steady => LevelOff(transform.forward),
+                Move.Evade => EvadeDirection(),
+                _ => AimPoint() - transform.position,
+            };
 
             return SteerTowards(AvoidGround(Smooth(desired, deltaTime)), distance);
         }
@@ -200,26 +242,41 @@ namespace Adler.Flight
         /// </summary>
         private void UpdateMove(float distance, float deltaTime)
         {
-            if (_move == Move.Evade)
+            _stateRemaining -= deltaTime;
+
+            switch (_move)
             {
-                _evadeRemaining -= deltaTime;
+                case Move.Evade:
+                    if (_stateRemaining <= 0f)
+                    {
+                        // 뿌리친 뒤에는 반드시 쉰다. 연달아 쓸수록 더 오래 쉰다 —
+                        // 그러지 않으면 뒤를 잡힌 채로 끝없이 피할 수 있다.
+                        _move = Move.Steady;
+                        _stateRemaining = _consecutiveEvades >= _maxConsecutiveEvades
+                            ? _steadySeconds * 2f
+                            : _steadySeconds;
 
-                if (_evadeRemaining <= 0f)
-                {
-                    _move = Move.Pursue;
-                }
+                        if (_consecutiveEvades >= _maxConsecutiveEvades)
+                        {
+                            _consecutiveEvades = 0;
+                        }
+                    }
 
-                return;
+                    return;
+
+                case Move.Steady:
+                    if (_stateRemaining <= 0f)
+                    {
+                        _move = Move.Pursue;
+                    }
+
+                    return;
             }
 
             // Two reasons to break: we just merged, or someone is on our tail.
             if (distance <= _breakOffRange || IsThreatened(distance))
             {
-                _move = Move.Evade;
-                _evadeRemaining = _evadeSeconds;
-
-                // Alternate sides so the same escape is not repeated every time.
-                _evadeSide = -_evadeSide;
+                BeginEvade();
             }
         }
 
@@ -240,6 +297,29 @@ namespace Adler.Flight
             Vector3 toTarget = (_target.position - transform.position).normalized;
 
             return Vector3.Angle(-transform.forward, toTarget) <= _threatAngle;
+        }
+
+        /// <summary>
+        /// 뿌리치기를 시작한다. 방금 쓴 것과 다른 방식을 고른다.
+        /// <para>
+        /// 같은 동작을 반복하면 자주 피해도 성가시기만 하다. 몇 가지 중에서 골라야
+        /// 무엇을 하려는지 보이면서도 매번 다르게 읽힌다.
+        /// </para>
+        /// </summary>
+        private void BeginEvade()
+        {
+            _move = Move.Evade;
+            _stateRemaining = _evadeSeconds;
+            _consecutiveEvades++;
+
+            Escape next = _escape;
+
+            for (int i = 0; i < 4 && next == _escape; i++)
+            {
+                next = (Escape)Random.Range(0, 4);
+            }
+
+            _escape = next;
         }
 
         /// <summary>
@@ -264,14 +344,22 @@ namespace Adler.Flight
                 across = transform.right;
             }
 
-            // Dive when there is height to spend, climb when there is not.
-            //
-            // 언제나 내려가면 뿌리칠 때마다 고도를 잃고, 되찾는 곳이 없으니 결국
-            // 바닥까지 걸어 내려간다. 낮을 때 위로 빼면 고도가 돌아오고, 넘어가는
-            // 기동이 하나 더 생겨 같은 회피만 반복하지도 않는다.
-            float vertical = HasHeightToSpend ? -_evadeDive : _evadeDive;
+            across.Normalize();
 
-            return (across.normalized * _evadeSide) + (Vector3.up * vertical);
+            // 고도가 없으면 내려가는 방식을 쓰지 않는다. 언제나 강하하면 뿌리칠 때마다
+            // 고도를 잃고, 되찾는 곳이 없으니 결국 바닥까지 걸어 내려간다.
+            Escape escape = _escape == Escape.DiveAway && !HasHeightToSpend
+                ? Escape.ClimbOver
+                : _escape;
+
+            return escape switch
+            {
+                Escape.BreakLeft => -across + (Vector3.up * -_evadeDive),
+                Escape.BreakRight => across + (Vector3.up * -_evadeDive),
+                Escape.ClimbOver => (transform.forward * 0.4f) + Vector3.up,
+                Escape.DiveAway => (transform.forward * 0.4f) + Vector3.down,
+                _ => across,
+            };
         }
 
         /// <summary>지면까지 얼마나 남았는지 재둔다. 회피와 지면 필터가 함께 쓴다.</summary>

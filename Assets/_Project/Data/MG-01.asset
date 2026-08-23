@@ -18,7 +18,7 @@ MonoBehaviour:
   AmmoCapacity: 1000
   Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
   Range: 300
-  Damage: 10
+  Damage: 4
   Penetration: 2
   Demolition: 0
   MuzzleVelocity: 120

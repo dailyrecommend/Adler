@@ -25,6 +25,15 @@ namespace Adler.Flight
         bool IsFrozen { get; }
 
         /// <summary>
+        /// 이번 스텝에 걸린 견인. 그래플 같은 것이 매 물리 스텝 넣는다.
+        /// <para>
+        /// 넣어준 스텝에만 듣고 곧바로 비워진다. 줄을 놓은 뒤에도 힘이 남아
+        /// 한동안 끌려가는 일이 없다.
+        /// </para>
+        /// </summary>
+        void SetTether(in Tether tether);
+
+        /// <summary>
         /// 조종과 추력을 끊거나 되돌린다.
         /// <para>
         /// 끊긴 동안 기체는 물리에 맡겨진다. 입력도 스로틀도 받지 않고 중력에 떨어지며,
