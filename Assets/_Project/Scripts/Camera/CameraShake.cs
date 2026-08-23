@@ -59,6 +59,22 @@ namespace Adler.CameraRig
         [Min(0.1f)]
         [SerializeField] private float _impulseDecay = 6f;
 
+        [Header("명중")]
+        [Tooltip("명중과 격추 반응을 내보내는 쪽. 비워두면 기체 아래에서 찾는다.")]
+        [SerializeField] private HitImpact _hitImpact;
+
+        [Tooltip("기총이 맞았을 때의 흔들림 폭. 자주 일어나므로 작게 둔다.")]
+        [Min(0f)]
+        [SerializeField] private float _hitAmplitude = 0.35f;
+
+        [Tooltip("폭발이 표적을 덮었을 때의 흔들림 폭.")]
+        [Min(0f)]
+        [SerializeField] private float _blastAmplitude = 1f;
+
+        [Tooltip("격추했을 때의 흔들림 폭. 한 발 맞힌 것과는 확실히 구별돼야 한다.")]
+        [Min(0f)]
+        [SerializeField] private float _killAmplitude = 1.8f;
+
         private CinemachineBasicMultiChannelPerlin _noise;
         private float _amplitude;
         private float _frequency;
@@ -104,6 +120,11 @@ namespace Adler.CameraRig
             {
                 _damage = _aircraft.GetComponentInChildren<DamageFeedback>(includeInactive: true);
             }
+
+            if (_hitImpact == null)
+            {
+                _hitImpact = _aircraft.GetComponentInChildren<HitImpact>(includeInactive: true);
+            }
         }
 
         /// <summary>
@@ -120,6 +141,11 @@ namespace Adler.CameraRig
             {
                 _damage.Reacted += OnDamaged;
             }
+
+            if (_hitImpact != null)
+            {
+                _hitImpact.Impact += OnImpact;
+            }
         }
 
         private void OnDisable()
@@ -128,9 +154,21 @@ namespace Adler.CameraRig
             {
                 _damage.Reacted -= OnDamaged;
             }
+
+            if (_hitImpact != null)
+            {
+                _hitImpact.Impact -= OnImpact;
+            }
         }
 
         private void OnDamaged(float strength) => AddImpulse(_damageAmplitude * strength);
+
+        private void OnImpact(ImpactWeight weight) => AddImpulse(weight switch
+        {
+            ImpactWeight.Kill => _killAmplitude,
+            ImpactWeight.Blast => _blastAmplitude,
+            _ => _hitAmplitude,
+        });
 
         private void Update()
         {

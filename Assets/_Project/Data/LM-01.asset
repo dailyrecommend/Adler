@@ -22,7 +22,7 @@ MonoBehaviour:
   Penetration: 5
   Demolition: 20
   LockAngle: 40
-  LockRange: 150
+  LockRange: 200
   LockSeconds: 1.2
   LockGraceSeconds: 0.5
   NavigationConstant: 4
