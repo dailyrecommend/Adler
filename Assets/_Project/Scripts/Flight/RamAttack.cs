@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Adler.Abilities;
 using Adler.Combat;
 using Adler.Core;
 using UnityEngine;
@@ -113,9 +114,12 @@ namespace Adler.Flight
         [Range(0f, 1f)]
         [SerializeField] private float _boostReturn = 0.5f;
 
-        [Tooltip("성공하면 깎아주는 갈고리 쿨다운. 전체 쿨다운에 대한 비율이다.\n\n" +
+        [Tooltip("성공하면 이 행동의 쿨타임을 깎아준다. 보통 갈고리를 넣는다.\n\n" +
                  "갈고리로 붙어서 박고, 박은 값으로 다시 걸고, 또 박는다.\n" +
-                 "이 고리가 돌아가려면 두 값이 함께 돌아와야 한다.")]
+                 "이 고리가 돌아가려면 연료와 함께 이쪽도 돌아와야 한다.")]
+        [SerializeField] private AbilitySpec _returnedAbility;
+
+        [Tooltip("깎아주는 몫. 전체 쿨타임에 대한 비율이다.")]
         [Range(0f, 1f)]
         [SerializeField] private float _grappleReturn = 0.5f;
 
@@ -323,7 +327,7 @@ namespace Adler.Flight
         private void Reward()
         {
             _aircraft.Boost?.Restore(_boostReturn);
-            _aircraft.Grapple?.ReduceCooldown(_grappleReturn);
+            _aircraft.Abilities?.ReduceCooldown(_returnedAbility, _grappleReturn);
         }
 
         /// <summary>

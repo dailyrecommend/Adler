@@ -71,8 +71,6 @@ namespace Adler.Controls
 
         public bool SwitchTargetPressed => WasPressed(PilotAction.SwitchTarget);
 
-        public bool GrapplePressed => WasPressed(PilotAction.Grapple);
-
         public bool RespawnPressed => WasPressed(PilotAction.Respawn);
 
 

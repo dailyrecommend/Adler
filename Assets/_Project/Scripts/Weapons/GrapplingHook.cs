@@ -1,6 +1,5 @@
 using System;
 using Adler.Combat;
-using Adler.Controls;
 using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
@@ -43,9 +42,6 @@ namespace Adler.Weapons
         private const float ClearTimeout = 5f;
 
         [Header("참조")]
-        [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
-        [SerializeField] private PilotInput _input;
-
         [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
 
@@ -131,10 +127,6 @@ namespace Adler.Weapons
         [Min(0.5f)]
         [SerializeField] private float _duration = 10f;
 
-        [Tooltip("끊긴 뒤 다시 걸 수 있을 때까지의 시간(초).")]
-        [Min(0f)]
-        [SerializeField] private float _cooldown = 6f;
-
         [Tooltip("이 거리를 넘어가면 줄이 끊어진다 (m).\n" +
                  "조준 사거리보다 넉넉해야 걸자마자 끊기지 않는다.")]
         [Min(1f)]
@@ -145,11 +137,6 @@ namespace Adler.Weapons
         private Transform _hooked;
         private Rigidbody _hookedBody;
         private float _remaining;
-        private float _cooldownRemaining;
-
-        // 줄이 나가 있는 동안 받아둔 쿨다운 감면(초). 놓을 때 한꺼번에 깎는다 —
-        // 그전에는 깎을 쿨다운 자체가 아직 시작되지 않았다.
-        private float _relief;
 
         private readonly StateMachine<GrapplePhase> _phase = new(GrapplePhase.Idle);
 
@@ -159,7 +146,6 @@ namespace Adler.Weapons
         // 걸어둔 상대를 통과시키는 일은 통째로 맡긴다. 되돌리는 시점이 까다로운데,
         // 그 까다로움은 들이받기도 똑같이 겪는 것이라 한곳에 모아뒀다.
         private CollisionPassage _passage;
-
 
         /// <summary>쏘아둔 표적. 날아가는 중에도 들어 있다. 없으면 null.</summary>
         public Transform Hooked => _hooked;
@@ -191,44 +177,8 @@ namespace Adler.Weapons
         /// <summary>남은 유지 시간(초). 물리기 전에는 0이다.</summary>
         public float Remaining => _remaining;
 
-        /// <summary>다시 걸 수 있을 때까지 남은 시간(초).</summary>
-        public float CooldownRemaining => _cooldownRemaining;
-
-        /// <summary>
-        /// 쿨다운을 정해진 몫만큼 깎아준다. 잘한 것에 대한 값으로 돌려주는 쪽이 부른다.
-        /// </summary>
-        /// <param name="fraction">전체 쿨다운에 대한 비율. 0.5면 절반을 돌려준다.</param>
-        /// <remarks>
-        /// <para>
-        /// 지금 깎는 것만으로는 모자란다. 쿨다운은 놓은 뒤에 흐르기 시작하므로 줄이
-        /// 걸려 있는 동안 깎아봐야 놓는 순간 제 값으로 채워져, 깎은 적이 없는 것이 된다.
-        /// 그런데 매달린 채로 들이받는 것이야말로 값을 치를 만한 일이라, 그 경우가
-        /// 빠지면 되돌려주는 뜻이 없어진다.
-        /// </para>
-        /// <para>
-        /// 그래서 줄이 나가 있는 동안 받은 몫은 적어뒀다가 놓을 때 깎는다. 그 사이에
-        /// 여러 번 박았다면 그만큼 쌓인다 — 한 번의 돌진으로 붙어서 계속 갈았다면
-        /// 돌려받는 것도 그만큼이어야 한다.
-        /// </para>
-        /// </remarks>
-        public void ReduceCooldown(float fraction)
-        {
-            float relief = _cooldown * Mathf.Clamp01(fraction);
-
-            if (relief <= 0f)
-            {
-                return;
-            }
-
-            // 줄이 나가 있으면 아직 쿨다운이 시작되지 않았다.
-            if (Phase != GrapplePhase.Idle)
-            {
-                _relief += relief;
-                return;
-            }
-
-            _cooldownRemaining = Mathf.Max(0f, _cooldownRemaining - relief);
-        }
+        // 쿨타임은 여기 없다. 행동의 제한은 실행기의 장부 하나에 오르고, 이 부품은
+        // 줄의 물리만 안다 — 언제 또 던질 수 있는지는 이쪽이 답할 질문이 아니다.
 
         private Clock _clock;
 
@@ -243,11 +193,9 @@ namespace Adler.Weapons
                 _origin = transform;
             }
 
-            _input = _input != null ? _input : _aircraft?.Input;
-
-            if (_aircraft == null || _targeting == null || _input == null)
+            if (_aircraft == null || _targeting == null)
             {
-                Debug.LogError($"{nameof(GrapplingHook)}: 기체, 조준, 입력 중 빠진 것이 있습니다.", this);
+                Debug.LogError($"{nameof(GrapplingHook)}: 기체 또는 조준을 찾지 못했습니다.", this);
                 enabled = false;
                 return;
             }
@@ -267,16 +215,6 @@ namespace Adler.Weapons
         private void Update()
         {
             _phase.Advance(_clock.Delta);
-
-            if (_cooldownRemaining > 0f)
-            {
-                _cooldownRemaining -= _clock.Delta;
-            }
-
-            if (_input.GrapplePressed)
-            {
-                Toggle();
-            }
 
             UpdateHook();
             UpdateContact();
@@ -365,21 +303,18 @@ namespace Adler.Weapons
             return _hookedBody.linearVelocity.magnitude + _closeRate;
         }
 
-        /// <summary>같은 키로 걸고 놓는다. 급할 때 놓을 수단이 없으면 갇힌 셈이 된다.</summary>
-        private void Toggle()
+        /// <summary>
+        /// 조준한 표적에 갈고리를 던진다. 던져졌으면 참.
+        /// <para>
+        /// 쿨타임은 묻지 않는다. 그것은 실행기가 이미 문턱에서 거른 뒤고, 여기서 또
+        /// 물으면 같은 제한을 두 곳이 세게 된다.
+        /// </para>
+        /// </summary>
+        public bool Fire()
         {
-            // 날아가는 중에 다시 누르면 거둬들인다. 쏘고 나서야 잘못 걸었다는 것을
-            // 아는 경우가 있는데, 물릴 때까지 기다려야만 놓을 수 있으면 그 사이가
-            // 조작을 빼앗긴 시간이 된다.
-            if (_hooked != null)
+            if (_hooked != null || !_targeting.HasLock)
             {
-                Release();
-                return;
-            }
-
-            if (_cooldownRemaining > 0f || !_targeting.HasLock)
-            {
-                return;
+                return false;
             }
 
             // 조준이 걸렸다고 해서 표적이 아직 있다는 보장은 없다. 없는 것에 대고
@@ -387,26 +322,20 @@ namespace Adler.Weapons
             Transform target = _targeting.Target;
             if (target == null)
             {
-                return;
+                return false;
             }
 
             _hooked = target;
             _hookedBody = _hooked.GetComponentInParent<Rigidbody>();
-
-            // 던지는 순간 지난 몫을 버린다. 줄이 나가 있지 않을 때 받은 것은 그 자리에서
-            // 이미 깎았으므로, 들고 있으면 한 번 잘한 것으로 두 번 받는다.
-            _relief = 0f;
             _remaining = 0f;
 
             _phase.Set(GrapplePhase.Flying);
             _tip = _origin.position;
 
-            // 늘어진 채로 시작한다. 지난번에 팽팽했던 값이 남아 있으면 던지자마자
-            // 곧게 뻗어서, 아직 날아가는 중인데 이미 당기는 것처럼 보인다.
-
             // 통과 처리와 유지 시간은 물릴 때 시작한다. 여기서 켜면 날아가는 동안
             // 상대를 그냥 뚫고 지나가고, 유지 시간도 날아가는 몫만큼 깎여 나간다.
 
+            return true;
         }
 
         /// <summary>갈고리가 표적에 닿았다. 물기만 하고 아직 당기지 않는다.</summary>
@@ -523,7 +452,8 @@ namespace Adler.Weapons
             _tip += toTarget.normalized * step;
         }
 
-        private void Release()
+        /// <summary>줄을 놓는다. 날아가는 중이든 매달린 중이든, 이미 놓였으면 아무 일도 없다.</summary>
+        public void Release()
         {
             if (_hooked == null)
             {
@@ -542,8 +472,6 @@ namespace Adler.Weapons
             _hookedBody = null;
             _remaining = 0f;
             _phase.Set(GrapplePhase.Idle);
-            _cooldownRemaining = Mathf.Max(0f, _cooldown - _relief);
-            _relief = 0f;
         }
 
     }

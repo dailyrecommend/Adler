@@ -11640,6 +11640,7 @@ MonoBehaviour:
   _clearTimeout: 4
   _shieldGrace: 0.5
   _boostReturn: 0.5
+  _returnedAbility: {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
   _grappleReturn: 0.5
   _afterSeconds: 2
 --- !u!1 &1818190744
@@ -11830,6 +11831,9 @@ MonoBehaviour:
   - Action: 0
     Ability: {fileID: 11400000, guid: 2eb784d5437aa4a46a5c6c16143ee1a4, type: 2}
     Style: 1
+  - Action: 2
+    Ability: {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
+    Style: 2
 --- !u!114 &1840017528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11848,6 +11852,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
   - {fileID: 11400000, guid: 2eb784d5437aa4a46a5c6c16143ee1a4, type: 2}
   - {fileID: 11400000, guid: 848b47f07bf8f2349a0a8b44024e8ead, type: 2}
+  - {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
 --- !u!1 &1840385403
 GameObject:
   m_ObjectHideFlags: 0
@@ -12663,7 +12668,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d960924ae3b9cbe4f8283255c699f901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrapplingHook
-  _input: {fileID: 1812182311}
   _aircraft: {fileID: 1812182315}
   _origin: {fileID: 1812182287}
   _closeRate: 20
@@ -12676,7 +12680,6 @@ MonoBehaviour:
   _travelSpeed: 200
   _biteSeconds: 0.25
   _duration: 3
-  _cooldown: 5
   _breakRange: 500
 --- !u!114 &1919053229
 MonoBehaviour:
