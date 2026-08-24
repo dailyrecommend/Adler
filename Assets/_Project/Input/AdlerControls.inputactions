@@ -265,7 +265,7 @@
                 {
                     "name": "",
                     "id": "20000000-0000-4000-8000-000000000017",
-                    "path": "<Gamepad>/buttonWest",
+                    "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
@@ -551,7 +551,7 @@
                 {
                     "name": "",
                     "id": "20000000-0000-4000-8000-00000000002c",
-                    "path": "<Gamepad>/leftStickPress",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
