@@ -17,8 +17,11 @@ namespace Adler.UI
         /// <summary>미사일이 날아오고 있다. 선회를 걸고 유지해야 한다.</summary>
         MissileIncoming = 0,
 
+        /// <summary>적기가 뒤를 잡고 기수를 얹었다. 지금 꺾어야 한다.</summary>
+        GunsOnMe = 1,
+
         /// <summary>발사대가 조준을 쌓고 있다. 아직 숨을 시간이 있다.</summary>
-        SamLock = 1,
+        SamLock = 2,
     }
 
     /// <summary>
@@ -49,6 +52,11 @@ namespace Adler.UI
         [SerializeField] private string _incomingText = "LOCK ON";
 
         [SerializeField] private Color _incomingColor = new Color(1f, 0.25f, 0.2f, 1f);
+
+        [Header("적기 기총")]
+        [SerializeField] private string _gunsText = "GUNS";
+
+        [SerializeField] private Color _gunsColor = new Color(1f, 0.4f, 0.2f, 1f);
 
         [Header("조준")]
         [SerializeField] private string _lockText = "SAM LOCK";
@@ -99,6 +107,11 @@ namespace Adler.UI
             if (SamSite.AnyIncoming(self))
             {
                 _active.Add(WarningKind.MissileIncoming);
+            }
+
+            if (EnemyGun.AnyAimingAt(self))
+            {
+                _active.Add(WarningKind.GunsOnMe);
             }
 
             if (SamSite.AnyCovering(self))
@@ -167,6 +180,7 @@ namespace Adler.UI
             return kind switch
             {
                 WarningKind.MissileIncoming => _incomingText,
+                WarningKind.GunsOnMe => _gunsText,
                 WarningKind.SamLock => _lockText,
                 _ => string.Empty,
             };
@@ -177,6 +191,7 @@ namespace Adler.UI
             return kind switch
             {
                 WarningKind.MissileIncoming => _incomingColor,
+                WarningKind.GunsOnMe => _gunsColor,
                 WarningKind.SamLock => _lockColor,
                 _ => Color.white,
             };
