@@ -279,6 +279,41 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &49589781
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 49589782}
+  m_Layer: 10
+  m_Name: VFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &49589782
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49589781}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1923980050}
+  - {fileID: 1708753519}
+  - {fileID: 297140800}
+  - {fileID: 2075592591}
+  m_Father: {fileID: 1812182287}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &57205299
 GameObject:
   m_ObjectHideFlags: 0
@@ -640,7 +675,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baa7b582f6ff1f74e8b79323cd9c8d70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.SpeedReadout
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _speedLabel: {fileID: 1818190747}
   _speedFormat: '{0:0}'
   _speedDisplayScale: 10
@@ -663,7 +698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3370c7bd48e9f440a1ad98e43a655cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HitMarker
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _hitMarker: {fileID: 972978319}
   _blockedMarker: {fileID: 1944196075}
   _duration: 0.25
@@ -679,7 +714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca646f09685f295448d29285316a3a30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.CommandDisplay
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _slotPrefab: {fileID: 2048752005125739745, guid: 27a35dd39de322c4ba4e84493d6328ea, type: 3}
   _arrowPrefab: {fileID: 2838819515787711201, guid: d3e0749532ff28f49b33cdfe31fd493c, type: 3}
   _slotRoot: {fileID: 317987486}
@@ -696,7 +731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48fc3fa17effa6744b01baaf21de10e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.AmmoReadout
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _weaponIcon: {fileID: 1856517642}
   _weaponLabel: {fileID: 0}
   _label: {fileID: 389554579}
@@ -721,7 +756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fce1c6905496edb48a32da9ea6684aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HudShake
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _target: {fileID: 1608626950}
   _idleAmplitude: 0
   _boostAmplitude: 9
@@ -743,7 +778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8788eac0e3d4ccf44bf0d9ba0242b405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.BoostReadout
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _fill: {fileID: 1707024023}
   _label: {fileID: 0}
   _format: '{0:0}%'
@@ -764,7 +799,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea9813e44756aec499241d2d52bb52f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HealthReadout
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _fill: {fileID: 393208460}
   _label: {fileID: 0}
   _format: '{2:0}%'
@@ -784,7 +819,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc22e4157b9cff94aadbded68d25451a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.DebuffDisplay
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _slotPrefab: {fileID: 9162635204580019929, guid: ab69cc3a0c898b243b8a81fac627acca, type: 3}
   _slotRoot: {fileID: 161864362}
 --- !u!114 &99851332
@@ -799,7 +834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1d5c20220bb50441ac752b38f0fa765, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.WarningDisplay
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _slotPrefab: {fileID: 1615651186832046776, guid: 920e9cbaf86a16b4ba3f0ebd64362954, type: 3}
   _slotRoot: {fileID: 1079101734}
   _incomingText: MISSILE
@@ -820,7 +855,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 810079b3c1ee8694ea5ac344cb812d17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.LockMarkDisplay
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _camera: {fileID: 330585545}
   _markPrefab: {fileID: 7298350418524237421, guid: de533cc487a6178489df6988cbeddf88, type: 3}
   _markRoot: {fileID: 1608626950}
@@ -1650,14 +1685,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 189988664}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1388372180}
   - {fileID: 699131689}
-  m_Father: {fileID: 1812182287}
+  m_Father: {fileID: 1919053223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &189988666
 MonoBehaviour:
@@ -1671,7 +1706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74fafca667ab19d42bc6f8d4415ef597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.MissileLauncher
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _muzzles:
   - {fileID: 1388372180}
   - {fileID: 699131689}
@@ -1679,7 +1714,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2176
   _missile: {fileID: 11400000, guid: f64f7d928d4def24a9b9968d9c6a6901, type: 2}
-  _targeting: {fileID: 1812182305}
+  _targeting: {fileID: 0}
 --- !u!1 &212017414
 GameObject:
   m_ObjectHideFlags: 0
@@ -2567,12 +2602,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 297140798}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1812182287}
+  m_Father: {fileID: 49589782}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &299142187 stripped
 Transform:
@@ -2900,7 +2935,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 75
   orthographic: 0
@@ -3083,7 +3118,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 01540d0807cd1364c857d115d709853b, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: -400310251153081761, guid: 34b103a760cf810408493ebebff3e175, type: 3}
+      objectReference: {fileID: -8848810374240701247, guid: 9e16076126986f34497a8da4b0f0e0a1, type: 3}
     - target: {fileID: -7511558181221131132, guid: 01540d0807cd1364c857d115d709853b, type: 3}
       propertyPath: 'm_Materials.Array.data[2]'
       value: 
@@ -6540,6 +6575,129 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 865649399}
   m_CullTransparentMesh: 1
+--- !u!1 &881712667
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 881712668}
+  - component: {fileID: 881712672}
+  - component: {fileID: 881712671}
+  - component: {fileID: 881712670}
+  - component: {fileID: 881712669}
+  m_Layer: 10
+  m_Name: State
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &881712668
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881712667}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812182287}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &881712669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881712667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b644dca71d4fdc717fd3df496ab131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.AircraftPostFx
+  _aircraft: {fileID: 1812182315}
+  _layers:
+  - Volume: {fileID: 1701901517}
+    When: 0
+    Debuff: {fileID: 0}
+    ActiveWeight: 1
+    IdleWeight: 0
+    RiseSpeed: 9
+    FallSpeed: 3.5
+  - Volume: {fileID: 1696491828}
+    When: 1
+    Debuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
+    ActiveWeight: 1
+    IdleWeight: 0
+    RiseSpeed: 3
+    FallSpeed: 1
+  - Volume: {fileID: 656095957}
+    When: 2
+    Debuff: {fileID: 0}
+    ActiveWeight: 1
+    IdleWeight: 0
+    RiseSpeed: 5
+    FallSpeed: 2
+--- !u!114 &881712670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881712667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab44bc844e7a6a42aaeb3c535ccb586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HitImpact
+  _aircraft: {fileID: 1812182315}
+  _lightWindow: 0.15
+  _blastStopSeconds: 0.05
+  _blastStopScale: 0.15
+  _killStopSeconds: 0.11
+  _killStopScale: 0.05
+--- !u!114 &881712671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881712667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba87f06be0f46414b947ded9a6ee4ba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.DamageFeedback
+  _aircraft: {fileID: 1812182315}
+  _hudShake: {fileID: 99851327}
+  _window: 0.2
+  _shakeAtFullLoss: 60
+  _minimumShake: 3
+--- !u!114 &881712672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881712667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1d80baf1297f174384e405e87a130ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AltitudeFreeze
+  _freezeAltitude: 400
+  _thawMargin: 25
+  _definition: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
+  _chillAltitude: 175
+  _volume: {fileID: 57205300}
+  _fadeOutSpeed: 2
 --- !u!1 &898042521
 GameObject:
   m_ObjectHideFlags: 0
@@ -6602,7 +6760,7 @@ MonoBehaviour:
   Lens:
     FieldOfView: 75
     OrthographicSize: 5
-    NearClipPlane: 0.3
+    NearClipPlane: 0.01
     FarClipPlane: 1000
     Dutch: 0
     ModeOverride: 0
@@ -6646,7 +6804,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aaa0f0983410274a96862927dc6f1d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.SpeedFieldOfView
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _fieldOfViewGain: 50
   _useTopSpeedAsReference: 1
   _maxSpeed: 0
@@ -6667,7 +6825,7 @@ MonoBehaviour:
     BindingMode: 3
     PositionDamping: {x: 0, y: 0, z: 0}
     AngularDampingMode: 0
-    RotationDamping: {x: 0.5, y: 0.5, z: 4}
+    RotationDamping: {x: 0.5, y: 0.5, z: 2}
     QuaternionDamping: 0.5
   FollowOffset: {x: 0, y: 0.35, z: -0.85}
 --- !u!114 &898042528
@@ -6682,16 +6840,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149bbba50a043f84b9a6e5e5cc0b1182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.BoostCameraShake
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _idleAmplitude: 0
   _boostAmplitude: 0.6
   _boostFrequency: 1.4
   _rampUpSpeed: 8
   _rampDownSpeed: 3
-  _damage: {fileID: 1812182313}
+  _damage: {fileID: 881712671}
   _damageAmplitude: 2.5
   _impulseDecay: 6
-  _hitImpact: {fileID: 1812182315}
+  _hitImpact: {fileID: 881712670}
   _hitAmplitude: 0.5
   _blastAmplitude: 1
   _killAmplitude: 1.6
@@ -6724,7 +6882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df7a45dbe5606e1439d2834b20c62b1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.DebuffFog
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 1812182315}
   _debuff: {fileID: 11400000, guid: 0556abf0ec0087d4093544bb274f5c03, type: 2}
   _fogColor: {r: 0.72, g: 0.75, b: 0.78, a: 1}
   _fogDensity: 0.033
@@ -7069,14 +7227,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1017914244}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 824846410}
   - {fileID: 2083879041}
-  m_Father: {fileID: 1812182287}
+  m_Father: {fileID: 1919053223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1017914246
 MonoBehaviour:
@@ -7090,7 +7248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7e0af3c430c5ef4c99c0d6377e63584, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.AircraftGun
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _muzzles:
   - {fileID: 824846410}
   - {fileID: 2083879041}
@@ -9984,6 +10142,124 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1707024021}
   m_CullTransparentMesh: 1
+--- !u!1 &1708753518
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1708753519}
+  - component: {fileID: 1708753521}
+  - component: {fileID: 1708753520}
+  m_Layer: 0
+  m_Name: BoostEffect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1708753519
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708753518}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.06499958, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 49589782}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!73398921 &1708753520
+VFXRenderer:
+  serializedVersion: 1
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708753518}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+--- !u!2083052967 &1708753521
+VisualEffect:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708753518}
+  m_Enabled: 1
+  m_Asset: {fileID: 8926484042661614526, guid: 11852b555acdfdc42bf578666b93af71, type: 3}
+  m_InitialEventName: OnPlay
+  m_InitialEventNameOverriden: 0
+  m_StartSeed: 0
+  m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
+  m_ResourceVersion: 1
+  m_PropertySheet:
+    m_Float:
+      m_Array: []
+    m_Vector2f:
+      m_Array: []
+    m_Vector3f:
+      m_Array: []
+    m_Vector4f:
+      m_Array: []
+    m_Uint:
+      m_Array: []
+    m_Int:
+      m_Array: []
+    m_Matrix4x4f:
+      m_Array: []
+    m_AnimationCurve:
+      m_Array: []
+    m_Gradient:
+      m_Array: []
+    m_NamedObject:
+      m_Array: []
+    m_Bool:
+      m_Array: []
 --- !u!1 &1712817659
 GameObject:
   m_ObjectHideFlags: 0
@@ -10562,29 +10838,14 @@ GameObject:
   - component: {fileID: 1812182287}
   - component: {fileID: 1812182307}
   - component: {fileID: 1812182286}
-  - component: {fileID: 1812182285}
-  - component: {fileID: 1812182292}
-  - component: {fileID: 1812182291}
-  - component: {fileID: 1812182293}
-  - component: {fileID: 1812182294}
-  - component: {fileID: 1812182297}
-  - component: {fileID: 1812182298}
-  - component: {fileID: 1812182299}
-  - component: {fileID: 1812182301}
-  - component: {fileID: 1812182302}
-  - component: {fileID: 1812182303}
-  - component: {fileID: 1812182306}
-  - component: {fileID: 1812182305}
-  - component: {fileID: 1812182304}
-  - component: {fileID: 1812182308}
-  - component: {fileID: 1812182309}
-  - component: {fileID: 1812182310}
-  - component: {fileID: 1812182311}
-  - component: {fileID: 1812182312}
-  - component: {fileID: 1812182313}
-  - component: {fileID: 1812182314}
   - component: {fileID: 1812182315}
-  - component: {fileID: 1812182316}
+  - component: {fileID: 1812182314}
+  - component: {fileID: 1812182313}
+  - component: {fileID: 1812182312}
+  - component: {fileID: 1812182311}
+  - component: {fileID: 1812182310}
+  - component: {fileID: 1812182309}
+  - component: {fileID: 1812182308}
   m_Layer: 10
   m_Name: Flight
   m_TagString: Untagged
@@ -10592,23 +10853,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1812182285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d2221efdeb266d45b90d01616c548ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftController
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
-  _airframe: {fileID: 11400000, guid: 2ba22bcf339a66649b8b2538082452eb, type: 2}
-  _initialParts: []
-  _invertPitch: 1
-  _frozenDebuff: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
 --- !u!54 &1812182286
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10649,250 +10893,15 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2022929754}
-  - {fileID: 2075592591}
-  - {fileID: 1017914245}
-  - {fileID: 189988665}
   - {fileID: 1976869347}
-  - {fileID: 297140800}
-  - {fileID: 1923980050}
+  - {fileID: 1919053223}
+  - {fileID: 1870984622}
+  - {fileID: 1840017526}
+  - {fileID: 881712668}
+  - {fileID: 2022929754}
+  - {fileID: 49589782}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1812182291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5caf17208276a3142ac2d9a214fb0880, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.ImpactDamage
-  _health: {fileID: 1812182292}
-  _impactMask:
-    serializedVersion: 2
-    m_Bits: 2176
-  _minImpactSpeed: 6
-  _lethal: 1
-  _damagePerImpactSpeed: 4
---- !u!114 &1812182292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 666fced05baaf4e49932f28f8a66c274, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.Health
-  _maxHealth: 100
-  _armor: 1
-  _requiredDemolition: 0
-  _deactivateOnDeath: 0
---- !u!114 &1812182293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d566f6912a543e4f9f73a31bd15da72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombBay
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
-  _dropPoint: {fileID: 1812182287}
-  _aircraft: {fileID: 1812182299}
-  _jammedDebuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
-  _loadout:
-  - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
-  - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
-  - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
-  - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
-  _inputTimeout: 1.5
-  _gamepadOpensOnInput: 1
-  _openGuardSeconds: 0.1
---- !u!114 &1812182294
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ee592243c77de9448c9a4369b810ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombImpactPredictor
-  _aircraft: {fileID: 0}
-  _dropPoint: {fileID: 1812182287}
-  _marker: {fileID: 299142187}
-  _markerSurfaceOffset: 0.05
-  _onlyWhenArmed: 1
-  _constantScreenSize: 1
-  _screenHeightFraction: 0.06
-  _worldSizeRange: {x: 1, y: 60}
-  _camera: {fileID: 0}
-  _groundMask:
-    serializedVersion: 2
-    m_Bits: 128
-  _stepSeconds: 0.05
-  _maxFlightTime: 15
-  _castRadius: 0.1
---- !u!114 &1812182297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55cc2e5f73c7fc247add4e44292033a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.BoostFuel
-  _aircraft: {fileID: 1812182299}
---- !u!114 &1812182298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ecec4d1202fe2d84a91f3a64c382122d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.BoostPostFx
-  _aircraft: {fileID: 1812182299}
-  _volume: {fileID: 1701901517}
-  _boostWeight: 1
-  _idleWeight: 0
-  _rampUpSpeed: 9
-  _rampDownSpeed: 3.5
---- !u!114 &1812182299
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ab731d786ea99b42821f9e53f3de065, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRig
---- !u!114 &1812182301
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a31dcd90714a8884eb7cb226c6610bbd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.RepairPostFx
-  _aircraft: {fileID: 1812182299}
-  _volume: {fileID: 656095957}
-  _repairWeight: 1
-  _idleWeight: 0
-  _rampUpSpeed: 5
-  _rampDownSpeed: 2
---- !u!114 &1812182302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ace0dece7528a14cb0aa77d2d123d27, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.DevTools.DamageTester
-  _aircraft: {fileID: 1812182299}
-  _damage: 10
---- !u!114 &1812182303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99b98506affaa0d44918345f13bc2b16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRepair
---- !u!114 &1812182304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36a0cf2acb62a494cbdc4ba174d69297, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponResupply
-  _aircraft: {fileID: 1812182299}
---- !u!114 &1812182305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 412bb8d724c168c47b41d98b969a0db1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.LockOnTargeting
-  _aircraft: {fileID: 1812182299}
-  _boresight: {fileID: 0}
-  _view: {fileID: 0}
-  _targetMask:
-    serializedVersion: 2
-    m_Bits: 2048
-  _screenMargin: 0.05
-  _range: 150
-  _requireLineOfSight: 1
-  _sightBlockers:
-    serializedVersion: 2
-    m_Bits: 128
-  _sightPadding: 0.5
-  _scanInterval: 0.2
-  _acquireSeconds: 0.8
-  _farAcquireMultiplier: 3
-  _forgetSeconds: 2
-  _switchMargin: 0.03
-  _holdSeconds: 0.4
-  _manualHoldSeconds: 2.5
---- !u!114 &1812182306
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40cf9cbe9e3f8ec49b8a3087b7654c82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponBay
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
-  _aircraft: {fileID: 1812182299}
-  _weapons:
-  - {fileID: 1017914246}
-  - {fileID: 189988666}
 --- !u!65 &1812182307
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10923,9 +10932,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13e59e001ca3113449cd7ebd35478a95, type: 3}
+  m_Script: {fileID: 11500000, guid: 5caf17208276a3142ac2d9a214fb0880, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftDebuffs
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.ImpactDamage
+  _health: {fileID: 1812182309}
+  _impactMask:
+    serializedVersion: 2
+    m_Bits: 2176
+  _minImpactSpeed: 6
+  _lethal: 1
+  _damagePerImpactSpeed: 4
 --- !u!114 &1812182309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10935,35 +10951,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1d80baf1297f174384e405e87a130ad, type: 3}
+  m_Script: {fileID: 11500000, guid: 666fced05baaf4e49932f28f8a66c274, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AltitudeFreeze
-  _freezeAltitude: 250
-  _thawMargin: 150
-  _definition: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
-  _chillAltitude: 175
-  _volume: {fileID: 57205300}
-  _fadeOutSpeed: 2
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.Health
+  _maxHealth: 100
+  _armor: 2
+  _requiredDemolition: 0
+  _deactivateOnDeath: 1
 --- !u!114 &1812182310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e40aac6f4f524c34298c62566b02a9de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.CameraRig.DebuffPostFx
-  _aircraft: {fileID: 1812182299}
-  _debuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
-  _volume: {fileID: 1696491828}
-  _activeWeight: 1
-  _idleWeight: 0
-  _rampUpSpeed: 3
-  _rampDownSpeed: 1
---- !u!114 &1812182311
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10975,7 +10970,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 984213f8472838f49abfb7a369e0aefa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftLifecycle
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
+  _input: {fileID: 1812182311}
   _spawnPoint: {fileID: 819950027}
   _restorePhysics: 1
   _tumbleTorque: 4
@@ -10983,6 +10978,20 @@ MonoBehaviour:
   _onlyWhenDead: 0
   _autoRespawn: 1
   _autoRespawnDelay: 2.5
+--- !u!114 &1812182311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812182284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab63e693537c6a068efe152738de4a47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Controls.PilotInput
+  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
+  _mapName: Flight
 --- !u!114 &1812182312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10992,11 +11001,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5c1c9c5dc859c042ade4acab6209a76, type: 3}
+  m_Script: {fileID: 11500000, guid: 13e59e001ca3113449cd7ebd35478a95, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.FlareDispenser
-  _aircraft: {fileID: 1812182299}
-  _dispensePoint: {fileID: 1812182287}
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.AircraftDebuffs
 --- !u!114 &1812182313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11006,14 +11013,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba87f06be0f46414b947ded9a6ee4ba3, type: 3}
+  m_Script: {fileID: 11500000, guid: 55cc2e5f73c7fc247add4e44292033a4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.DamageFeedback
-  _aircraft: {fileID: 1812182299}
-  _hudShake: {fileID: 99851327}
-  _window: 0.2
-  _shakeAtFullLoss: 60
-  _minimumShake: 3
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.BoostFuel
+  _aircraft: {fileID: 1812182315}
 --- !u!114 &1812182314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11023,29 +11026,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d960924ae3b9cbe4f8283255c699f901, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d2221efdeb266d45b90d01616c548ef, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrapplingHook
-  _controls: {fileID: -944628639613478452, guid: 8879ff7a19205764394492375c6eabcd, type: 3}
-  _aircraft: {fileID: 1812182299}
-  _origin: {fileID: 1812182287}
-  _closeRate: 20
-  _pathBend: 0.5
-  _holdRange: 2.5
-  _ignoreCollisionWhileHooked: 1
-  _clearRange: 25
-  _aimAssist: 0.9
-  _turnRate: 720
-  _travelSpeed: 250
-  _biteSeconds: 0.15
-  _duration: 3
-  _cooldown: 1
-  _breakRange: 500
-  _line: {fileID: 297140799}
-  _segments: 16
-  _sag: 0.12
-  _taut: 0.2
-  _trail: 0.55
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftController
+  _input: {fileID: 1812182311}
+  _airframe: {fileID: 11400000, guid: 2ba22bcf339a66649b8b2538082452eb, type: 2}
+  _initialParts: []
+  _invertPitch: 1
+  _frozenDebuff: {fileID: 11400000, guid: c8766de06f6fc4a4691abcd29d708604, type: 2}
 --- !u!114 &1812182315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11055,33 +11043,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812182284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cab44bc844e7a6a42aaeb3c535ccb586, type: 3}
+  m_Script: {fileID: 11500000, guid: 8ab731d786ea99b42821f9e53f3de065, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HitImpact
-  _aircraft: {fileID: 1812182299}
-  _lightWindow: 0.15
-  _blastStopSeconds: 0.05
-  _blastStopScale: 0.15
-  _killStopSeconds: 0.09
-  _killStopScale: 0.05
---- !u!114 &1812182316
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812182284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1dc7bc685b47d9a4ea52f9b48df0792f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.SoftLock
-  _aircraft: {fileID: 1812182299}
-  _targeting: {fileID: 1812182305}
-  _cone: 7
-  _range: 100
-  _assist: 0.6
-  _maxBend: 4
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftRig
 --- !u!1 &1818190744
 GameObject:
   m_ObjectHideFlags: 0
@@ -11219,6 +11183,72 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &1840017525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1840017526}
+  - component: {fileID: 1840017528}
+  - component: {fileID: 1840017527}
+  m_Layer: 10
+  m_Name: Abilities
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1840017526
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840017525}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812182287}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1840017527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840017525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773fcaf72232b7b8ce2957a98fa54f1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AbilityBinder
+  _aircraft: {fileID: 1812182315}
+  _input: {fileID: 1812182311}
+  _bindings:
+  - Action: 0
+    Ability: {fileID: 11400000, guid: 66e3fa6d8b0a5604abab9a94ad27827b, type: 2}
+    Style: 1
+--- !u!114 &1840017528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840017525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 483fa114a5acf078f1962d1384a79fd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Abilities.AbilityRunner
+  _granted:
+  - {fileID: 11400000, guid: 66e3fa6d8b0a5604abab9a94ad27827b, type: 2}
+  _transitions: {fileID: 11400000, guid: e836442525edcc548986f2a0a4b78a39, type: 2}
 --- !u!1 &1840385403
 GameObject:
   m_ObjectHideFlags: 0
@@ -11369,6 +11399,103 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1856517640}
   m_CullTransparentMesh: 1
+--- !u!1 &1870984621
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1870984622}
+  - component: {fileID: 1870984625}
+  - component: {fileID: 1870984624}
+  - component: {fileID: 1870984623}
+  m_Layer: 10
+  m_Name: Stratagem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1870984622
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870984621}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812182287}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1870984623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870984621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ee592243c77de9448c9a4369b810ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombImpactPredictor
+  _aircraft: {fileID: 1812182315}
+  _dropPoint: {fileID: 1812182287}
+  _marker: {fileID: 299142187}
+  _markerSurfaceOffset: 0.05
+  _onlyWhenArmed: 1
+  _constantScreenSize: 1
+  _screenHeightFraction: 0.06
+  _worldSizeRange: {x: 1, y: 60}
+  _camera: {fileID: 330585545}
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _stepSeconds: 0.05
+  _maxFlightTime: 15
+  _castRadius: 0.1
+--- !u!114 &1870984624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870984621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5c1c9c5dc859c042ade4acab6209a76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.FlareDispenser
+  _aircraft: {fileID: 1812182315}
+  _dispensePoint: {fileID: 1812182287}
+--- !u!114 &1870984625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870984621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d566f6912a543e4f9f73a31bd15da72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.StratagemBay
+  _input: {fileID: 1812182311}
+  _dropPoint: {fileID: 1812182287}
+  _aircraft: {fileID: 1812182315}
+  _jammedDebuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
+  _loadout:
+  - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
+  - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
+  _inputTimeout: 1.5
+  _gamepadOpensOnInput: 1
+  _openGuardSeconds: 0.1
 --- !u!4 &1875298262 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -949369033195206985, guid: 6864cf92dc458e14fbbff9538e404532, type: 3}
@@ -11476,6 +11603,156 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1889517887}
   m_CullTransparentMesh: 1
+--- !u!1 &1919053222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1919053223}
+  - component: {fileID: 1919053226}
+  - component: {fileID: 1919053225}
+  - component: {fileID: 1919053224}
+  - component: {fileID: 1919053228}
+  - component: {fileID: 1919053227}
+  m_Layer: 10
+  m_Name: Weapons
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1919053223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1017914245}
+  - {fileID: 189988665}
+  m_Father: {fileID: 1812182287}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1919053224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc7bc685b47d9a4ea52f9b48df0792f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.SoftLock
+  _aircraft: {fileID: 1812182315}
+  _targeting: {fileID: 1919053225}
+  _cone: 7
+  _range: 150
+  _assist: 0.4
+  _maxBend: 4
+--- !u!114 &1919053225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 412bb8d724c168c47b41d98b969a0db1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.LockOnTargeting
+  _aircraft: {fileID: 1812182315}
+  _boresight: {fileID: 1812182287}
+  _view: {fileID: 330585545}
+  _targetMask:
+    serializedVersion: 2
+    m_Bits: 2048
+  _screenMargin: 0.05
+  _range: 150
+  _requireLineOfSight: 1
+  _sightBlockers:
+    serializedVersion: 2
+    m_Bits: 128
+  _sightPadding: 0.5
+  _scanInterval: 0.15
+  _acquireSeconds: 0.8
+  _farAcquireMultiplier: 3
+  _forgetSeconds: 2
+  _switchMargin: 3
+  _holdSeconds: 0.4
+  _manualHoldSeconds: 2.5
+--- !u!114 &1919053226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40cf9cbe9e3f8ec49b8a3087b7654c82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponBay
+  _input: {fileID: 1812182311}
+  _aircraft: {fileID: 1812182315}
+  _weapons:
+  - {fileID: 1017914246}
+  - {fileID: 189988666}
+--- !u!114 &1919053227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a0cf2acb62a494cbdc4ba174d69297, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponResupply
+  _aircraft: {fileID: 1812182315}
+--- !u!114 &1919053228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d960924ae3b9cbe4f8283255c699f901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrapplingHook
+  _input: {fileID: 1812182311}
+  _aircraft: {fileID: 1812182315}
+  _origin: {fileID: 1812182287}
+  _closeRate: 20
+  _pathBend: 0.9
+  _holdRange: 3
+  _ignoreCollisionWhileHooked: 1
+  _clearRange: 25
+  _aimAssist: 0.9
+  _turnRate: 360
+  _travelSpeed: 200
+  _biteSeconds: 0.25
+  _duration: 3
+  _cooldown: 5
+  _breakRange: 500
+  _line: {fileID: 297140799}
+  _segments: 16
+  _sag: 0.12
+  _taut: 0.2
+  _trail: 0.55
 --- !u!1 &1923980047
 GameObject:
   m_ObjectHideFlags: 0
@@ -11588,11 +11865,11 @@ Transform:
   m_GameObject: {fileID: 1923980047}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.086, y: 0.122, z: -0.048}
+  m_LocalPosition: {x: -0.086, y: 0.12199974, z: -0.04799986}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1812182287}
+  m_Father: {fileID: 49589782}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1926917758
 GameObject:
@@ -11939,7 +12216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd1467d2e3f6c964280dfa79b0d20186, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.EngineAudio
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _cruise: {fileID: 212017416}
   _boost: {fileID: 2140962959}
   _boostIgnition: {fileID: 645464329}
@@ -11961,7 +12238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70df00aacfbd6d340b44deceb4fff311, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.WeaponAudio
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _gunLoop: {fileID: 807098815}
   _source: {fileID: 478951797}
   _missile: {fileID: 0}
@@ -11983,7 +12260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77ac5e1f7fa791c4b854bc636aa7158c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.BoostAudio
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _source: {fileID: 2140962959}
   _low: {fileID: 8300000, guid: 9729b4cb11d58d64aa65a4781d8df3d4, type: 3}
   _denied: {fileID: 8300000, guid: 558ec8d9cebb1514697140651368aa13, type: 3}
@@ -12002,8 +12279,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 584db31b9be8f5a429fc51cceb1701d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.DamageAudio
-  _aircraft: {fileID: 1812182299}
-  _feedback: {fileID: 1812182313}
+  _aircraft: {fileID: 0}
+  _feedback: {fileID: 0}
   _source: {fileID: 31974038}
   _hit: {fileID: 8300000, guid: b1614c36717a4494a9e11b5ebd56bd7d, type: 3}
   _destroyed: {fileID: 8300000, guid: 50dbe5d57e1227841b6d55ac43ee2a72, type: 3}
@@ -12023,7 +12300,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a79fe4f3c8bc846ad68a0ca5a2884f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.CommandAudio
-  _aircraft: {fileID: 1812182299}
+  _aircraft: {fileID: 0}
   _source: {fileID: 1227013278}
   _arrow: {fileID: 8300000, guid: 80fc38396d572c4459ead0f628f94bb6, type: 3}
   _accepted: {fileID: 8300000, guid: ccc6189ca2fabab4f97e8ea00fced062, type: 3}
@@ -12043,8 +12320,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c98079b0b79ae948869f89996ad15fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.GrappleAudio
-  _aircraft: {fileID: 1812182299}
-  _hook: {fileID: 1812182314}
+  _aircraft: {fileID: 0}
+  _hook: {fileID: 0}
   _source: {fileID: 829220200}
   _fire: {fileID: 8300000, guid: b43f11083fe8f18479779041c3927685, type: 3}
   _arrive: {fileID: 8300000, guid: 94b04a79e94a8fd4d9302c96ee706b41, type: 3}
@@ -12107,7 +12384,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2035002040}
-  - component: {fileID: 2035002039}
   m_Layer: 0
   m_Name: Hitstop
   m_TagString: Untagged
@@ -12115,20 +12391,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2035002039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2035002038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80c45c7e9e39e4d4395f6bf237f406fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.HitStop
-  _baseFixedDeltaTime: 0
-  _remaining: 0
 --- !u!4 &2035002040
 Transform:
   m_ObjectHideFlags: 0
@@ -12470,12 +12732,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2075592590}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1812182287}
+  m_Father: {fileID: 49589782}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2075592592
 MonoBehaviour:

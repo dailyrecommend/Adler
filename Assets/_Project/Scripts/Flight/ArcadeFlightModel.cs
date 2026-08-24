@@ -1,4 +1,5 @@
 using System;
+using Adler.Abilities;
 using Adler.Aircraft;
 using Adler.Core;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace Adler.Flight
     /// 아케이드 비행 게임에서 지형 충돌은 대개 격추 처리이므로 의도된 동작이다.
     /// </para>
     /// </summary>
-    public sealed class ArcadeFlightModel : IFlightModel
+    public sealed class ArcadeFlightModel : IFlightModel, IMovementDriver
     {
         private readonly AircraftStatSheet _stats;
         private Rigidbody _body;
@@ -40,6 +41,9 @@ namespace Adler.Flight
 
         // 세상에 견준 이번 스텝의 시간 배율. 내놓는 속도에 곱해 이 기체만 늦춘다.
         private float _relative = 1f;
+
+        // 매 스텝 넘겨받은 시계. 행동 쪽이 이 기체의 시간을 물어볼 때 답한다.
+        private Clock _clock;
 
         // 이번 스텝에 걸린 외부 견인. 쓰고 나면 비운다.
         private Tether _tether = Tether.None;
@@ -75,6 +79,15 @@ namespace Adler.Flight
 
         /// <inheritdoc />
         public void SetTether(in Tether tether) => _tether = tether;
+
+        /// <inheritdoc />
+        Transform IMovementDriver.Body => _body != null ? _body.transform : null;
+
+        /// <summary>이 기체가 사는 시계. 매 스텝 넘겨받은 것을 들고 있는다.</summary>
+        Clock IMovementDriver.Clock => _clock;
+
+        /// <inheritdoc />
+        void IMovementDriver.Pull(in Tether tether) => SetTether(in tether);
 
         /// <summary>
         /// 조종과 추력을 끊거나 되돌린다.
@@ -160,6 +173,7 @@ namespace Adler.Flight
         {
             float deltaTime = clock.FixedDelta;
             _relative = clock.Relative;
+            _clock = clock;
 
             if (_body == null)
             {

@@ -7,6 +7,22 @@ using UnityEngine;
 
 namespace Adler.Weapons
 {
+    /// <summary>줄 한 번이 거치는 단계.</summary>
+    public enum GrapplePhase
+    {
+        /// <summary>걸린 것이 없다.</summary>
+        Idle,
+
+        /// <summary>갈고리가 표적을 향해 날아가는 중.</summary>
+        Flying,
+
+        /// <summary>물렸지만 줄이 아직 늘어져 있다.</summary>
+        Biting,
+
+        /// <summary>줄이 팽팽해져 끌려가는 중.</summary>
+        Pulling,
+    }
+
     /// <summary>
     /// 조준한 적에게 줄을 걸어 매달린다. 따라가기와 맞추기를 함께 돕는다.
     /// <para>
@@ -28,21 +44,6 @@ namespace Adler.Weapons
         /// 늦다 — 이 정도가 눈에는 줄이 채이는 것으로 보인다.
         /// </summary>
         private const float SlackResponse = 14f;
-
-        /// <summary>줄 한 번이 거치는 단계.</summary>
-        private enum Phase
-        {
-            Idle,
-
-            /// <summary>갈고리가 표적을 향해 날아가는 중.</summary>
-            Flying,
-
-            /// <summary>물렸지만 줄이 아직 늘어져 있다.</summary>
-            Biting,
-
-            /// <summary>줄이 팽팽해져 끌려가는 중.</summary>
-            Pulling,
-        }
 
         [Header("참조")]
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
@@ -179,13 +180,10 @@ namespace Adler.Weapons
         private float _remaining;
         private float _cooldownRemaining;
 
-        private Phase _phase = Phase.Idle;
+        private readonly StateMachine<GrapplePhase> _phase = new(GrapplePhase.Idle);
 
         // 날아가는 갈고리 끝의 월드 좌표. 물리기 전까지만 뜻이 있다.
         private Vector3 _tip;
-
-        // 물린 뒤 당기기 시작할 때까지 남은 시간.
-        private float _biteRemaining;
 
         // 지금 줄이 얼마나 늘어져 있는지 (0~1). 팽팽해지는 것을 눈에 보이게 하려고
         // 곧바로 바꾸지 않고 따라가게 둔다.
@@ -200,32 +198,24 @@ namespace Adler.Weapons
         private readonly List<Collider> _myColliders = new();
         private readonly List<Collider> _theirColliders = new();
 
-        /// <summary>갈고리가 날아가기 시작할 때.</summary>
-        public event Action<Transform> Fired;
-
-        /// <summary>갈고리가 표적에 닿아 물렸을 때. 아직 끌지는 않는다.</summary>
-        public event Action<Transform> Arrived;
-
-        /// <summary>줄이 팽팽해져 끌기 시작할 때.</summary>
-        public event Action<Transform> PullStarted;
-
-        /// <summary>줄이 끊어질 때. 날아가는 중에 놓친 경우도 포함한다.</summary>
-        public event Action Released;
-
         /// <summary>쏘아둔 표적. 날아가는 중에도 들어 있다. 없으면 null.</summary>
         public Transform Hooked => _hooked;
 
-        /// <summary>갈고리가 날아가는 중.</summary>
-        public bool IsFlying => _phase == Phase.Flying;
+        /// <summary>지금 어느 단계인지. 소리와 화면이 이것 하나만 보면 된다.</summary>
+        public GrapplePhase Phase => _phase.Current;
 
-        /// <summary>물렸지만 아직 당기기 전.</summary>
-        public bool IsBiting => _phase == Phase.Biting;
+        /// <summary>지금 단계에 머문 시간(초).</summary>
+        public float PhaseElapsed => _phase.Elapsed;
 
-        /// <summary>줄이 감기며 끌려가는 중.</summary>
-        public bool IsPulling => _phase == Phase.Pulling;
+        /// <summary>단계가 바뀔 때. (떠난 단계, 들어선 단계)</summary>
+        public event Action<GrapplePhase, GrapplePhase> PhaseChanged
+        {
+            add => _phase.Changed += value;
+            remove => _phase.Changed -= value;
+        }
 
         /// <summary>표적에 물려 있다. 버티는 중이든 끌리는 중이든.</summary>
-        public bool IsAttached => _phase is Phase.Biting or Phase.Pulling;
+        public bool IsAttached => Phase is GrapplePhase.Biting or GrapplePhase.Pulling;
 
         /// <summary>남은 유지 시간(초). 물리기 전에는 0이다.</summary>
         public float Remaining => _remaining;
@@ -265,7 +255,6 @@ namespace Adler.Weapons
             ShowLine(false);
         }
 
-
         private void OnDisable()
         {
             Release();
@@ -278,6 +267,8 @@ namespace Adler.Weapons
 
         private void Update()
         {
+            _phase.Advance(_clock.Delta);
+
             if (_cooldownRemaining > 0f)
             {
                 _cooldownRemaining -= _clock.Delta;
@@ -304,7 +295,7 @@ namespace Adler.Weapons
         {
             // 끌기 시작한 뒤에만 당긴다. 날아가는 동안 당기면 갈고리보다 기체가 먼저
             // 도착하고, 물자마자 당기면 늘어졌다 팽팽해지는 사이가 사라진다.
-            if (_phase != Phase.Pulling)
+            if (!_phase.Is(GrapplePhase.Pulling))
             {
                 return;
             }
@@ -372,7 +363,7 @@ namespace Adler.Weapons
             _hookedBody = _hooked.GetComponentInParent<Rigidbody>();
             _remaining = 0f;
 
-            _phase = Phase.Flying;
+            _phase.Set(GrapplePhase.Flying);
             _tip = _origin.position;
 
             // 늘어진 채로 시작한다. 지난번에 팽팽했던 값이 남아 있으면 던지자마자
@@ -381,20 +372,20 @@ namespace Adler.Weapons
 
             // 통과 처리와 유지 시간은 물릴 때 시작한다. 여기서 켜면 날아가는 동안
             // 상대를 그냥 뚫고 지나가고, 유지 시간도 날아가는 몫만큼 깎여 나간다.
-            Fired?.Invoke(_hooked);
+
         }
 
         /// <summary>갈고리가 표적에 닿았다. 물기만 하고 아직 당기지 않는다.</summary>
         private void Bite()
         {
-            _phase = Phase.Biting;
-            _biteRemaining = _biteSeconds;
+            _phase.Set(GrapplePhase.Biting);
             _remaining = _duration;
 
             SetCollisionIgnored(true);
-            Arrived?.Invoke(_hooked);
 
-            if (_biteRemaining <= 0f)
+            // 뜸이 0이면 물자마자 당긴다. 다음 프레임을 기다리면 그 한 프레임 동안
+            // 물렸는데도 끌려가지 않는 상태가 생긴다.
+            if (_biteSeconds <= 0f)
             {
                 Pull();
             }
@@ -403,10 +394,8 @@ namespace Adler.Weapons
         /// <summary>줄이 팽팽해졌다. 여기서부터 끌려간다.</summary>
         private void Pull()
         {
-            _phase = Phase.Pulling;
-            _biteRemaining = 0f;
+            _phase.Set(GrapplePhase.Pulling);
 
-            PullStarted?.Invoke(_hooked);
         }
 
         /// <summary>줄이 아직 유효한지 본다. 실제 견인은 물리 스텝에서 넣는다.</summary>
@@ -427,7 +416,7 @@ namespace Adler.Weapons
 
             // 날아가는 동안에도 사거리는 본다. 쏘자마자 상대가 달아나면 갈고리가
             // 허공에서 물리는 셈이 되는데, 그건 걸린 것이 아니라 빗나간 것이다.
-            if (_phase == Phase.Flying)
+            if (_phase.Is(GrapplePhase.Flying))
             {
                 if (distance > _breakRange)
                 {
@@ -447,11 +436,12 @@ namespace Adler.Weapons
                 return;
             }
 
-            if (_phase == Phase.Biting)
+            if (_phase.Is(GrapplePhase.Biting))
             {
-                _biteRemaining -= _clock.Delta;
+                // 머문 시간은 상태기계가 센다. 상태마다 남은 시간을 따로 담아두면
+                // 옮겨갈 때 그것을 되돌리는 일을 잊을 수 있다.
 
-                if (_biteRemaining <= 0f)
+                if (_phase.Elapsed >= _biteSeconds)
                 {
                     Pull();
                 }
@@ -511,11 +501,9 @@ namespace Adler.Weapons
             _hooked = null;
             _hookedBody = null;
             _remaining = 0f;
-            _biteRemaining = 0f;
-            _phase = Phase.Idle;
+            _phase.Set(GrapplePhase.Idle);
             _cooldownRemaining = _cooldown;
 
-            Released?.Invoke();
         }
 
         /// <summary>
@@ -643,9 +631,9 @@ namespace Adler.Weapons
             }
 
             Vector3 start = _origin.position;
-            Vector3 end = _phase == Phase.Flying ? _tip : _hooked.position;
+            Vector3 end = _phase.Is(GrapplePhase.Flying) ? _tip : _hooked.position;
 
-            float wanted = _phase == Phase.Pulling ? _taut : 1f;
+            float wanted = _phase.Is(GrapplePhase.Pulling) ? _taut : 1f;
             _slack = Mathf.Lerp(_slack, wanted, 1f - Mathf.Exp(-SlackResponse * _clock.Delta));
 
             Vector3 middle = Vector3.Lerp(start, end, 0.5f)

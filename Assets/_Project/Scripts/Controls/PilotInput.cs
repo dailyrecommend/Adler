@@ -32,14 +32,8 @@ namespace Adler.Controls
 
         private InputAction _pitch;
         private InputAction _roll;
-        private InputAction _boost;
-        private InputAction _fire;
-        private InputAction _switchWeapon;
-        private InputAction _switchTarget;
-        private InputAction _grapple;
-        private InputAction _respawn;
-        private InputAction _drop;
-        private InputAction _toggleCommands;
+        // 조작 이름표로 찾는다. 이름별 속성은 읽기 좋으라고 그 위에 얹어둔 것이다.
+        private readonly InputAction[] _actions = new InputAction[8];
         private readonly InputAction[] _commands = new InputAction[4];
 
         private IControlSuppressor[] _suppressors;
@@ -51,22 +45,22 @@ namespace Adler.Controls
         public float Roll => Stick(_roll);
 
         /// <summary>부스터를 누르고 있는가.</summary>
-        public bool Boost => _boost != null && _boost.IsPressed();
+        public bool Boost => IsHeld(PilotAction.Boost);
 
         /// <summary>방아쇠를 당기고 있는가.</summary>
-        public bool Fire => _fire != null && _fire.IsPressed();
+        public bool Fire => IsHeld(PilotAction.Fire);
 
-        public bool SwitchWeaponPressed => Pressed(_switchWeapon);
+        public bool SwitchWeaponPressed => WasPressed(PilotAction.SwitchWeapon);
 
-        public bool SwitchTargetPressed => Pressed(_switchTarget);
+        public bool SwitchTargetPressed => WasPressed(PilotAction.SwitchTarget);
 
-        public bool GrapplePressed => Pressed(_grapple);
+        public bool GrapplePressed => WasPressed(PilotAction.Grapple);
 
-        public bool RespawnPressed => Pressed(_respawn);
+        public bool RespawnPressed => WasPressed(PilotAction.Respawn);
 
-        public bool DropPressed => Pressed(_drop);
+        public bool DropPressed => WasPressed(PilotAction.DropBomb);
 
-        public bool ToggleCommandsPressed => Pressed(_toggleCommands);
+        public bool ToggleCommandsPressed => WasPressed(PilotAction.ToggleCommands);
 
         /// <summary>이번 프레임에 이 방향이 눌렸는가.</summary>
         public bool CommandPressed(CommandDirection direction) => Pressed(_commands[(int)direction]);
@@ -115,14 +109,14 @@ namespace Adler.Controls
 
             _pitch = _map.FindAction("Pitch", throwIfNotFound: true);
             _roll = _map.FindAction("Roll", throwIfNotFound: true);
-            _boost = _map.FindAction("Boost", throwIfNotFound: true);
-            _fire = _map.FindAction("Fire", throwIfNotFound: true);
-            _switchWeapon = _map.FindAction("SwitchWeapon", throwIfNotFound: true);
-            _switchTarget = _map.FindAction("SwitchTarget", throwIfNotFound: true);
-            _grapple = _map.FindAction("Grapple", throwIfNotFound: true);
-            _respawn = _map.FindAction("Respawn", throwIfNotFound: true);
-            _drop = _map.FindAction("DropBomb", throwIfNotFound: true);
-            _toggleCommands = _map.FindAction("ToggleCommands", throwIfNotFound: true);
+            _actions[(int)PilotAction.Boost] = _map.FindAction("Boost", throwIfNotFound: true);
+            _actions[(int)PilotAction.Fire] = _map.FindAction("Fire", throwIfNotFound: true);
+            _actions[(int)PilotAction.SwitchWeapon] = _map.FindAction("SwitchWeapon", throwIfNotFound: true);
+            _actions[(int)PilotAction.SwitchTarget] = _map.FindAction("SwitchTarget", throwIfNotFound: true);
+            _actions[(int)PilotAction.Grapple] = _map.FindAction("Grapple", throwIfNotFound: true);
+            _actions[(int)PilotAction.Respawn] = _map.FindAction("Respawn", throwIfNotFound: true);
+            _actions[(int)PilotAction.DropBomb] = _map.FindAction("DropBomb", throwIfNotFound: true);
+            _actions[(int)PilotAction.ToggleCommands] = _map.FindAction("ToggleCommands", throwIfNotFound: true);
 
             _commands[(int)CommandDirection.Up] = _map.FindAction("CommandUp", throwIfNotFound: true);
             _commands[(int)CommandDirection.Down] = _map.FindAction("CommandDown", throwIfNotFound: true);
@@ -133,6 +127,12 @@ namespace Adler.Controls
         }
 
         private void OnDisable() => _map?.Disable();
+
+        /// <summary>이 조작을 누르고 있는가.</summary>
+        public bool IsHeld(PilotAction action) => _actions[(int)action]?.IsPressed() == true;
+
+        /// <summary>이번 프레임에 이 조작이 눌렸는가.</summary>
+        public bool WasPressed(PilotAction action) => Pressed(_actions[(int)action]);
 
         private static bool Pressed(InputAction action)
             => action != null && action.WasPressedThisFrame();

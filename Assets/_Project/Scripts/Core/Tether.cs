@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Adler.Flight
+namespace Adler.Core
 {
     /// <summary>
     /// 밖에서 기체를 표적 쪽으로 끌어당기는 힘. 그래플이 매 물리 스텝 넣는다.

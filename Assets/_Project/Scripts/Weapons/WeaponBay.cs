@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Adler.Abilities;
 using Adler.Controls;
-using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -19,7 +19,7 @@ namespace Adler.Weapons
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class WeaponBay : MonoBehaviour
+    public sealed class WeaponBay : MonoBehaviour, IWeaponHost
     {
         [Header("참조")]
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
@@ -40,16 +40,23 @@ namespace Adler.Weapons
         public event Action<AircraftWeapon> WeaponChanged;
 
         /// <summary>지금 손에 든 무기. 하나도 없으면 null.</summary>
+        /// <summary>지금 손에 든 무기가 쏠 수 있는 상태인지. 행동 쪽이 물어본다.</summary>
+        public bool CanFire => Active != null && Active.CanFire;
+
+        /// <inheritdoc />
+        public void HoldTrigger(float deltaTime) => Active?.HoldTrigger(deltaTime);
+
+        /// <inheritdoc />
+        public void ReleaseTrigger() => Active?.ReleaseTrigger();
+
         public AircraftWeapon Active =>
             _weapons.Count > 0 ? _weapons[Mathf.Clamp(_activeIndex, 0, _weapons.Count - 1)] : null;
 
         public IReadOnlyList<AircraftWeapon> Weapons => _weapons;
 
-        private Clock _clock;
 
         private void Awake()
         {
-            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_weapons.Count == 0 && _aircraft != null)
@@ -112,20 +119,8 @@ namespace Adler.Weapons
                 _targeting.CycleTarget();
             }
 
-            AircraftWeapon weapon = Active;
-            if (weapon == null)
-            {
-                return;
-            }
-
-            if (_input.Fire)
-            {
-                weapon.HoldTrigger(_clock.Delta);
-            }
-            else
-            {
-                weapon.ReleaseTrigger();
-            }
+            // 방아쇠는 행동 쪽이 당긴다. 여기서 함께 읽으면 같은 무기를 두 곳이
+            // 몰게 되어, 어느 쪽이 쏘고 있는지 알 수 없다.
         }
 
         /// <summary>다음 무기로 넘어간다.</summary>

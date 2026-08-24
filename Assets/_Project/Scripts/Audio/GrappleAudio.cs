@@ -113,18 +113,12 @@ namespace Adler.Audio
 
         private void OnEnable()
         {
-            _hook.Fired += OnFired;
-            _hook.Arrived += OnArrived;
-            _hook.PullStarted += OnPullStarted;
-            _hook.Released += OnReleased;
+            _hook.PhaseChanged += OnPhaseChanged;
         }
 
         private void OnDisable()
         {
-            _hook.Fired -= OnFired;
-            _hook.Arrived -= OnArrived;
-            _hook.PullStarted -= OnPullStarted;
-            _hook.Released -= OnReleased;
+            _hook.PhaseChanged -= OnPhaseChanged;
 
             if (_sustained != null)
             {
@@ -135,13 +129,35 @@ namespace Adler.Audio
             _playing = Sustain.None;
         }
 
-        private void OnFired(Transform target) => Play(_fire);
+        /// <summary>
+        /// 단계가 바뀌는 순간 그 자리에 맞는 소리를 낸다.
+        /// <para>
+        /// 신호를 넷 받아 각각 대응하지 않고 단계 하나만 본다. 신호가 늘 때마다 잇는
+        /// 줄이 늘고, 어느 신호가 어느 순서로 오는지는 여기서 알 수 없어서 소리가
+        /// 겹치거나 빠지는 것을 짐작으로만 막게 된다. 단계는 하나뿐이라 그럴 자리가 없다.
+        /// </para>
+        /// </summary>
+        private void OnPhaseChanged(GrapplePhase from, GrapplePhase to)
+        {
+            switch (to)
+            {
+                case GrapplePhase.Flying:
+                    Play(_fire);
+                    break;
 
-        private void OnArrived(Transform target) => Play(_arrive);
+                case GrapplePhase.Biting:
+                    Play(_arrive);
+                    break;
 
-        private void OnPullStarted(Transform target) => Play(_pull);
+                case GrapplePhase.Pulling:
+                    Play(_pull);
+                    break;
 
-        private void OnReleased() => Play(_release);
+                case GrapplePhase.Idle:
+                    Play(_release);
+                    break;
+            }
+        }
 
         private void Play(AudioClip clip)
         {
@@ -170,8 +186,8 @@ namespace Adler.Audio
                 return;
             }
 
-            Sustain wanted = _hook.IsPulling ? Sustain.Reel
-                : _hook.IsFlying ? Sustain.Flight
+            Sustain wanted = _hook.Phase == GrapplePhase.Pulling ? Sustain.Reel
+                : _hook.Phase == GrapplePhase.Flying ? Sustain.Flight
                 : Sustain.None;
 
             if (wanted != _playing)

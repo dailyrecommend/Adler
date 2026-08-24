@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Adler.Abilities;
 using Adler.Combat;
 using Adler.Core;
 using Adler.Flight;
@@ -32,7 +33,7 @@ namespace Adler.Weapons
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class LockOnTargeting : MonoBehaviour
+    public sealed class LockOnTargeting : MonoBehaviour, ITargetSource
     {
         /// <summary>
         /// 화면에 표시할 표적 하나의 이번 프레임 상태.
@@ -188,6 +189,9 @@ namespace Adler.Weapons
 
         /// <summary>잡은 것이 있으면 곧 걸린 것이다. 잡히는 데는 시간이 들지 않는다.</summary>
         public bool HasLock => _target != null;
+
+        /// <inheritdoc />
+        bool ITargetSource.HasTarget => HasLock;
 
         /// <summary>조준 진행도. 잡히는 데 시간이 들지 않으므로 0 아니면 1이다.</summary>
         public float Progress => HasLock ? 1f : 0f;
