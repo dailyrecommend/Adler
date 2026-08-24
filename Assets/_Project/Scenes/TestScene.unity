@@ -10978,7 +10978,7 @@ MonoBehaviour:
   _maxHealth: 100
   _armor: 2
   _requiredDemolition: 0
-  _deactivateOnDeath: 1
+  _deactivateOnDeath: 0
 --- !u!114 &1812182310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12237,7 +12237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd1467d2e3f6c964280dfa79b0d20186, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.EngineAudio
-  _aircraft: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
   _cruise: {fileID: 212017416}
   _boost: {fileID: 2140962959}
   _boostIgnition: {fileID: 645464329}
@@ -12259,7 +12259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70df00aacfbd6d340b44deceb4fff311, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.WeaponAudio
-  _aircraft: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
   _gunLoop: {fileID: 807098815}
   _source: {fileID: 478951797}
   _missile: {fileID: 0}
@@ -12281,7 +12281,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77ac5e1f7fa791c4b854bc636aa7158c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.BoostAudio
-  _aircraft: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
   _source: {fileID: 2140962959}
   _low: {fileID: 8300000, guid: 9729b4cb11d58d64aa65a4781d8df3d4, type: 3}
   _denied: {fileID: 8300000, guid: 558ec8d9cebb1514697140651368aa13, type: 3}
@@ -12300,8 +12300,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 584db31b9be8f5a429fc51cceb1701d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.DamageAudio
-  _aircraft: {fileID: 0}
-  _feedback: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
+  _feedback: {fileID: 881712671}
   _source: {fileID: 31974038}
   _hit: {fileID: 8300000, guid: b1614c36717a4494a9e11b5ebd56bd7d, type: 3}
   _destroyed: {fileID: 8300000, guid: 50dbe5d57e1227841b6d55ac43ee2a72, type: 3}
@@ -12321,7 +12321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a79fe4f3c8bc846ad68a0ca5a2884f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.CommandAudio
-  _aircraft: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
   _source: {fileID: 1227013278}
   _arrow: {fileID: 8300000, guid: 80fc38396d572c4459ead0f628f94bb6, type: 3}
   _accepted: {fileID: 8300000, guid: ccc6189ca2fabab4f97e8ea00fced062, type: 3}
@@ -12341,8 +12341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c98079b0b79ae948869f89996ad15fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.GrappleAudio
-  _aircraft: {fileID: 0}
-  _hook: {fileID: 0}
+  _aircraft: {fileID: 1812182315}
+  _hook: {fileID: 1919053228}
   _source: {fileID: 829220200}
   _fire: {fileID: 8300000, guid: b43f11083fe8f18479779041c3927685, type: 3}
   _arrive: {fileID: 8300000, guid: 94b04a79e94a8fd4d9302c96ee706b41, type: 3}
