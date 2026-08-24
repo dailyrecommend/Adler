@@ -29,9 +29,9 @@ namespace Adler.CameraRig
         [Tooltip("최고 속도에서 기준 화각에 더해지는 각도.")]
         [SerializeField] private float _fieldOfViewGain = 18f;
 
-        [Tooltip("기체의 부스터 속도를 기준으로 삼는다.\n" +
-                 "정비로 부스터 성능이 바뀌어도 연출이 따라가므로 대개 켜두면 된다.")]
-        [SerializeField] private bool _useBoostSpeedAsReference = true;
+        [Tooltip("기체가 낼 수 있는 가장 빠른 속도를 기준으로 삼는다.\n" +
+                 "정비로 성능이 바뀌어도 연출이 따라가므로 대개 켜두면 된다.")]
+        [SerializeField] private bool _useTopSpeedAsReference = true;
 
         [Tooltip("기준 속도를 직접 지정할 때 쓴다 (m/s). 위 항목을 끄면 이 값이 쓰인다.")]
         [SerializeField] private float _maxSpeed = 32f;
@@ -107,13 +107,13 @@ namespace Adler.CameraRig
 
         private float ResolveMaxSpeed()
         {
-            if (!_useBoostSpeedAsReference && _maxSpeed > 0f)
+            if (!_useTopSpeedAsReference && _maxSpeed > 0f)
             {
                 return _maxSpeed;
             }
 
             // Stats는 AircraftController.Awake에서 만들어지므로 첫 프레임에는 비어 있을 수 있다.
-            return _aircraft.Stats != null ? _aircraft.Stats.BoostSpeed : 0f;
+            return _aircraft.Stats != null ? _aircraft.Stats.TopSpeed : 0f;
         }
 
         /// <summary>확장 하나가 여러 카메라에 붙을 수 있으므로 보간 상태는 카메라별로 갖는다.</summary>

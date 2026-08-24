@@ -1,15 +1,15 @@
 using System;
 using Adler.Combat;
-using Adler.Weapons;
+using Adler.Flight;
 using UnityEngine;
 
-namespace Adler.Flight
+namespace Adler.Weapons
 {
     /// <summary>
     /// 수리 요청이 승인되면 정해진 시간에 걸쳐 내구도를 채운다.
     /// <para>
     /// 재보급이 승인과 동시에 끝나는 것과 달리 수리는 지속된다. 그래서 스트라타젬 쪽에
-    /// 두지 않고 기체가 들고 있는다 — 채우는 동안 기체가 죽거나 맞을 수 있고, 그 판단은
+    /// 두지 않고 따로 들고 있는다 — 채우는 동안 기체가 죽거나 맞을 수 있고, 그 판단은
     /// 기체의 상태를 아는 쪽에서 해야 한다.
     /// </para>
     /// </summary>

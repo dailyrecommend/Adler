@@ -25,23 +25,17 @@ namespace Adler.Aircraft
         [Tooltip("기동성이 100%가 되는 기준 속도.")]
         public float CruiseSpeed = 12f;
 
-        [Tooltip("스로틀 최대일 때의 속도.")]
-        public float MaxSpeed = 20f;
-
-        [Tooltip("부스터 사용 시 도달하는 속도.")]
-        public float BoostSpeed = 32f;
+        // 최고 속도는 따로 적어두지 않는다. 스로틀이 없어진 뒤로 기체가 낼 수 있는 가장
+        // 빠른 속도는 순항 속도에 부스터 배율을 곱한 값 하나뿐이라, 그것을 별도 수치로
+        // 두면 실제 속도와 어긋난 채 화면에만 쓰이는 숫자가 된다.
 
         [Header("가감속")]
         public float Acceleration = 8f;
         public float Deceleration = 6f;
 
-        [Tooltip("스로틀 레버가 0에서 1까지 움직이는 속도.")]
-        public float ThrottleResponse = 0.8f;
-
         [Header("선회 속도 (도/초)")]
         public float PitchRate = 70f;
         public float RollRate = 180f;
-        public float YawRate = 40f;
 
         [Header("조종 감각")]
         [Tooltip("입력이 최대치에 도달하는 속도. 낮을수록 기체가 묵직해진다.")]
@@ -101,14 +95,10 @@ namespace Adler.Aircraft
         {
             values[(int)AircraftStat.MinSpeed] = MinSpeed;
             values[(int)AircraftStat.CruiseSpeed] = CruiseSpeed;
-            values[(int)AircraftStat.MaxSpeed] = MaxSpeed;
-            values[(int)AircraftStat.BoostSpeed] = BoostSpeed;
             values[(int)AircraftStat.Acceleration] = Acceleration;
             values[(int)AircraftStat.Deceleration] = Deceleration;
-            values[(int)AircraftStat.ThrottleResponse] = ThrottleResponse;
             values[(int)AircraftStat.PitchRate] = PitchRate;
             values[(int)AircraftStat.RollRate] = RollRate;
-            values[(int)AircraftStat.YawRate] = YawRate;
             values[(int)AircraftStat.ControlResponse] = ControlResponse;
             values[(int)AircraftStat.LowSpeedAgility] = LowSpeedAgility;
             values[(int)AircraftStat.BankTurnRate] = BankTurnRate;

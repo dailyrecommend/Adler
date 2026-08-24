@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Adler.Aircraft;
 using Adler.Combat;
-using Adler.Weapons;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -47,8 +46,8 @@ namespace Adler.Flight
         // 없으면 얼어붙는 일도 없다.
         private AircraftDebuffs _debuffs;
 
-        // 커맨드 창이 열렸는지 알아야 WASD를 조종에서 뗄 수 있다.
-        private StratagemBay _stratagems;
+        // 키보드를 가져간 것이 있는지 알아야 WASD를 조종에서 뗄 수 있다.
+        private IControlSuppressor _suppressor;
 
         private InputActionMap _flightMap;
         private InputAction _pitchAction;
@@ -70,7 +69,7 @@ namespace Adler.Flight
 
             _boostFuel = GetComponent<BoostFuel>();
             _debuffs = GetComponent<AircraftDebuffs>();
-            _stratagems = GetComponent<StratagemBay>();
+            _suppressor = GetComponent<IControlSuppressor>();
 
             if (_airframe == null)
             {
@@ -193,7 +192,7 @@ namespace Adler.Flight
         {
             float value = action.ReadValue<float>();
 
-            if (value == 0f || _stratagems == null || !_stratagems.CommandModeActive)
+            if (value == 0f || _suppressor == null || !_suppressor.SuppressesKeyboard)
             {
                 return value;
             }

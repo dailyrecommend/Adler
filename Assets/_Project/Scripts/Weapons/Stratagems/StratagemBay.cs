@@ -19,7 +19,7 @@ namespace Adler.Weapons
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class StratagemBay : MonoBehaviour, IDebuffSource
+    public sealed class StratagemBay : MonoBehaviour, IDebuffSource, IControlSuppressor
     {
         [Header("참조")]
         [SerializeField] private InputActionAsset _controls;
@@ -78,6 +78,16 @@ namespace Adler.Weapons
         /// 커맨드 입력을 받는 중인지. 꺼져 있으면 방향키가 커맨드로 해석되지 않는다.
         /// </summary>
         public bool CommandModeActive { get; private set; }
+
+        /// <summary>
+        /// 커맨드 창이 열려 있는 동안 키보드 조종을 멈춘다.
+        /// <para>
+        /// WASD가 조종과 커맨드를 함께 맡으므로, 창이 열린 채로 커맨드를 치면 기수가
+        /// 같이 움직인다. 커맨드는 몇 초를 잡아먹는 일이라 그동안 기체가 제멋대로
+        /// 꺾이면, 입력을 마치고 났을 때 어디를 향하고 있을지 알 수 없다.
+        /// </para>
+        /// </summary>
+        public bool SuppressesKeyboard => CommandModeActive;
 
         /// <summary>입력 모드가 켜지고 꺼질 때. 커맨드 창이 구독한다.</summary>
         public event Action<bool> CommandModeChanged;

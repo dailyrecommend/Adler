@@ -15,14 +15,10 @@ MonoBehaviour:
   DisplayName: Tester
   MinSpeed: 10
   CruiseSpeed: 20
-  MaxSpeed: 25
-  BoostSpeed: 40
   Acceleration: 60
   Deceleration: 40
-  ThrottleResponse: 3
   PitchRate: 120
   RollRate: 160
-  YawRate: 40
   ControlResponse: 8
   LowSpeedAgility: 0.85
   BankTurnRate: 60

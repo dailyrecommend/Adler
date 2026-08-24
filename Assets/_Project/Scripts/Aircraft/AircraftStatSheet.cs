@@ -53,20 +53,30 @@ namespace Adler.Aircraft
         // 비행 모델이 매 스텝 읽는 값들. 인덱서보다 읽기 쉬우라고 둔 것이다.
         public float MinSpeed => this[AircraftStat.MinSpeed];
         public float CruiseSpeed => this[AircraftStat.CruiseSpeed];
-        public float MaxSpeed => this[AircraftStat.MaxSpeed];
-        public float BoostSpeed => this[AircraftStat.BoostSpeed];
         public float Acceleration => this[AircraftStat.Acceleration];
         public float Deceleration => this[AircraftStat.Deceleration];
-        public float ThrottleResponse => this[AircraftStat.ThrottleResponse];
         public float PitchRate => this[AircraftStat.PitchRate];
         public float RollRate => this[AircraftStat.RollRate];
-        public float YawRate => this[AircraftStat.YawRate];
         public float ControlResponse => this[AircraftStat.ControlResponse];
         public float LowSpeedAgility => this[AircraftStat.LowSpeedAgility];
         public float BankTurnRate => this[AircraftStat.BankTurnRate];
         public float BoostCapacity => this[AircraftStat.BoostCapacity];
         public float BoostDrain => this[AircraftStat.BoostDrain];
         public float BoostRecharge => this[AircraftStat.BoostRecharge];
+
+        /// <summary>
+        /// 이 기체가 낼 수 있는 가장 빠른 속도. 부스터를 켠 순항 속도다.
+        /// <para>
+        /// 수치로 따로 적어두지 않고 여기서 계산한다. 별도 값으로 두면 부스터 배율을
+        /// 만졌을 때 실제 속도만 바뀌고 그 값은 그대로 남아서, 속도계와 시야각이
+        /// 존재하지 않는 최고 속도를 기준으로 눈금을 그리게 된다.
+        /// </para>
+        /// <para>
+        /// 부품이 순항 속도를 올리면 이쪽도 함께 올라간다 — 배율이 곱해지는 대상이
+        /// 보정을 거친 순항 속도이기 때문이다.
+        /// </para>
+        /// </summary>
+        public float TopSpeed => CruiseSpeed * (_airframe != null ? _airframe.BoostMultiplier : 1f);
 
         // ------------------------------------------------------------------
         // 부품
@@ -220,29 +230,17 @@ namespace Adler.Aircraft
         }
 
         /// <summary>
-        /// 부품을 겹쳐 끼우다 보면 최저 속도가 최고 속도를 넘는 조합이 나온다.
+        /// 부품을 겹쳐 끼우다 보면 최저 속도가 순항 속도를 넘는 조합이 나온다.
         /// 그대로 두면 비행 모델이 목표 속도를 잡지 못하므로 순서를 강제한다.
         /// </summary>
         private void EnforceSpeedOrder()
         {
             int min = (int)AircraftStat.MinSpeed;
             int cruise = (int)AircraftStat.CruiseSpeed;
-            int max = (int)AircraftStat.MaxSpeed;
-            int boost = (int)AircraftStat.BoostSpeed;
 
             if (_values[cruise] < _values[min])
             {
                 _values[cruise] = _values[min];
-            }
-
-            if (_values[max] < _values[cruise])
-            {
-                _values[max] = _values[cruise];
-            }
-
-            if (_values[boost] < _values[max])
-            {
-                _values[boost] = _values[max];
             }
         }
 

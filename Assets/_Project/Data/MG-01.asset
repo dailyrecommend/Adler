@@ -21,7 +21,7 @@ MonoBehaviour:
   Damage: 4
   Penetration: 2
   Demolition: 0
-  MuzzleVelocity: 120
+  MuzzleVelocity: 80
   GravityScale: 0.3
   SpreadDegrees: 0.2
   HitRadius: 1

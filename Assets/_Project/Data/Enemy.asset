@@ -15,14 +15,10 @@ MonoBehaviour:
   DisplayName: Enemy
   MinSpeed: 10
   CruiseSpeed: 20
-  MaxSpeed: 25
-  BoostSpeed: 40
   Acceleration: 45
   Deceleration: 30
-  ThrottleResponse: 3
   PitchRate: 60
   RollRate: 75
-  YawRate: 40
   ControlResponse: 4
   LowSpeedAgility: 0.7
   BankTurnRate: 38

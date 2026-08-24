@@ -49,6 +49,9 @@ namespace Adler.UI
         private Canvas _canvas;
         private readonly List<LockMarkSlot> _slots = new();
 
+        // 지난 프레임에 잡혀 있던 표적. 바뀌는 순간을 잡아 연출을 다시 재생한다.
+        private Transform _locked;
+
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
@@ -90,13 +93,31 @@ namespace Adler.UI
             for (int i = 0; i < marks.Count && shown < _maxMarks; i++)
             {
                 LockOnTargeting.LockMark mark = marks[i];
+                LockMarkSlot slot = SlotAt(shown);
 
-                if (!TryPlace(SlotAt(shown), mark))
+                if (!TryPlace(slot, mark))
                 {
                     continue;
                 }
 
+                // 잡힌 대상이 바뀌었으면 연출을 처음부터 다시 재생한다. 슬롯이 아니라
+                // 표적을 기준으로 견주는 이유는, 슬롯이 표적들 사이를 돌려 쓰이기
+                // 때문이다 — 같은 표적이 다른 슬롯으로 넘어갔을 뿐인데도 새로 잡힌
+                // 것으로 읽히면, 조준점이 흔들리는 동안 연출이 계속 다시 터진다.
+                if (mark.Locked && mark.Target != _locked)
+                {
+                    _locked = mark.Target;
+                    slot.Strike();
+                }
+
                 shown++;
+            }
+
+            // 놓쳤으면 비워둔다. 그러지 않으면 같은 표적을 다시 잡을 때 바뀐 것이
+            // 없다고 보고 연출을 건너뛴다.
+            if (!_targeting.HasLock)
+            {
+                _locked = null;
             }
 
             // 이번에 쓰지 않은 것들은 숨겨만 둔다. 다음 프레임에 다시 필요해진다.

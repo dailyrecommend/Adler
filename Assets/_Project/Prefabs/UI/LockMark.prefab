@@ -129,8 +129,11 @@ MonoBehaviour:
   _locked: {fileID: 4265922782635932675}
   _standbyColor: {r: 0, g: 1, b: 0.23493981, a: 1}
   _lockedColor: {r: 1, g: 0.0637255, b: 0, a: 1}
-  _startScale: 2.5
-  _spin: 360
+  _standbyStartScale: 2.5
+  _standbySpin: 180
+  _lockSeconds: 0.2
+  _lockStartScale: 8
+  _lockSpin: -120
 --- !u!1 &3056434944510868257
 GameObject:
   m_ObjectHideFlags: 0

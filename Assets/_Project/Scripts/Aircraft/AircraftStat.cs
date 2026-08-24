@@ -18,24 +18,20 @@ namespace Adler.Aircraft
     {
         MinSpeed = 0,
         CruiseSpeed = 1,
-        MaxSpeed = 2,
-        BoostSpeed = 3,
 
-        Acceleration = 4,
-        Deceleration = 5,
-        ThrottleResponse = 6,
+        Acceleration = 2,
+        Deceleration = 3,
 
-        PitchRate = 7,
-        RollRate = 8,
-        YawRate = 9,
+        PitchRate = 4,
+        RollRate = 5,
 
-        ControlResponse = 10,
-        LowSpeedAgility = 11,
-        BankTurnRate = 12,
+        ControlResponse = 6,
+        LowSpeedAgility = 7,
+        BankTurnRate = 8,
 
-        BoostCapacity = 13,
-        BoostDrain = 14,
-        BoostRecharge = 15,
+        BoostCapacity = 9,
+        BoostDrain = 10,
+        BoostRecharge = 11,
     }
 
     /// <summary>보정치를 어떻게 얹을지.</summary>
@@ -70,22 +66,18 @@ namespace Adler.Aircraft
     /// </summary>
     public static class AircraftStatInfo
     {
-        public const int Count = 16;
+        public const int Count = 12;
 
-        // 기체 길이 1m 기준의 범위다. 속도 상한이 낮아 보이지만 1m 기체에게 60m/s는
+        // 기체 길이 1m 기준의 범위다. 속도 상한이 낮아 보이지만 1m 기체에게 50m/s는
         // 실제 전투기의 900m/s에 해당한다 — 조종이 불가능한 속도다.
         private static readonly (float Min, float Max)[] Ranges =
         {
             (1f, 40f),      // MinSpeed
             (1f, 50f),      // CruiseSpeed
-            (1f, 60f),      // MaxSpeed
-            (1f, 80f),      // BoostSpeed
             (0.5f, 60f),    // Acceleration
             (0.5f, 60f),    // Deceleration
-            (0.05f, 10f),   // ThrottleResponse
             (1f, 360f),     // PitchRate
             (1f, 720f),     // RollRate
-            (1f, 360f),     // YawRate
             (0.1f, 30f),    // ControlResponse
             (0.05f, 1f),    // LowSpeedAgility
             (0f, 180f),     // BankTurnRate

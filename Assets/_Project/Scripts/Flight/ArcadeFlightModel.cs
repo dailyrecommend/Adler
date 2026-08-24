@@ -234,10 +234,10 @@ namespace Adler.Flight
         /// </para>
         /// </summary>
         private float TargetSpeedFor(bool boosting)
-            => boosting ? _stats.CruiseSpeed * _stats.Airframe.BoostMultiplier : _stats.CruiseSpeed;
+            => boosting ? _stats.TopSpeed : _stats.CruiseSpeed;
 
         /// <summary>낼 수 있는 가장 빠른 속도. 게이지의 끝이자 얼었다 녹을 때의 상한이다.</summary>
-        private float TopSpeed => _stats.CruiseSpeed * _stats.Airframe.BoostMultiplier;
+        private float TopSpeed => _stats.TopSpeed;
 
         /// <summary>날것의 입력을 조종면 위치로 서서히 옮겨 기체에 무게감을 준다.</summary>
         private void SmoothControls(in FlightInput input, float deltaTime)

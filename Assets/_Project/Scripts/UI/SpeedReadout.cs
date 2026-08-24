@@ -136,8 +136,8 @@ namespace Adler.UI
                 return _speedFillMax;
             }
 
-            // 정비로 부스터 성능이 바뀌면 눈금도 따라가야 한다.
-            return _aircraft.Stats != null ? _aircraft.Stats.BoostSpeed : 0f;
+            // 정비로 순항 속도가 바뀌면 눈금도 따라가야 한다.
+            return _aircraft.Stats != null ? _aircraft.Stats.TopSpeed : 0f;
         }
     }
 }

@@ -20,10 +20,14 @@ namespace Adler.Weapons
     /// 없어진다. 앞쪽에 두면 값은 한 번만 치르고, 치러둔 것들 사이는 자유롭다.
     /// </para>
     /// <para>
-    /// 카메라가 아니라 조준선을 기준으로 잰다. 카메라는 둘러보기로 따로 움직이므로
-    /// 그쪽을 기준으로 하면 고개를 돌리는 것만으로 잡히는 것이 바뀌고, 화면 구석에
-    /// 걸쳐 있을 뿐 겨누지도 않은 적이 후보가 된다. 잡는 것은 기수를 돌려서 하는
-    /// 일이어야 한다.
+    /// 두 단계가 기준으로 삼는 것도 다르다. 후보가 되는 것은 <b>화면</b>에 담아둔
+    /// 시간으로 정하고, 그중 무엇이 잡히는지는 <b>조준선</b>에 가까운 순으로 정한다.
+    /// </para>
+    /// <para>
+    /// 나누는 이유는 둘이 다른 질문에 답하기 때문이다. 앞은 "저것을 잡을 수 있느냐"인데
+    /// 플레이어가 그것을 판단하는 근거는 눈에 보이느냐이므로, 화면에 뻔히 있는 적이
+    /// 원뿔 밖이라 차오르지 않으면 규칙을 배울 방법이 없다. 뒤는 "그중 무엇을 잡느냐"이고
+    /// 그건 겨누는 일이라, 기수를 돌려 고르는 것이 맞다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
@@ -80,22 +84,26 @@ namespace Adler.Weapons
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
 
-        [Tooltip("조준선. 기총의 총구를 넣으면 탄이 가는 곳과 잡는 곳이 같아진다.\n" +
+        [Tooltip("조준선. 잡을 것을 고를 때 이 방향에 가까운 순으로 고른다.\n" +
+                 "기총의 총구를 넣으면 탄이 가는 곳과 잡는 곳이 같아진다.\n" +
                  "비워두면 기체의 정면을 쓴다.")]
         [SerializeField] private Transform _boresight;
+
+        [Tooltip("화면 판정에 쓸 카메라. 비워두면 Main Camera를 쓴다.")]
+        [SerializeField] private Camera _view;
 
         [Header("탐색")]
         [Tooltip("잡을 대상의 레이어.")]
         [SerializeField] private LayerMask _targetMask;
 
-        [Tooltip("조준선에서 이 각도 안에 있어야 센다.\n\n" +
-                 "화면에 담기는 범위쯤으로 잡으면 보이는 것이 곧 잡히는 것이 되어 규칙이\n" +
-                 "눈에 익는다. 좁히면 정확히 겨눠야 하고, 넓히면 등 뒤의 적까지 잡힌다.")]
-        [Range(1f, 90f)]
-        [SerializeField] private float _cone = 45f;
+        [Tooltip("화면 가장자리에서 이만큼 안쪽에 들어와야 센다 (화면 비율).\n\n" +
+                 "0이면 화면에 걸치기만 해도 세는데, 가장자리에서는 조금만 움직여도\n" +
+                 "들어왔다 나갔다 해서 표시가 깜빡인다.")]
+        [Range(0f, 0.3f)]
+        [SerializeField] private float _screenMargin = 0.05f;
 
         [Tooltip("이 거리 안의 표적만 잡는다 (m).\n" +
-                 "겨누고 있더라도 너무 멀면 점에 불과해 잡아봐야 할 일이 없다.")]
+                 "화면에 보이더라도 너무 멀면 점에 불과해 잡아봐야 할 일이 없다.")]
         [Min(1f)]
         [SerializeField] private float _range = 400f;
 
@@ -115,9 +123,9 @@ namespace Adler.Weapons
         [SerializeField] private float _scanInterval = 0.15f;
 
         [Header("잡을 수 있게 되기까지")]
-        [Tooltip("조준선 안에 이만큼 두어야 잡을 수 있게 된다(초).\n\n" +
+        [Tooltip("화면 안에 이만큼 두어야 잡을 수 있게 된다(초).\n\n" +
                  "이 값은 표적마다 따로 쌓인다. 한 번 다 찬 표적들 사이를 오가는 데는\n" +
-                 "시간이 들지 않는다 — 값은 겨누는 일에만 치른다.")]
+                 "시간이 들지 않는다 — 값은 화면에 담는 일에만 치른다.")]
         [Min(0f)]
         [SerializeField] private float _acquireSeconds = 0.8f;
 
@@ -129,7 +137,7 @@ namespace Adler.Weapons
         [Min(1f)]
         [SerializeField] private float _farAcquireMultiplier = 3f;
 
-        [Tooltip("조준선에서 벗어난 뒤 쌓인 것이 다 풀리기까지의 시간(초).\n\n" +
+        [Tooltip("화면에서 벗어난 뒤 쌓인 것이 다 풀리기까지의 시간(초).\n\n" +
                  "쌓이는 시간보다 길게 둘 것. 급기동 중에 잠깐 놓치는 것은 흔한 일이라,\n" +
                  "같거나 짧으면 한 번 스칠 때마다 처음으로 돌아간다.")]
         [Min(0.05f)]
@@ -236,6 +244,19 @@ namespace Adler.Weapons
             {
                 _boresight = _aircraft != null ? _aircraft.transform : transform;
             }
+
+            if (_view == null)
+            {
+                _view = Camera.main;
+            }
+
+            if (_view == null)
+            {
+                Debug.LogError(
+                    $"{nameof(LockOnTargeting)}: 화면 판정에 쓸 카메라를 찾지 못했습니다. " +
+                    "Main Camera 태그를 달거나 View에 직접 넣으세요.", this);
+                enabled = false;
+            }
         }
 
         private void Update()
@@ -299,10 +320,14 @@ namespace Adler.Weapons
         }
 
         /// <summary>
-        /// 조준선 안에 있는 동안 차오르고, 벗어나 있는 동안 풀린다.
+        /// 화면 안에 있는 동안 차오르고, 벗어나 있는 동안 풀린다.
         /// <para>
         /// 차오르는 속도는 거리에 따라 다르다. 멀수록 오래 걸리므로, 지평선의 점을
-        /// 겨누고 기다리는 것보다 다가가는 편이 빠르다.
+        /// 바라보고 기다리는 것보다 다가가는 편이 빠르다.
+        /// </para>
+        /// <para>
+        /// 조준선까지의 각도는 차오르는 데 쓰지 않는다. 잡을 것을 고를 때만 쓰므로
+        /// 여기서는 재두기만 한다.
         /// </para>
         /// </summary>
         private void UpdateTracked(float deltaTime)
@@ -312,16 +337,34 @@ namespace Adler.Weapons
             for (int i = 0; i < _tracked.Count; i++)
             {
                 Tracked entry = _tracked[i];
-                Vector3 offset = entry.Target.bounds.center - Origin;
+                Vector3 point = entry.Target.bounds.center;
+                Vector3 offset = point - Origin;
 
                 entry.Angle = Vector3.Angle(_boresight.forward, offset);
-                entry.InSight = entry.Angle <= _cone && HasLineOfSight(offset);
+                entry.InSight = IsOnScreen(point) && HasLineOfSight(offset);
 
                 entry.Progress = Mathf.Clamp01(entry.Progress
                     + (entry.InSight ? GainFor(offset.magnitude, deltaTime) : -loss));
 
                 _tracked[i] = entry;
             }
+        }
+
+        /// <summary>
+        /// 화면 안에 들어와 있는지. 뷰포트는 왼쪽 아래가 (0,0), 오른쪽 위가 (1,1)이고
+        /// z는 카메라 앞쪽 거리라 음수면 뒤에 있다는 뜻이다.
+        /// </summary>
+        private bool IsOnScreen(Vector3 point)
+        {
+            Vector3 viewport = _view.WorldToViewportPoint(point);
+
+            if (viewport.z <= 0f)
+            {
+                return false;
+            }
+
+            return viewport.x >= _screenMargin && viewport.x <= 1f - _screenMargin
+                   && viewport.y >= _screenMargin && viewport.y <= 1f - _screenMargin;
         }
 
         /// <summary>이번 프레임에 차오를 몫. 사거리 끝에 가까울수록 적다.</summary>
