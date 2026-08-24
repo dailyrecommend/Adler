@@ -44,10 +44,29 @@ namespace Adler.Weapons
         public bool CanFire => Active != null && Active.CanFire;
 
         /// <inheritdoc />
-        public void HoldTrigger(float deltaTime) => Active?.HoldTrigger(deltaTime);
+        /// <summary>
+        /// 지금 쏘고 있는지. 총구 화염이나 탄피 같은 연출이 이것을 본다.
+        /// <para>
+        /// 방아쇠를 당기는 쪽이 행동으로 옮겨간 뒤로는 무기고가 그 사실을 알 길이
+        /// 여기뿐이다. 입력을 다시 읽어 알아내면 같은 것을 두 곳이 판단하게 된다.
+        /// </para>
+        /// </summary>
+        public bool IsFiring { get; private set; }
 
         /// <inheritdoc />
-        public void ReleaseTrigger() => Active?.ReleaseTrigger();
+        public void HoldTrigger(float deltaTime)
+        {
+            IsFiring = true;
+            Active?.HoldTrigger(deltaTime);
+        }
+
+        /// <inheritdoc />
+        /// <inheritdoc />
+        public void ReleaseTrigger()
+        {
+            IsFiring = false;
+            Active?.ReleaseTrigger();
+        }
 
         public AircraftWeapon Active =>
             _weapons.Count > 0 ? _weapons[Mathf.Clamp(_activeIndex, 0, _weapons.Count - 1)] : null;

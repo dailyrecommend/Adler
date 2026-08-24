@@ -288,6 +288,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 49589782}
+  - component: {fileID: 49589783}
   m_Layer: 10
   m_Name: VFX
   m_TagString: Untagged
@@ -314,6 +315,26 @@ Transform:
   - {fileID: 2075592591}
   m_Father: {fileID: 1812182287}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &49589783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49589781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d95f992c475a6ce31793c8cd10642ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Effects.AircraftEffects
+  _aircraft: {fileID: 1812182315}
+  _emitters:
+  - Effect: {fileID: 1708753518}
+    When: 0
+    Debuff: {fileID: 0}
+  - Effect: {fileID: 1923980047}
+    When: 1
+    Debuff: {fileID: 0}
 --- !u!1 &57205299
 GameObject:
   m_ObjectHideFlags: 0
@@ -10231,10 +10252,10 @@ VisualEffect:
   m_GameObject: {fileID: 1708753518}
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: 11852b555acdfdc42bf578666b93af71, type: 3}
-  m_InitialEventName: OnPlay
-  m_InitialEventNameOverriden: 0
+  m_InitialEventName: 
+  m_InitialEventNameOverriden: 1
   m_StartSeed: 0
-  m_ResetSeedOnPlay: 1
+  m_ResetSeedOnPlay: 0
   m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:
@@ -11827,10 +11848,10 @@ VisualEffect:
   m_GameObject: {fileID: 1923980047}
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: 44b2faed9df6a3744aa987125fa5cffa, type: 3}
-  m_InitialEventName: OnPlay
-  m_InitialEventNameOverriden: 0
+  m_InitialEventName: 
+  m_InitialEventNameOverriden: 1
   m_StartSeed: 0
-  m_ResetSeedOnPlay: 1
+  m_ResetSeedOnPlay: 0
   m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:

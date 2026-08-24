@@ -1,7 +1,8 @@
+using Adler.Combat;
 using Adler.Core;
 using UnityEngine;
 
-namespace Adler.Combat
+namespace Adler.Effects
 {
     /// <summary>
     /// 맞은 자리에 이펙트를 띄운다. <see cref="Health"/>이 있는 것이면 무엇이든 붙는다.

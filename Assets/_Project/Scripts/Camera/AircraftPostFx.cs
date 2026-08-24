@@ -18,27 +18,12 @@ namespace Adler.CameraRig
     /// </para>
     /// <para>
     /// 그래서 효과를 늘리는 일이 클래스가 아니라 목록의 한 줄이 된다. 새 조건이
-    /// 필요할 때만 <see cref="Trigger"/>에 이름을 더한다.
+    /// 필요할 때만 <see cref="AircraftCondition"/>에 이름을 더한다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class AircraftPostFx : MonoBehaviour
     {
-        /// <summary>효과를 켜는 조건.</summary>
-        public enum Trigger
-        {
-            /// <summary>부스터를 쓰는 동안.</summary>
-            Boosting,
-
-            /// <summary>정해둔 디버프가 걸려 있는 동안.</summary>
-            Debuff,
-
-            /// <summary>수리가 도는 동안.</summary>
-            Repairing,
-
-            /// <summary>얼어붙어 있는 동안.</summary>
-            Frozen,
-        }
 
         [Serializable]
         public struct Layer
@@ -47,7 +32,7 @@ namespace Adler.CameraRig
             public Volume Volume;
 
             [Tooltip("무엇을 보고 켤지.")]
-            public Trigger When;
+            public AircraftCondition When;
 
             [Tooltip("Debuff를 고른 경우에만 쓴다. 어느 디버프인지.")]
             public DebuffDefinition Debuff;
@@ -113,32 +98,13 @@ namespace Adler.CameraRig
 
         private void Apply(in Layer layer)
         {
-            bool on = IsOn(in layer);
+            bool on = AircraftConditions.IsMet(_aircraft, layer.When, layer.Debuff);
 
             float target = on ? layer.ActiveWeight : layer.IdleWeight;
             float speed = on ? layer.RiseSpeed : layer.FallSpeed;
 
             layer.Volume.weight = Mathf.Lerp(
                 layer.Volume.weight, target, 1f - Mathf.Exp(-speed * _clock.Delta));
-        }
-
-        /// <summary>
-        /// 조건 하나를 판정한다.
-        /// <para>
-        /// 볼 곳이 없으면 꺼진 것으로 본다. 기체에 수리가 없는데 수리 효과를 걸어두는
-        /// 일은 흔하고, 그때 켜진 채로 남으면 원인을 짚기 어렵다.
-        /// </para>
-        /// </summary>
-        private bool IsOn(in Layer layer)
-        {
-            return layer.When switch
-            {
-                Trigger.Boosting => _aircraft.Model?.IsBoosting == true,
-                Trigger.Frozen => _aircraft.Model?.IsFrozen == true,
-                Trigger.Repairing => _aircraft.Repair?.IsRepairing == true,
-                Trigger.Debuff => layer.Debuff != null && _aircraft.Debuffs?.IsActive(layer.Debuff) == true,
-                _ => false,
-            };
         }
     }
 }

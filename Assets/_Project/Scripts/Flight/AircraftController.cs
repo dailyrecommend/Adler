@@ -40,6 +40,9 @@ namespace Adler.Flight
         [SerializeField] private DebuffDefinition _frozenDebuff;
 
         private Clock _clock;
+
+        // 이번 프레임에 부스터가 켜져 있는지. 화면 갱신에서 정하고 물리 스텝이 태운다.
+        private bool _boosting;
         private Rigidbody _body;
         private ArcadeFlightModel _model;
 
@@ -125,6 +128,27 @@ namespace Adler.Flight
             _model?.Initialize(_body);
         }
 
+        /// <summary>
+        /// 부스터를 켤지는 화면 갱신에서 정한다.
+        /// <para>
+        /// 물리 스텝은 초당 쉰 번뿐이라 거기서 정하면 키를 누른 뒤 최대 20밀리초를
+        /// 기다린다. 144프레임에서는 세 프레임쯤이고, 그동안 불꽃도 소리도 나오지 않아
+        /// 조작이 늦게 먹는 것으로 느껴진다.
+        /// </para>
+        /// <para>
+        /// 태우는 일은 물리 스텝에 남는다. 연료는 얼마나 흘렀는지가 중요하고, 프레임마다
+        /// 태우면 화면이 빠를수록 빨리 닳는다.
+        /// </para>
+        /// </summary>
+        private void Update()
+        {
+            // 얼어붙은 동안에는 누르지 않은 것으로 친다. 엔진이 죽었는데 연료만
+            // 타들어가면, 녹은 뒤에 쓸 것이 남아 있지 않아 두 번 벌을 받는다.
+            bool wants = !_model.IsFrozen && _input.Boost;
+
+            _boosting = _boostFuel != null ? _boostFuel.RequestBoost(wants) : wants;
+        }
+
         private void FixedUpdate()
         {
             // 무엇이 얼렸는지는 묻지 않는다. 고도든 적의 무기든 목록에 이것이 올라와
@@ -133,28 +157,17 @@ namespace Adler.Flight
                              && _debuffs != null
                              && _debuffs.IsActive(_frozenDebuff));
 
-            FlightInput input = ReadInput();
-            _model.Tick(in input, _clock);
-        }
+            // 켤지는 이미 정해졌고, 여기서는 그만큼 태우기만 한다.
+            _boostFuel?.Consume(_boosting, _clock.FixedDelta);
 
-        private FlightInput ReadInput()
-        {
-            // 연료 쪽은 누르지 않을 때도 불러야 한다. 회복을 그쪽에서 함께 처리하므로,
-            // 쓰지 않는 동안 부르지 않으면 연료가 영영 차지 않는다.
-            //
-            // 얼어붙은 동안에는 누르지 않은 것으로 넘긴다. 엔진이 죽었는데 연료만
-            // 타들어가면, 녹은 뒤에 쓸 것이 남아 있지 않아 두 번 벌을 받는다.
-            bool wantsBoost = !_model.IsFrozen && _input.Boost;
-            bool boosting = _boostFuel != null
-                ? _boostFuel.RequestBoost(wantsBoost, _clock.FixedDelta)
-                : wantsBoost;
-
-            return new FlightInput
+            FlightInput input = new()
             {
                 Pitch = _input.Pitch,
                 Roll = _input.Roll,
-                Boost = boosting,
+                Boost = _boosting,
             };
+
+            _model.Tick(in input, _clock);
         }
 
 

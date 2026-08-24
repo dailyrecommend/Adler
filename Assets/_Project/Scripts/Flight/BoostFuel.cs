@@ -80,10 +80,14 @@ namespace Adler.Flight
         private AircraftStatSheet Stats => _aircraft.Stats;
 
         /// <summary>
-        /// 이번 스텝에 부스터를 쓸 수 있는지 묻고, 쓴 만큼 깎는다.
-        /// 조종 쪽이 매 물리 스텝 한 번만 부른다.
+        /// 지금 부스터를 켤 수 있는지 답한다. 연료는 깎지 않는다.
+        /// <para>
+        /// 묻는 일과 태우는 일을 갈라둔 이유는 둘이 필요한 박자가 다르기 때문이다.
+        /// 켜졌는지는 화면이 갱신될 때마다 알아야 불꽃과 소리가 제때 나오지만, 태우는
+        /// 양은 흐른 시간에 비례해야 하므로 물리 스텝에서만 세야 한다.
+        /// </para>
         /// </summary>
-        public bool RequestBoost(bool wanted, float deltaTime)
+        public bool RequestBoost(bool wanted)
         {
             AircraftStatSheet stats = Stats;
             if (stats == null)
@@ -112,8 +116,25 @@ namespace Adler.Flight
             }
 
             _wasDenied = denied;
+            return allowed;
+        }
 
-            if (allowed)
+        /// <summary>
+        /// 흐른 만큼 태우거나 채운다. 물리 스텝에서 한 번만 부른다.
+        /// <para>
+        /// 켜지 않았을 때도 불러야 한다. 회복을 여기서 함께 처리하므로, 쓰지 않는 동안
+        /// 부르지 않으면 연료가 영영 차지 않는다.
+        /// </para>
+        /// </summary>
+        public void Consume(bool boosting, float deltaTime)
+        {
+            AircraftStatSheet stats = Stats;
+            if (stats == null)
+            {
+                return;
+            }
+
+            if (boosting)
             {
                 Spend(stats.BoostDrain * deltaTime);
             }
@@ -121,8 +142,6 @@ namespace Adler.Flight
             {
                 Recover(stats, deltaTime);
             }
-
-            return allowed;
         }
 
         private void Spend(float amount)

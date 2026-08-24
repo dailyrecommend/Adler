@@ -1,6 +1,7 @@
+using Adler.Combat;
 using UnityEngine;
 
-namespace Adler.Combat
+namespace Adler.Effects
 {
     /// <summary>
     /// 쓰러지는 자리에 폭발을 남긴다.
