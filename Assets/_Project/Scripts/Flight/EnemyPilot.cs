@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using Adler.Aircraft;
 using Adler.Core;
 using UnityEngine;
@@ -14,7 +15,9 @@ namespace Adler.Flight
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [DisallowMultipleComponent]
-    public sealed class EnemyPilot : MonoBehaviour
+    // ITargetSource를 입는 이유는 기총 때문이다. 기총이 조종사 클래스를 직접 알면
+    // 장비가 기체 층을 올려다보게 되므로, "표적을 아는 자"라는 낮은 어휘로만 보이게 한다.
+    public sealed class EnemyPilot : MonoBehaviour, ITargetSource
     {
         private enum Move
         {
@@ -178,6 +181,10 @@ namespace Adler.Flight
         public AircraftStatSheet Stats { get; private set; }
 
         public Transform Target => _target;
+
+        bool ITargetSource.HasTarget => _target != null;
+
+        Vector3 ITargetSource.TargetPoint => _target != null ? _target.position : transform.position;
 
         private void Awake()
         {

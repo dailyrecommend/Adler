@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Adler.Abilities;
 using Adler.Combat;
 using Adler.Core;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -84,7 +83,7 @@ namespace Adler.Weapons
 
         [Header("참조")]
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private AircraftRig _aircraft;
+        [SerializeField] private AircraftRoot _root;
 
         [Tooltip("조준선. 잡을 것을 고를 때 이 방향에 가까운 순으로 고른다.\n" +
                  "기총의 총구를 넣으면 탄이 가는 곳과 잡는 곳이 같아진다.\n" +
@@ -246,11 +245,11 @@ namespace Adler.Weapons
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _root = AircraftRoot.Resolve(this, _root);
 
             if (_boresight == null)
             {
-                _boresight = _aircraft != null ? _aircraft.transform : transform;
+                _boresight = _root != null ? _root.transform : transform;
             }
 
             if (_view == null)

@@ -23,8 +23,9 @@ namespace Adler.Weapons
 
             // 조준 보정은 흩어짐보다 먼저 건다. 뒤에 걸면 보정이 흩어짐까지 없애버려
             // 탄이 한 점으로 모이고, 기총이 저격총처럼 굴게 된다.
-            Vector3 aim = _aircraft != null && _aircraft.Aim != null
-                ? _aircraft.Aim.Adjust(origin, muzzle.forward, _gun)
+            SoftLock softLock = _root != null ? _root.Find<SoftLock>() : null;
+            Vector3 aim = softLock != null
+                ? softLock.Adjust(origin, muzzle.forward, _gun)
                 : muzzle.forward;
 
             Vector3 direction = ProjectileLauncher.ApplySpread(aim, _gun.SpreadDegrees);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Adler.Abilities;
 using Adler.Aircraft;
 using Adler.Controls;
 using Adler.Combat;
@@ -17,7 +18,9 @@ namespace Adler.Flight
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [DisallowMultipleComponent]
-    public sealed class AircraftController : MonoBehaviour
+    // IMovementDriver를 대신 서 준다. 비행 모델은 컴포넌트가 아니라 찾아지지 않으므로,
+    // 갈고리처럼 "이 기체를 움직이는 것"만 필요한 쪽은 이 컴포넌트를 그 얼굴로 찾는다.
+    public sealed class AircraftController : MonoBehaviour, IMovementDriver
     {
         [Header("참조")]
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 오브젝트에서 찾는다.")]
@@ -57,6 +60,15 @@ namespace Adler.Flight
 
         /// <summary>HUD와 카메라가 속도를 읽는 통로.</summary>
         public IFlightModel Model => _model;
+
+        // 전부 모델에게 넘긴다. 모델이 아직 없는 순간에도 터지지 않게 비어 있는 값을 준다.
+        float IMovementDriver.Speed => _model?.Speed ?? 0f;
+
+        Transform IMovementDriver.Body => transform;
+
+        Clock IMovementDriver.Clock => _clock;
+
+        void IMovementDriver.Pull(in Tether tether) => _model?.SetTether(in tether);
 
         /// <summary>정비창과 전투 로직이 성능을 읽고 바꾸는 통로.</summary>
         public AircraftStatSheet Stats { get; private set; }

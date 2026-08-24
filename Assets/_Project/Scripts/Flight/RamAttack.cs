@@ -253,9 +253,18 @@ namespace Adler.Flight
         /// </summary>
         private void Update()
         {
-            if (Armed)
+            bool armed = Armed;
+
+            if (armed)
             {
                 _shieldedUntil = _clock.Now + _shieldGrace;
+            }
+
+            // 갈고리에게 지금 부딪히는 것이 목적인지 알려준다. 그쪽이 이쪽을 물어보게
+            // 두면 장비가 기체 층을 올려다보는 순환이 된다.
+            if (_aircraft.Grapple != null)
+            {
+                _aircraft.Grapple.KeepContact = armed;
             }
 
             _passage.Tick(_clock.Delta);

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Adler.Core;
 using Adler.Abilities;
 using Adler.Controls;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -26,7 +26,7 @@ namespace Adler.Weapons
         [SerializeField] private PilotInput _input;
 
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private AircraftRig _aircraft;
+        [SerializeField] private AircraftRoot _root;
 
         [Header("탑재 무기")]
         [Tooltip("들고 다니는 무기들. 순서대로 돌아가며 교체된다.\n" +
@@ -67,18 +67,18 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _root = AircraftRoot.Resolve(this, _root);
 
-            if (_weapons.Count == 0 && _aircraft != null)
+            if (_weapons.Count == 0 && _root != null)
             {
-                _aircraft.GetComponentsInChildren(includeInactive: true, _weapons);
+                _root.GetComponentsInChildren(includeInactive: true, _weapons);
             }
 
             _weapons.RemoveAll(weapon => weapon == null);
 
-            if (_aircraft != null)
+            if (_root != null)
             {
-                _targeting = _aircraft.GetComponentInChildren<LockOnTargeting>(includeInactive: true);
+                _targeting = _root.Find<LockOnTargeting>();
             }
         }
 
@@ -100,7 +100,7 @@ namespace Adler.Weapons
 
         private void OnEnable()
         {
-            _input = _input != null ? _input : _aircraft?.Input;
+            _input = _input != null ? _input : _root?.Find<PilotInput>();
 
             if (_input == null)
             {

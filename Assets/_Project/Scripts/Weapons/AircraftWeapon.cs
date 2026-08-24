@@ -1,6 +1,6 @@
 using System;
+using Adler.Core;
 using Adler.Combat;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -22,7 +22,7 @@ namespace Adler.Weapons
     {
         [Header("참조")]
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] protected AircraftRig _aircraft;
+        [SerializeField] protected AircraftRoot _root;
 
         [Tooltip("발사 위치. 여러 개면 번갈아 쓴다. 비어 있으면 이 오브젝트에서 나간다.")]
         [SerializeField] protected Transform[] _muzzles = Array.Empty<Transform>();
@@ -79,7 +79,7 @@ namespace Adler.Weapons
 
         protected virtual void Awake()
         {
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _root = AircraftRoot.Resolve(this, _root);
 
             if (Definition == null)
             {
@@ -166,9 +166,9 @@ namespace Adler.Weapons
 
         /// <summary>기체가 움직이는 만큼 발사체에 얹어줄 속도.</summary>
         protected Vector3 CarrierVelocity =>
-            _aircraft != null && _aircraft.Body != null ? _aircraft.Body.linearVelocity : Vector3.zero;
+            _root != null && _root.Body != null ? _root.Body.linearVelocity : Vector3.zero;
 
-        protected GameObject Owner => _aircraft != null ? _aircraft.gameObject : gameObject;
+        protected GameObject Owner => _root != null ? _root.gameObject : gameObject;
 
         private void SpendRound()
         {

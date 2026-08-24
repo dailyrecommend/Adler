@@ -2,7 +2,6 @@ using Adler.Abilities;
 using Adler.Combat;
 using Adler.Controls;
 using Adler.Core;
-using Adler.Flight;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +27,7 @@ namespace Adler.Weapons
         [SerializeField] private PilotInput _input;
 
         [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private AircraftRig _aircraft;
+        [SerializeField] private AircraftRoot _root;
 
         [Tooltip("봉인당했을 때 디버프 목록에 올릴 것. JAMMED로 만들어 둔 에셋.\n" +
                  "비워두면 봉인은 그대로 걸리되 목록에는 뜨지 않는다.")]
@@ -161,11 +160,11 @@ namespace Adler.Weapons
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _input = _input != null ? _input : _aircraft?.Input;
+            _root = AircraftRoot.Resolve(this, _root);
+            _input = _input != null ? _input : _root?.Find<PilotInput>();
             // 기체 전체에서 찾는다. 부모 방향만 보면 실행기가 형제 오브젝트에 있을 때
             // 놓치는데, 컴포넌트를 무리 지어 배치하면 형제로 놓이는 것이 자연스럽다.
-            _abilities = _aircraft != null ? _aircraft.Abilities : null;
+            _abilities = _root != null ? _root.Find<AbilityRunner>() : null;
 
             if (_input == null)
             {

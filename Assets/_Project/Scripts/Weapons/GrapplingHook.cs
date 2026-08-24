@@ -1,7 +1,7 @@
 using System;
+using Adler.Abilities;
 using Adler.Combat;
 using Adler.Core;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -42,8 +42,8 @@ namespace Adler.Weapons
         private const float ClearTimeout = 5f;
 
         [Header("참조")]
-        [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private AircraftRig _aircraft;
+        [Tooltip("이 장비를 실은 기체의 뿌리. 비워두면 위로 거슬러 올라가 찾는다.")]
+        [SerializeField] private AircraftRoot _root;
 
         [Tooltip("줄이 나가는 자리. 비워두면 기체에서 나간다.")]
         [SerializeField] private Transform _origin;
@@ -133,6 +133,7 @@ namespace Adler.Weapons
         [SerializeField] private float _breakRange = 500f;
 
         private LockOnTargeting _targeting;
+        private IMovementDriver _mover;
 
         private Transform _hooked;
         private Rigidbody _hookedBody;
@@ -185,22 +186,23 @@ namespace Adler.Weapons
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _targeting = _aircraft != null ? _aircraft.Targeting : null;
+            _root = AircraftRoot.Resolve(this, _root);
+            _targeting = _root != null ? _root.Find<LockOnTargeting>() : null;
+            _mover = _root != null ? _root.Find<IMovementDriver>() : null;
 
             if (_origin == null)
             {
                 _origin = transform;
             }
 
-            if (_aircraft == null || _targeting == null)
+            if (_root == null || _targeting == null || _mover == null)
             {
-                Debug.LogError($"{nameof(GrapplingHook)}: 기체 또는 조준을 찾지 못했습니다.", this);
+                Debug.LogError($"{nameof(GrapplingHook)}: 기체 뿌리, 조준, 조종 중 빠진 것이 있습니다.", this);
                 enabled = false;
                 return;
             }
 
-            _passage = new CollisionPassage(_aircraft.transform);
+            _passage = new CollisionPassage(_root.transform);
         }
 
         private void OnDisable()
@@ -223,15 +225,22 @@ namespace Adler.Weapons
         }
 
         /// <summary>
-        /// 들이받을 수 있는 상태면 통과시키지 않는다.
+        /// 부딪히는 것이 목적인 동안은 참. 들이받기 쪽이 매 프레임 알려준다.
+        /// <para>
+        /// 이쪽이 그쪽에게 묻지 않고 그쪽이 이쪽에 써넣는 이유는 방향 때문이다.
+        /// 기체(위층)가 장비(아래층)를 아는 것은 자연스럽지만, 장비가 기체의 다른
+        /// 부품을 알아 올려다보기 시작하면 층이 서로를 물고 돈다.
+        /// </para>
+        /// </summary>
+        public bool KeepContact { get; set; }
+
+        /// <summary>
+        /// 부딪히는 것이 목적이 아닌 동안만 통과시킨다.
         /// <para>
         /// 서로를 통과시키는 것은 코앞까지 끌어당겼을 때 둘 다 격추되는 것을 막으려는
-        /// 것이었다. 그런데 들이받기가 생기면서 그 전제가 바뀌었다 — 이제 그 상황은
-        /// 사고가 아니라 노린 것이고, 죽지 않게 막아주는 것도 그쪽이 맡는다.
-        /// </para>
-        /// <para>
-        /// 매달린 채로 부스터를 밟는 것이 곧 "이대로 박겠다"는 뜻이 되므로, 통과시켜
-        /// 버리면 그 선택이 화면에서 아무 일도 아닌 것이 된다.
+        /// 것이었다. 그런데 들이받기가 생기면서 그 전제가 바뀌었다 — 매달린 채로
+        /// 부스터를 밟는 것이 곧 "이대로 박겠다"는 뜻이 되므로, 통과시켜 버리면
+        /// 그 선택이 화면에서 아무 일도 아닌 것이 된다.
         /// </para>
         /// </summary>
         private void UpdateContact()
@@ -241,9 +250,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            bool armed = _aircraft.Ram != null && _aircraft.Ram.IsArmed;
-
-            if (armed)
+            if (KeepContact)
             {
                 _passage.Close(_hooked);
             }
@@ -277,7 +284,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _aircraft.Model?.SetTether(new Tether(
+            _mover.Pull(new Tether(
                 toTarget / distance, _pathBend, _aimAssist, SpeedFor(), _turnRate));
         }
 

@@ -42,9 +42,9 @@ namespace Adler.Weapons
         {
             base.Awake();
 
-            if (_targeting == null && _aircraft != null)
+            if (_targeting == null && _root != null)
             {
-                _targeting = _aircraft.GetComponentInChildren<LockOnTargeting>(includeInactive: true);
+                _targeting = _root.Find<LockOnTargeting>();
             }
 
             if (_targeting == null)

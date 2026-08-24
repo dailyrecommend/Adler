@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Adler.Core;
-using Adler.Flight;
+using Adler.Abilities;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -38,9 +38,6 @@ namespace Adler.Weapons
         [SerializeField] private LayerMask _hitMask = ~0;
 
         [Header("참조")]
-        [Tooltip("표적을 고르는 조종사. 비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private EnemyPilot _pilot;
-
         [Tooltip("기수 방향. 비워두면 이 기체의 정면을 쓴다.")]
         [SerializeField] private Transform _boresight;
 
@@ -142,28 +139,28 @@ namespace Adler.Weapons
         }
 
         private Clock _clock;
+        private ITargetSource _targets;
 
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            if (_pilot == null)
-            {
-                _pilot = GetComponentInParent<EnemyPilot>();
-            }
+            // 조종사 클래스가 아니라 "표적을 아는 자"로 찾는다. 이름으로 찾으면 장비가
+            // 기체 층을 올려다보게 되고, 조종사를 갈아치울 때 여기도 함께 고쳐야 한다.
+            _targets = GetComponentInParent<ITargetSource>();
 
             if (_boresight == null)
             {
-                _boresight = _pilot != null ? _pilot.transform : transform;
+                _boresight = _targets is Component pilot ? pilot.transform : transform;
             }
 
-            if (_gun == null || _pilot == null)
+            if (_gun == null || _targets == null)
             {
-                Debug.LogError($"{nameof(EnemyGun)}: Gun Definition 또는 조종사가 없습니다.", this);
+                Debug.LogError($"{nameof(EnemyGun)}: Gun Definition 또는 표적을 아는 것이 없습니다.", this);
                 enabled = false;
                 return;
             }
 
-            _body = _pilot.GetComponent<Rigidbody>();
+            _body = _boresight.GetComponentInParent<Rigidbody>();
         }
 
         private void OnEnable() => Active.Add(this);
@@ -178,7 +175,7 @@ namespace Adler.Weapons
         {
             // 표적이 바뀔 때만 리지드바디를 찾는다. 쏘는 동안 매 발 뒤져 올라가면
             // 초당 스물다섯 번씩 계층을 훑게 된다.
-            Transform target = _pilot.Target;
+            Transform target = _targets.Target;
 
             if (!ReferenceEquals(target, _target))
             {

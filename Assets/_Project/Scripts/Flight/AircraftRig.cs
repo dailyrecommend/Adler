@@ -1,5 +1,6 @@
 using Adler.Abilities;
 using Adler.Aircraft;
+using Adler.Core;
 using Adler.Controls;
 using Adler.Combat;
 using Adler.Weapons;
@@ -73,6 +74,14 @@ namespace Adler.Flight
         /// </summary>
         private void Awake()
         {
+            // 아래층 부품들이 쓰는 뿌리 표시를 함께 세운다. 무기 같은 부품은 이 이름 있는
+            // 창구 대신 무형의 뿌리로 형제를 찾는다 — 그쪽이 이쪽을 알면 순환이 된다.
+            // 여기서 심어주므로 씬에서 따로 붙일 일은 없다.
+            if (!TryGetComponent(out AircraftRoot _))
+            {
+                gameObject.AddComponent<AircraftRoot>();
+            }
+
             Body = GetComponent<Rigidbody>();
             Control = GetComponentInChildren<AircraftController>(includeInactive: true);
             Lifecycle = GetComponentInChildren<AircraftLifecycle>(includeInactive: true);

@@ -1,4 +1,4 @@
-using Adler.Flight;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -32,7 +32,7 @@ namespace Adler.Weapons
     {
         [Header("참조")]
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
-        [SerializeField] private AircraftRig _aircraft;
+        [SerializeField] private AircraftRoot _root;
 
         [Tooltip("표적을 잡는 곳. 비워두면 기체에서 찾는다.")]
         [SerializeField] private LockOnTargeting _targeting;
@@ -69,11 +69,11 @@ namespace Adler.Weapons
 
         private void Awake()
         {
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _root = AircraftRoot.Resolve(this, _root);
 
-            if (_targeting == null && _aircraft != null)
+            if (_targeting == null && _root != null)
             {
-                _targeting = _aircraft.GetComponentInChildren<LockOnTargeting>(includeInactive: true);
+                _targeting = _root.Find<LockOnTargeting>();
             }
 
             if (_targeting == null)
@@ -158,8 +158,8 @@ namespace Adler.Weapons
         /// </summary>
         private Vector3 ShotPoint(Vector3 point, Vector3 origin, GunDefinition gun)
         {
-            Vector3 carrier = _aircraft != null && _aircraft.Body != null
-                ? _aircraft.Body.linearVelocity
+            Vector3 carrier = _root != null && _root.Body != null
+                ? _root.Body.linearVelocity
                 : Vector3.zero;
 
             Transform target = _targeting.Target;

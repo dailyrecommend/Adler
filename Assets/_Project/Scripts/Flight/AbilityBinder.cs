@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Adler.Abilities;
 using Adler.Core;
 using Adler.Controls;
-using Adler.Weapons;
 using UnityEngine;
 
 namespace Adler.Flight

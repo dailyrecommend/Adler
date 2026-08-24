@@ -1,5 +1,4 @@
 using Adler.Core;
-using Adler.Flight;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -29,7 +28,7 @@ namespace Adler.Weapons
         [Tooltip("그릴 줄의 주인. 비워두면 이 오브젝트와 위쪽에서 찾는다.")]
         [SerializeField] private GrapplingHook _hook;
 
-        [SerializeField] private AircraftRig _aircraft;
+        [SerializeField] private AircraftRoot _root;
 
         [Header("줄")]
         [Tooltip("기체와 표적을 잇는 선.")]
@@ -70,8 +69,8 @@ namespace Adler.Weapons
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _hook = _hook != null ? _hook : _aircraft?.Grapple;
+            _root = AircraftRoot.Resolve(this, _root);
+            _hook = _hook != null ? _hook : _root?.Find<GrapplingHook>();
 
             if (_hook == null || _line == null)
             {
@@ -134,8 +133,8 @@ namespace Adler.Weapons
         /// </summary>
         private Vector3 SagDirection()
         {
-            Vector3 drift = _aircraft != null && _aircraft.Body != null
-                ? -_aircraft.Body.linearVelocity
+            Vector3 drift = _root != null && _root.Body != null
+                ? -_root.Body.linearVelocity
                 : Vector3.zero;
 
             Vector3 direction = drift.sqrMagnitude > 0.0001f
