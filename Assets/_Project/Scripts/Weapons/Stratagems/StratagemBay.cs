@@ -1,10 +1,10 @@
 using Adler.Combat;
+using Adler.Controls;
 using Adler.Core;
 using Adler.Flight;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Adler.Weapons
 {
@@ -23,7 +23,8 @@ namespace Adler.Weapons
     public sealed class StratagemBay : MonoBehaviour, IDebuffSource, IControlSuppressor
     {
         [Header("참조")]
-        [SerializeField] private InputActionAsset _controls;
+        [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
+        [SerializeField] private PilotInput _input;
 
         [Tooltip("폭탄이 떨어져 나오는 자리. 기체 아래쪽에 빈 오브젝트를 두면 된다.")]
         [SerializeField] private Transform _dropPoint;
@@ -55,9 +56,6 @@ namespace Adler.Weapons
         [Min(0f)]
         [SerializeField] private float _openGuardSeconds = 0.1f;
 
-        private InputAction _dropAction;
-        private InputAction _toggleAction;
-        private readonly InputAction[] _directionActions = new InputAction[4];
 
         // 어느 커맨드를 치고 있는지 알아내는 일은 이쪽이 맡는다. 여기는 입력을 읽어
         // 넘기고 결과를 알릴 뿐이다.
@@ -208,6 +206,13 @@ namespace Adler.Weapons
         {
             _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+
+            if (_input == null)
+            {
+                Debug.LogError($"{nameof(StratagemBay)}: {nameof(PilotInput)}을 찾지 못했습니다.", this);
+                enabled = false;
+            }
 
             // 쿨타임과 횟수는 여기서 세고, 인식기는 그 결과만 물어본다.
             _recognizer = new CommandRecognizer(_loadout, IsReady);
@@ -218,43 +223,6 @@ namespace Adler.Weapons
             }
         }
 
-        private void OnEnable()
-        {
-            if (_controls == null)
-            {
-                Debug.LogError($"{nameof(StratagemBay)}: Controls 에셋이 비어 있습니다.", this);
-                enabled = false;
-                return;
-            }
-
-            InputActionMap map = _controls.FindActionMap("Flight", throwIfNotFound: true);
-            _directionActions[(int)CommandDirection.Up] = map.FindAction("CommandUp", throwIfNotFound: true);
-            _directionActions[(int)CommandDirection.Down] = map.FindAction("CommandDown", throwIfNotFound: true);
-            _directionActions[(int)CommandDirection.Left] = map.FindAction("CommandLeft", throwIfNotFound: true);
-            _directionActions[(int)CommandDirection.Right] = map.FindAction("CommandRight", throwIfNotFound: true);
-            _dropAction = map.FindAction("DropBomb", throwIfNotFound: true);
-            _toggleAction = map.FindAction("ToggleCommands", throwIfNotFound: true);
-
-            foreach (InputAction action in _directionActions)
-            {
-                action.Enable();
-            }
-
-            _dropAction.Enable();
-            _toggleAction.Enable();
-        }
-
-        private void OnDisable()
-        {
-            foreach (InputAction action in _directionActions)
-            {
-                action?.Disable();
-            }
-
-            _dropAction?.Disable();
-            _toggleAction?.Disable();
-        }
-
         private void Update()
         {
             UpdateJamming();
@@ -262,7 +230,7 @@ namespace Adler.Weapons
             // 봉인 중에도 창은 열린다. 열리지 않으면 눌러도 아무 일이 없는 것과 같아서
             // 봉인당한 것인지 키가 안 먹는 것인지 구분이 안 된다. 열어서 봉인당한 목록을
             // 보여주는 편이 무엇이 벌어졌는지 한 번에 알려준다.
-            if (_toggleAction.WasPressedThisFrame())
+            if (_input.ToggleCommandsPressed)
             {
                 _autoOpened = false;
                 SetCommandMode(!CommandModeActive);
@@ -290,7 +258,7 @@ namespace Adler.Weapons
             }
 
             // 투하는 커맨드 창과 무관하다. 장전해 둔 폭탄은 창을 닫은 뒤에 떨구게 된다.
-            if (!IsJammed && _dropAction.WasPressedThisFrame())
+            if (!IsJammed && _input.DropPressed)
             {
                 TryDrop();
             }
@@ -367,15 +335,7 @@ namespace Adler.Weapons
                 return false;
             }
 
-            foreach (InputAction action in _directionActions)
-            {
-                if (action.WasPressedThisFrame() && action.activeControl?.device is Gamepad)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return _input.AnyCommandOnGamepad;
         }
 
         /// <summary>입력이 끊긴 채로 시간이 지나면 처음부터 다시 받는다.</summary>
@@ -405,9 +365,9 @@ namespace Adler.Weapons
 
         private void ReadCommandInput()
         {
-            for (int i = 0; i < _directionActions.Length; i++)
+            for (int i = 0; i < 4; i++)
             {
-                if (_directionActions[i].WasPressedThisFrame())
+                if (_input.CommandPressed((CommandDirection)i))
                 {
                     Accept((CommandDirection)i);
                     return; // 한 프레임에 한 방향만 받는다

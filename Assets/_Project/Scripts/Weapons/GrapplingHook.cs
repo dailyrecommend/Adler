@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Adler.Controls;
 using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Adler.Weapons
 {
@@ -45,7 +45,8 @@ namespace Adler.Weapons
         }
 
         [Header("참조")]
-        [SerializeField] private InputActionAsset _controls;
+        [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
+        [SerializeField] private PilotInput _input;
 
         [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
@@ -172,7 +173,6 @@ namespace Adler.Weapons
         // 고정된다 — 줄이 늘어나든 휘든 코드가 손댈 일이 없다.
 
         private LockOnTargeting _targeting;
-        private InputAction _grappleAction;
 
         private Transform _hooked;
         private Rigidbody _hookedBody;
@@ -246,9 +246,11 @@ namespace Adler.Weapons
                 _origin = transform;
             }
 
-            if (_aircraft == null || _targeting == null || _controls == null)
+            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+
+            if (_aircraft == null || _targeting == null || _input == null)
             {
-                Debug.LogError($"{nameof(GrapplingHook)}: 기체, 조준, Controls 중 빠진 것이 있습니다.", this);
+                Debug.LogError($"{nameof(GrapplingHook)}: 기체, 조준, 입력 중 빠진 것이 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -263,16 +265,9 @@ namespace Adler.Weapons
             ShowLine(false);
         }
 
-        private void OnEnable()
-        {
-            _grappleAction = _controls.FindActionMap("Flight", throwIfNotFound: true)
-                                      .FindAction("Grapple", throwIfNotFound: true);
-            _grappleAction.Enable();
-        }
 
         private void OnDisable()
         {
-            _grappleAction?.Disable();
             Release();
 
             // 꺼질 때는 기다리지 않고 바로 되돌린다. 지켜볼 Update가 더는 돌지 않으므로,
@@ -288,7 +283,7 @@ namespace Adler.Weapons
                 _cooldownRemaining -= _clock.Delta;
             }
 
-            if (_grappleAction.WasPressedThisFrame())
+            if (_input.GrapplePressed)
             {
                 Toggle();
             }

@@ -1,4 +1,4 @@
-namespace Adler.Flight
+namespace Adler.Controls
 {
     /// <summary>
     /// 지금 키보드를 조종이 아닌 다른 일에 쓰고 있는 쪽.

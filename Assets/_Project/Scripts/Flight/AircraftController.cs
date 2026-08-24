@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Adler.Aircraft;
+using Adler.Controls;
 using Adler.Combat;
 using Adler.Core;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Adler.Flight
 {
@@ -20,7 +20,8 @@ namespace Adler.Flight
     public sealed class AircraftController : MonoBehaviour
     {
         [Header("참조")]
-        [SerializeField] private InputActionAsset _controls;
+        [Tooltip("입력을 읽어오는 곳. 비워두면 이 오브젝트에서 찾는다.")]
+        [SerializeField] private PilotInput _input;
 
         [Tooltip("기체의 소재 성능. 정비 결과는 여기가 아니라 런타임 스탯 시트에 얹힌다.")]
         [SerializeField] private AirframeDefinition _airframe;
@@ -49,12 +50,7 @@ namespace Adler.Flight
         private AircraftDebuffs _debuffs;
 
         // 키보드를 가져간 것이 있는지 알아야 WASD를 조종에서 뗄 수 있다.
-        private IControlSuppressor _suppressor;
 
-        private InputActionMap _flightMap;
-        private InputAction _pitchAction;
-        private InputAction _rollAction;
-        private InputAction _boostAction;
 
         /// <summary>HUD와 카메라가 속도를 읽는 통로.</summary>
         public IFlightModel Model => _model;
@@ -72,7 +68,10 @@ namespace Adler.Flight
 
             _boostFuel = GetComponent<BoostFuel>();
             _debuffs = GetComponent<AircraftDebuffs>();
-            _suppressor = GetComponent<IControlSuppressor>();
+            if (_input == null)
+            {
+                _input = GetComponent<PilotInput>();
+            }
 
             if (_airframe == null)
             {
@@ -113,27 +112,6 @@ namespace Adler.Flight
             return new ArcadeFlightModel(Stats) { InvertPitch = _invertPitch };
         }
 
-        private void OnEnable()
-        {
-            if (_controls == null)
-            {
-                Debug.LogError($"{nameof(AircraftController)}: Controls 에셋이 비어 있습니다.", this);
-                enabled = false;
-                return;
-            }
-
-            _flightMap = _controls.FindActionMap("Flight", throwIfNotFound: true);
-            _pitchAction = _flightMap.FindAction("Pitch", throwIfNotFound: true);
-            _rollAction = _flightMap.FindAction("Roll", throwIfNotFound: true);
-            _boostAction = _flightMap.FindAction("Boost", throwIfNotFound: true);
-
-            _flightMap.Enable();
-        }
-
-        private void OnDisable()
-        {
-            _flightMap?.Disable();
-        }
 
         /// <summary>
         /// 비행 상태를 처음으로 되돌린다. 리스폰이 기체를 옮긴 뒤에 부른다.
@@ -166,42 +144,19 @@ namespace Adler.Flight
             //
             // 얼어붙은 동안에는 누르지 않은 것으로 넘긴다. 엔진이 죽었는데 연료만
             // 타들어가면, 녹은 뒤에 쓸 것이 남아 있지 않아 두 번 벌을 받는다.
-            bool wantsBoost = !_model.IsFrozen && _boostAction.IsPressed();
+            bool wantsBoost = !_model.IsFrozen && _input.Boost;
             bool boosting = _boostFuel != null
                 ? _boostFuel.RequestBoost(wantsBoost, _clock.FixedDelta)
                 : wantsBoost;
 
             return new FlightInput
             {
-                Pitch = ReadStick(_pitchAction),
-                Roll = ReadStick(_rollAction),
+                Pitch = _input.Pitch,
+                Roll = _input.Roll,
                 Boost = boosting,
             };
         }
 
-        /// <summary>
-        /// 커맨드 창이 열려 있으면 키보드 쪽 조종면 입력을 버린다.
-        /// <para>
-        /// WASD가 조종과 커맨드를 함께 맡으므로, 창이 열린 채로 커맨드를 치면 기수가
-        /// 같이 움직인다. 커맨드는 몇 초를 잡아먹는 일이라 그동안 기체가 제멋대로
-        /// 꺾이면, 입력을 마치고 났을 때 어디를 향하고 있을지 알 수 없다.
-        /// </para>
-        /// <para>
-        /// 패드는 그대로 둔다. 그쪽은 커맨드가 십자키라 스틱과 겹치지 않으므로,
-        /// 함께 막으면 겪지도 않는 문제 때문에 조종을 빼앗기는 셈이 된다.
-        /// </para>
-        /// </summary>
-        private float ReadStick(InputAction action)
-        {
-            float value = action.ReadValue<float>();
-
-            if (value == 0f || _suppressor == null || !_suppressor.SuppressesKeyboard)
-            {
-                return value;
-            }
-
-            return action.activeControl?.device is Keyboard ? 0f : value;
-        }
 
 #if UNITY_EDITOR
         /// <summary>인스펙터에서 Invert Pitch를 켜고 끄면 플레이 중에도 즉시 반영한다.</summary>

@@ -1,8 +1,8 @@
 using System;
 using Adler.Combat;
+using Adler.Controls;
 using Adler.Core;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Adler.Flight
 {
@@ -19,7 +19,8 @@ namespace Adler.Flight
     public sealed class AircraftLifecycle : MonoBehaviour
     {
         [Header("참조")]
-        [SerializeField] private InputActionAsset _controls;
+        [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
+        [SerializeField] private PilotInput _input;
 
         [Tooltip("되돌아갈 자리. 비워두면 시작할 때의 위치와 자세를 기억해 쓴다.")]
         [SerializeField] private Transform _spawnPoint;
@@ -52,7 +53,6 @@ namespace Adler.Flight
         private float _autoRespawnRemaining = -1f;
 
         private AircraftRig _aircraft;
-        private InputAction _respawnAction;
         private Vector3 _startPosition;
         private Quaternion _startRotation;
 
@@ -66,6 +66,7 @@ namespace Adler.Flight
 
         private void Awake()
         {
+            _input = _input != null ? _input : GetComponent<PilotInput>();
             _clock = TimeScale.For(this);
             _aircraft = GetComponent<AircraftRig>();
 
@@ -80,15 +81,6 @@ namespace Adler.Flight
                 _aircraft.Health.Died += OnDied;
             }
 
-            if (_controls == null)
-            {
-                Debug.LogError($"{nameof(AircraftLifecycle)}: Controls 에셋이 비어 있습니다.", this);
-                return;
-            }
-
-            _respawnAction = _controls.FindActionMap("Flight", throwIfNotFound: true)
-                                      .FindAction("Respawn", throwIfNotFound: true);
-            _respawnAction.Enable();
         }
 
         private void OnDisable()
@@ -98,14 +90,13 @@ namespace Adler.Flight
                 _aircraft.Health.Died -= OnDied;
             }
 
-            _respawnAction?.Disable();
         }
 
         private void Update()
         {
             UpdateAutoRespawn();
 
-            if (_respawnAction == null || !_respawnAction.WasPressedThisFrame())
+            if (_input == null || !_input.RespawnPressed)
             {
                 return;
             }

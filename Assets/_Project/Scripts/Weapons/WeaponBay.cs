@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Adler.Controls;
 using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Adler.Weapons
 {
@@ -22,7 +22,8 @@ namespace Adler.Weapons
     public sealed class WeaponBay : MonoBehaviour
     {
         [Header("참조")]
-        [SerializeField] private InputActionAsset _controls;
+        [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
+        [SerializeField] private PilotInput _input;
 
         [Tooltip("비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
@@ -32,9 +33,6 @@ namespace Adler.Weapons
                  "비워두면 기체에 붙어 있는 것들을 알아서 모은다.")]
         [SerializeField] private List<AircraftWeapon> _weapons = new();
 
-        private InputAction _fireAction;
-        private InputAction _switchAction;
-        private InputAction _cycleTargetAction;
         private LockOnTargeting _targeting;
         private int _activeIndex;
 
@@ -85,28 +83,17 @@ namespace Adler.Weapons
 
         private void OnEnable()
         {
-            if (_controls == null)
+            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+
+            if (_input == null)
             {
-                Debug.LogError($"{nameof(WeaponBay)}: Controls 에셋이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(WeaponBay)}: {nameof(PilotInput)}을 찾지 못했습니다.", this);
                 enabled = false;
-                return;
             }
-
-            InputActionMap map = _controls.FindActionMap("Flight", throwIfNotFound: true);
-            _fireAction = map.FindAction("Fire", throwIfNotFound: true);
-            _switchAction = map.FindAction("SwitchWeapon", throwIfNotFound: true);
-            _cycleTargetAction = map.FindAction("SwitchTarget", throwIfNotFound: true);
-
-            _fireAction.Enable();
-            _switchAction.Enable();
-            _cycleTargetAction.Enable();
         }
 
         private void OnDisable()
         {
-            _fireAction?.Disable();
-            _switchAction?.Disable();
-            _cycleTargetAction?.Disable();
 
             // 꺼질 때 방아쇠를 놓은 것으로 친다. 격추된 뒤 되살아났을 때
             // 눌려 있던 상태가 남아 첫 발이 저절로 나가지 않게 한다.
@@ -115,12 +102,12 @@ namespace Adler.Weapons
 
         private void Update()
         {
-            if (_switchAction.WasPressedThisFrame())
+            if (_input.SwitchWeaponPressed)
             {
                 SelectNext();
             }
 
-            if (_cycleTargetAction.WasPressedThisFrame() && _targeting != null)
+            if (_input.SwitchTargetPressed && _targeting != null)
             {
                 _targeting.CycleTarget();
             }
@@ -131,7 +118,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            if (_fireAction.IsPressed())
+            if (_input.Fire)
             {
                 weapon.HoldTrigger(_clock.Delta);
             }

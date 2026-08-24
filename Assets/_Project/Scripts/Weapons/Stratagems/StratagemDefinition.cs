@@ -1,15 +1,8 @@
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
 {
-    /// <summary>승인 커맨드를 이루는 방향 입력 하나.</summary>
-    public enum CommandDirection
-    {
-        Up = 0,
-        Down = 1,
-        Left = 2,
-        Right = 3,
-    }
 
     /// <summary>
     /// 커맨드를 입력해 요청하는 것들의 공통 기반. 폭탄도 재보급도 여기서 갈라져 나온다.
