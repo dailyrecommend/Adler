@@ -41,7 +41,21 @@ namespace Adler.Combat
         private float _current;
 
         /// <summary>피해를 입을 때마다. 피격 효과와 HUD가 구독한다.</summary>
-        public event Action<Health, DamageInfo> Damaged;
+        public event Action<Health, DamageInfo, DamageResult> Damaged;
+
+        /// <summary>
+        /// 누구든 피해를 입을 때마다. 대상을 가리지 않고 전부 지나간다.
+        /// <para>
+        /// 정적인 이유는 듣는 쪽이 화면에 하나뿐이고, 말하는 쪽은 계속 태어나고
+        /// 사라지기 때문이다. 하나하나 이어주려면 적을 낳는 곳마다 화면 표시를 알아야
+        /// 하고, 그러면 전투 계층이 표현 계층을 향해 거슬러 올라간다.
+        /// </para>
+        /// <para>
+        /// 구독한 쪽은 반드시 OnDisable에서 끊어야 한다. 이 통로는 씬이 바뀌어도
+        /// 살아 있어서, 끊지 않으면 사라진 화면 표시가 계속 불려 나온다.
+        /// </para>
+        /// </summary>
+        public static event Action<Health, DamageInfo, DamageResult> AnyDamaged;
 
         /// <summary>관문에 막혔을 때. 도탄 표시나 "철거력 부족" 안내를 띄우는 자리.</summary>
         public event Action<Health, DamageInfo, DamageRejection> Blocked;
@@ -96,11 +110,18 @@ namespace Adler.Combat
 
             float applied = Mathf.Min(_current, damage.Amount * scale);
             _current -= applied;
-            Damaged?.Invoke(this, damage);
 
-            if (_current > 0f)
+            // 결과를 먼저 확정하고 알린다. 깎은 뒤에 알리고 죽음을 나중에 판단하면
+            // 구독자가 이번 한 방이 마지막이었는지 모르는 채로 반응하게 되는데,
+            // 마무리 일격은 대개 다르게 보여야 한다.
+            DamageResult result = new(DamageRejection.None, applied, _current <= 0f);
+
+            Damaged?.Invoke(this, damage, result);
+            AnyDamaged?.Invoke(this, damage, result);
+
+            if (!result.Killed)
             {
-                return new DamageResult(DamageRejection.None, applied, killed: false);
+                return result;
             }
 
             Died?.Invoke(this, damage);
@@ -110,7 +131,7 @@ namespace Adler.Combat
                 gameObject.SetActive(false);
             }
 
-            return new DamageResult(DamageRejection.None, applied, killed: true);
+            return result;
         }
 
         /// <summary>

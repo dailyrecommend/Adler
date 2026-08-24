@@ -69,7 +69,7 @@ namespace Adler.Effects
 
         private void OnDisable() => _health.Damaged -= OnDamaged;
 
-        private void OnDamaged(Health health, DamageInfo damage)
+        private void OnDamaged(Health health, DamageInfo damage, DamageResult result)
         {
             if (_clock.Now < _nextAt)
             {

@@ -81,7 +81,7 @@ namespace Adler.Audio
             _health.Died -= OnDied;
         }
 
-        private void OnDamaged(Health health, DamageInfo damage)
+        private void OnDamaged(Health health, DamageInfo damage, DamageResult result)
         {
             if (_hit == null || _clock.Now < _nextHitAt)
             {

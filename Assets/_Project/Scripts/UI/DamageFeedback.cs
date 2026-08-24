@@ -72,7 +72,10 @@ namespace Adler.UI
 
         private void OnDisable() => _health.Damaged -= OnDamaged;
 
-        private void OnDamaged(Health health, DamageInfo damage) => _pending += damage.Amount;
+        // 실제로 들어간 만큼만 센다. 요청한 값을 쓰면 장갑에 깎이거나 넘치게 때린
+        // 한 방이 그대로 흔들림이 되어, 화면이 남은 내구도와 다른 말을 한다.
+        private void OnDamaged(Health health, DamageInfo damage, DamageResult result)
+            => _pending += result.Applied;
 
         private void Update()
         {

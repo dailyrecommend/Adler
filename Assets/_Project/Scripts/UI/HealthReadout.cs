@@ -59,7 +59,7 @@ namespace Adler.UI
 
         private void OnEnable()
         {
-            _health.Damaged += OnChanged;
+            _health.Damaged += OnDamaged;
             _health.Died += OnChanged;
             _health.Revived += OnRevived;
             _health.Healed += OnHealed;
@@ -67,7 +67,7 @@ namespace Adler.UI
 
         private void OnDisable()
         {
-            _health.Damaged -= OnChanged;
+            _health.Damaged -= OnDamaged;
             _health.Died -= OnChanged;
             _health.Revived -= OnRevived;
             _health.Healed -= OnHealed;
@@ -82,6 +82,8 @@ namespace Adler.UI
         /// </para>
         /// </summary>
         private void Start() => Refresh();
+
+        private void OnDamaged(Health health, DamageInfo damage, DamageResult result) => Refresh();
 
         private void OnChanged(Health health, DamageInfo damage) => Refresh();
 

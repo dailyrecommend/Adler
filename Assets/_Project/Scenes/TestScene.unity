@@ -594,6 +594,7 @@ GameObject:
   - component: {fileID: 99851331}
   - component: {fileID: 99851332}
   - component: {fileID: 99851333}
+  - component: {fileID: 99851334}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -881,6 +882,28 @@ MonoBehaviour:
   _markPrefab: {fileID: 7298350418524237421, guid: de533cc487a6178489df6988cbeddf88, type: 3}
   _markRoot: {fileID: 1608626950}
   _maxMarks: 12
+--- !u!114 &99851334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99851318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2636b0d9643b50f459d3fed925e27796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.UI.DamageNumberDisplay
+  _layers:
+    serializedVersion: 2
+    m_Bits: 2048
+  _camera: {fileID: 330585545}
+  _numberPrefab: {fileID: 1097435432198445478, guid: 9146c649e571b2447abc43316812afd9, type: 3}
+  _numberRoot: {fileID: 1608626950}
+  _maxNumbers: 16
+  _worldOffset: {x: 0, y: 1.2, z: 0}
+  _followTarget: 1
+  _mergeSeconds: 0
 --- !u!1 &134741782
 GameObject:
   m_ObjectHideFlags: 0

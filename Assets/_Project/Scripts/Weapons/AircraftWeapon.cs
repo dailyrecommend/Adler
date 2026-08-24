@@ -31,6 +31,7 @@ namespace Adler.Weapons
         [Tooltip("맞을 레이어. 기체 자신이 속한 레이어는 빼야 자기 무기에 맞지 않는다.")]
         [SerializeField] protected LayerMask _hitMask = ~0;
 
+        private float _firingFor;
         private float _cooldown;
         private int _nextMuzzle;
         private int _remaining;
@@ -61,6 +62,21 @@ namespace Adler.Weapons
         /// </summary>
         public virtual bool CanFire => !IsEmpty;
 
+        /// <summary>
+        /// 지금 탄이 나가고 있는지. 총구 화염 같은 이어지는 연출이 이것을 본다.
+        /// <para>
+        /// 방아쇠가 당겨져 있는지와 다르다. 탄창이 비었거나 조준이 안 걸린 동안에도
+        /// 방아쇠는 당겨져 있는데, 그때 총구가 계속 타오르면 화면이 나가지도 않은
+        /// 탄을 쏘고 있다고 말하게 된다.
+        /// </para>
+        /// <para>
+        /// 한 발 나갈 때마다 다음 발까지 버틸 만큼만 켜 둔다. 나가는 순간에만 참이면
+        /// 연사 중에 매 발 꺼졌다 켜져서 깜빡이고, 방아쇠를 놓을 때까지 켜 두면
+        /// 마지막 탄을 쏘고 나서도 남는다.
+        /// </para>
+        /// </summary>
+        public bool IsFiring => _firingFor > 0f;
+
         protected virtual void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
@@ -80,6 +96,7 @@ namespace Adler.Weapons
         /// </summary>
         public void HoldTrigger(float deltaTime)
         {
+            _firingFor = Mathf.Max(0f, _firingFor - deltaTime);
             _cooldown -= deltaTime;
 
             if (_cooldown > 0f)
@@ -98,10 +115,28 @@ namespace Adler.Weapons
             SpendRound();
             FireOnce();
             _cooldown += Definition.ShotInterval;
+            _firingFor = FiringTail;
         }
 
+        /// <summary>
+        /// 한 발 쏜 뒤 "쏘는 중"으로 남아 있는 시간(초).
+        /// <para>
+        /// 발사 간격보다 조금 길게 잡아 연사 중에 끊기지 않게 하되, 위로 한계를 둔다.
+        /// 간격에만 비례시키면 몇 초에 한 발 나가는 발사기가 쏘고 나서 몇 초 동안
+        /// 계속 쏘는 중이 되는데, 그런 무기는 한 발마다 번쩍하는 편이 맞다.
+        /// </para>
+        /// </summary>
+        private float FiringTail => Mathf.Min(Definition.ShotInterval * 1.5f, 0.2f);
+
         /// <summary>방아쇠를 놓았을 때. 짧게 끊어 쏴도 첫 발이 즉시 나가게 한다.</summary>
-        public void ReleaseTrigger() => _cooldown = Mathf.Min(_cooldown, 0f);
+        public void ReleaseTrigger()
+        {
+            _cooldown = Mathf.Min(_cooldown, 0f);
+
+            // 놓는 순간 바로 끈다. 여기서 꼬리를 남기면 톡 눌렀을 때 총구가
+            // 손을 뗀 뒤에도 타올라, 끊어 쏘는 것이 화면에 끊어져 보이지 않는다.
+            _firingFor = 0f;
+        }
 
         /// <summary>교체돼서 손에서 떠날 때. 조준 같은 진행 중인 상태를 정리한다.</summary>
         public virtual void OnStowed() => ReleaseTrigger();
