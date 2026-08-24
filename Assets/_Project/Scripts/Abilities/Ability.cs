@@ -34,17 +34,6 @@ namespace Adler.Abilities
         public bool IsRunning => Phase is not (AbilityPhase.Idle or AbilityPhase.Finished);
 
         /// <summary>
-        /// 지금 끊을 수 있는지. 전이 표가 이것을 먼저 묻는다.
-        /// <para>
-        /// 언제 끊을 수 있는지는 행동이 정하고, 무엇으로 끊을 수 있는지는 표가 정한다.
-        /// 둘을 한곳에 두면 행동이 다른 행동의 이름을 알아야 하고, 그때부터 행동을
-        /// 더할 때마다 기존 행동들을 함께 고치게 된다.
-        /// </para>
-        /// </summary>
-        public virtual bool IsCancelable => Phase is AbilityPhase.Recovery
-                                            || (Phase == AbilityPhase.Active && Spec.CancelableWhileActive);
-
-        /// <summary>
         /// 지금 시작할 수 있는지. 꼬리표가 요구하는 것을 갖췄는지 여기서 본다.
         /// 더 볼 것이 있으면 물려받는 쪽이 덧붙인다.
         /// </summary>

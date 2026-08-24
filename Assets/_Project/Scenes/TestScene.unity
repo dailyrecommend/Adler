@@ -11264,7 +11264,7 @@ MonoBehaviour:
   _input: {fileID: 1812182311}
   _bindings:
   - Action: 0
-    Ability: {fileID: 11400000, guid: 66e3fa6d8b0a5604abab9a94ad27827b, type: 2}
+    Ability: {fileID: 11400000, guid: 2eb784d5437aa4a46a5c6c16143ee1a4, type: 2}
     Style: 1
 --- !u!114 &1840017528
 MonoBehaviour:
@@ -11279,8 +11279,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Abilities.AbilityRunner
   _granted:
-  - {fileID: 11400000, guid: 66e3fa6d8b0a5604abab9a94ad27827b, type: 2}
-  _transitions: {fileID: 11400000, guid: e836442525edcc548986f2a0a4b78a39, type: 2}
+  - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
+  - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
+  - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
+  - {fileID: 11400000, guid: 2eb784d5437aa4a46a5c6c16143ee1a4, type: 2}
 --- !u!1 &1840385403
 GameObject:
   m_ObjectHideFlags: 0
@@ -11512,6 +11514,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
   - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
   - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
+  - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   _inputTimeout: 1.5
   _gamepadOpensOnInput: 1
   _openGuardSeconds: 0.1

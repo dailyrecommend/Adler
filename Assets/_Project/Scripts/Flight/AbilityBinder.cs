@@ -66,7 +66,7 @@ namespace Adler.Flight
         {
             _runner = GetComponent<AbilityRunner>();
             _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+            _input = _input != null ? _input : _aircraft?.Input;
 
             if (_input == null || _aircraft == null)
             {
@@ -127,7 +127,7 @@ namespace Adler.Flight
         private void Hold(in Binding binding)
         {
             bool held = _input.IsHeld(binding.Action);
-            bool mine = _runner.Running?.Spec == binding.Ability;
+            bool mine = _runner.IsRunning(binding.Ability);
 
             if (held && !mine)
             {
@@ -135,15 +135,15 @@ namespace Adler.Flight
             }
             else if (!held && mine)
             {
-                _runner.Stop();
+                _runner.Stop(binding.Ability);
             }
         }
 
         private void Toggle(in Binding binding)
         {
-            if (_runner.Running?.Spec == binding.Ability)
+            if (_runner.IsRunning(binding.Ability))
             {
-                _runner.Stop();
+                _runner.Stop(binding.Ability);
                 return;
             }
 

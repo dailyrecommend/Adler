@@ -236,7 +236,7 @@ namespace Adler.Weapons
                 _origin = transform;
             }
 
-            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+            _input = _input != null ? _input : _aircraft?.Input;
 
             if (_aircraft == null || _targeting == null || _input == null)
             {

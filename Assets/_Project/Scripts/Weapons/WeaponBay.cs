@@ -109,7 +109,7 @@ namespace Adler.Weapons
 
         private void OnEnable()
         {
-            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+            _input = _input != null ? _input : _aircraft?.Input;
 
             if (_input == null)
             {

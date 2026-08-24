@@ -208,8 +208,10 @@ namespace Adler.Weapons
         {
             _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
-            _input = _input != null ? _input : GetComponentInParent<PilotInput>();
-            _abilities = GetComponentInParent<AbilityRunner>();
+            _input = _input != null ? _input : _aircraft?.Input;
+            // 기체 전체에서 찾는다. 부모 방향만 보면 실행기가 형제 오브젝트에 있을 때
+            // 놓치는데, 컴포넌트를 무리 지어 배치하면 형제로 놓이는 것이 자연스럽다.
+            _abilities = _aircraft != null ? _aircraft.Abilities : null;
 
             if (_input == null)
             {
@@ -406,6 +408,10 @@ namespace Adler.Weapons
                     return;
 
                 case CommandInput.Accepted:
+                    // 마지막 칸도 채워진 것은 채워진 것이다. 승인만 알리고 넘어가면
+                    // 그 한 번의 입력에는 소리도 표시도 없어서, 다 쳤는데 마지막
+                    // 화살표만 반응하지 않은 것처럼 보인다.
+                    CommandProgressed?.Invoke(_recognizer.Entered);
                     Authorize(_recognizer.Completed);
                     return;
             }

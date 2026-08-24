@@ -1,5 +1,6 @@
 using Adler.Abilities;
 using Adler.Aircraft;
+using Adler.Controls;
 using Adler.Combat;
 using Adler.Weapons;
 using UnityEngine;
@@ -27,6 +28,9 @@ namespace Adler.Flight
         public AircraftController Control { get; private set; }
 
         public AircraftLifecycle Lifecycle { get; private set; }
+
+        /// <summary>조종석의 입력. 무엇을 하려는지는 여기서 읽는다.</summary>
+        public PilotInput Input { get; private set; }
 
         public Health Health { get; private set; }
 
@@ -66,6 +70,7 @@ namespace Adler.Flight
             Body = GetComponent<Rigidbody>();
             Control = GetComponentInChildren<AircraftController>(includeInactive: true);
             Lifecycle = GetComponentInChildren<AircraftLifecycle>(includeInactive: true);
+            Input = GetComponentInChildren<PilotInput>(includeInactive: true);
             Health = GetComponentInChildren<Health>(includeInactive: true);
             Boost = GetComponentInChildren<BoostFuel>(includeInactive: true);
             Weapons = GetComponentInChildren<WeaponBay>(includeInactive: true);

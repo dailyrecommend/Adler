@@ -38,15 +38,9 @@ namespace Adler.Abilities
         public float ActiveSeconds = 0.1f;
 
         [Tooltip("효력이 끝난 뒤 다음 행동으로 넘어가기까지.\n" +
-                 "여기가 곧 끊을 수 있는 구간이므로, 0으로 두면 행동이 뚝뚝 이어진다.")]
+                 "0으로 두면 다음 행동이 곧바로 이어져 무게가 느껴지지 않는다.")]
         [Min(0f)]
         public float RecoverySeconds;
-
-        [Header("끊기")]
-        [Tooltip("효력 구간에서도 끊을 수 있다.\n\n" +
-                 "켜면 반응이 좋아지지만 그만큼 가볍다. 무거운 한 방일수록 꺼두어야\n" +
-                 "내지른 값을 치른다는 느낌이 남는다.")]
-        public bool CancelableWhileActive;
 
         [Header("재사용")]
         [Tooltip("끝난 뒤 다시 쓸 수 있을 때까지의 시간(초).")]

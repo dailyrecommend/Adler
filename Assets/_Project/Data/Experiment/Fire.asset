@@ -9,14 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: FireGun
-  m_EditorClassIdentifier: Adler.Runtime:Adler.Abilities:FireGunSpec
+  m_Script: {fileID: 11500000, guid: 590b2aa3408a4d62e5f5c2c663bc1d77, type: 3}
+  m_Name: Fire
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Abilities.FireGunSpec
   DisplayName: Fire
   Description: 
   Tags: 1
   WindupSeconds: 0
   ActiveSeconds: 0.1
   RecoverySeconds: 0
-  CancelableWhileActive: 0
   Cooldown: 0

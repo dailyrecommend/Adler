@@ -16,7 +16,7 @@ MonoBehaviour:
   Description: 
   Tags: 129
   WindupSeconds: 0
-  ActiveSeconds: 0.1
+  ActiveSeconds: 2
   RecoverySeconds: 0
   CancelableWhileActive: 0
   Cooldown: 20
