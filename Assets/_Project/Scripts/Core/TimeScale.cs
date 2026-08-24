@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Adler.Core
@@ -18,9 +19,26 @@ namespace Adler.Core
     public sealed class TimeScale : MonoBehaviour
     {
         [Tooltip("이 아래가 흐르는 속도. 1이면 바깥과 같고, 0.5면 절반으로 느리다.\n" +
-                 "부모에 또 다른 시계가 있으면 그쪽 배율에 곱해진다.")]
-        [Range(0.01f, 4f)]
+                 "0이면 이 아래의 시간이 멎는다. 부모에 또 다른 시계가 있으면 그쪽 배율에 곱해진다.")]
+        [Range(0f, 4f)]
         [SerializeField] private float _scale = 1f;
+
+        /// <summary>
+        /// 지금 살아 있는 시계들.
+        /// <para>
+        /// 시간을 건드리는 것이 무엇을 늦출지 찾을 때 쓴다. 늦출 대상의 목록을 손으로
+        /// 들고 있으면 적을 하나 새로 만들 때 그것을 넣는 것을 잊게 되고, 그때 증상이
+        /// "멈춘 세상에서 저놈만 날아다닌다"라 눈에 띄기는 하지만 원인이 멀리 있다.
+        /// </para>
+        /// <para>
+        /// 여기 오르는 것은 <b>시계를 가진 것들뿐</b>이다. 늦추고 싶은 것에는 이
+        /// 컴포넌트가 붙어 있어야 한다는 뜻이고, 그게 이 방식이 치르는 값이다.
+        /// </para>
+        /// </summary>
+        private static readonly List<TimeScale> Active = new();
+
+        /// <inheritdoc cref="Active" />
+        public static IReadOnlyList<TimeScale> All => Active;
 
         private Clock _clock;
 
@@ -54,6 +72,21 @@ namespace Adler.Core
 
             return owner != null ? owner.Clock : Core.Clock.World;
         }
+
+        /// <summary>
+        /// 자기를 내보낸 쪽의 시계를 물려받는다.
+        /// <para>
+        /// 탄이나 폭탄처럼 부모 없이 태어나는 것이 쓴다. 자기 자리에서 찾으면 매달린
+        /// 데가 없으니 늘 세상 시계가 되어, 쏜 놈이 아무리 늦춰져 있어도 탄만 제 속도로
+        /// 날아간다. 시간이 멎은 적이 쏜 탄이 평소처럼 날아오면 멎었다고 할 수 없다.
+        /// </para>
+        /// </summary>
+        public static Clock Inherited(GameObject owner, Component self)
+            => owner != null ? For(owner.transform) : For(self);
+
+        private void OnEnable() => Active.Add(this);
+
+        private void OnDisable() => Active.Remove(this);
 
         private void Awake() => Clock.LocalScale = _scale;
 

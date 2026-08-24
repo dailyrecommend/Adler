@@ -114,6 +114,16 @@ namespace Adler.Abilities
             ability.Begin(Context);
             _running.Add(ability);
 
+            // 쿨타임은 끝날 때가 아니라 쓰는 순간부터 흐른다.
+            //
+            // 끝날 때부터 재면 지속형이 곤란해진다. 화면은 부른 순간부터 세는데 실제로
+            // 열리는 것은 효과가 끝나고 나서라, 다 찼다고 보이는데 안 써지는 구간이
+            // 효과 지속시간만큼 생긴다. 그 구간에서 플레이어는 입력이 씹혔다고 읽는다.
+            if (spec.Cooldown > 0f && _clock != null)
+            {
+                _readyAt[spec] = _clock.Now + spec.Cooldown;
+            }
+
             Started?.Invoke(ability);
             return true;
         }
@@ -147,6 +157,18 @@ namespace Adler.Abilities
                 if (spec == null || _abilities.ContainsKey(spec))
                 {
                     continue;
+                }
+
+                // 손을 떼야 끝나는데 잡고 있는 사람이 없는 조합. 커맨드로 부르는 것은
+                // 아무도 놓아주지 않으므로 한 번 시작하면 영영 돈다. 증상이 "상태가
+                // 안 풀린다"라 원인을 실행기나 행동에서 찾게 되는데, 정작 틀린 것은
+                // 자산의 꼬리표 한 칸이다.
+                if (spec.Has(AbilityTag.Stratagem) && spec.Has(AbilityTag.Sustained))
+                {
+                    Debug.LogError(
+                        $"{nameof(AbilityRunner)}: '{spec.DisplayName}'이 Stratagem이면서 Sustained입니다. " +
+                        "커맨드로 부르는 것은 놓아줄 손이 없어 끝나지 않습니다 — " +
+                        "Sustained를 끄고 Active Seconds로 길이를 정하세요.", this);
                 }
 
                 Ability ability = spec.Create();
@@ -194,11 +216,6 @@ namespace Adler.Abilities
             }
 
             ability.End(Context);
-
-            if (ability.Spec != null && ability.Spec.Cooldown > 0f && _clock != null)
-            {
-                _readyAt[ability.Spec] = _clock.Now + ability.Spec.Cooldown;
-            }
 
             Ended?.Invoke(ability);
         }

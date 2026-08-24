@@ -436,14 +436,24 @@ namespace Adler.Weapons
             {
                 ArmedBomb = bomb;
             }
+            // 실행은 행동 쪽이 맡는다. 여기서 무엇을 하는지까지 알면 스트라타젬을
+            // 늘릴 때마다 이 분기가 함께 늘어난다.
+            //
+            // 실제로 시작됐을 때만 쓴 것으로 친다. 먼저 세어두고 결과를 버리면, 행동
+            // 쪽이 거절했을 때 출격 횟수만 깎이고 아무 일도 일어나지 않는다 —
+            // 플레이어에게는 한 번이 그냥 사라진 것으로 보인다.
+            else if (_abilities == null || _abilities.TryUse(stratagem))
+            {
+                MarkUsed(stratagem);
+            }
             else
             {
-                // 재보급처럼 승인과 동시에 끝나는 것은 그 자리에서 쓴 것으로 친다.
-                MarkUsed(stratagem);
+                // 커맨드는 맞았으니 창은 닫는다. 다만 쓴 것으로 치지는 않는다.
+                Refused?.Invoke(stratagem);
 
-                // 실행은 행동 쪽이 맡는다. 여기서 무엇을 하는지까지 알면 스트라타젬을
-                // 늘릴 때마다 이 분기가 함께 늘어난다.
-                _abilities?.TryUse(stratagem);
+                _autoOpened = false;
+                SetCommandMode(false);
+                return;
             }
 
             Authorized?.Invoke(stratagem);

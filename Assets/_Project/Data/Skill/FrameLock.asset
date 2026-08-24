@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0254e528ced79243a0ab04a1b32a663, type: 3}
+  m_Name: FrameLock
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.TimeStopDefinition
+  DisplayName: FrameLock
+  Description: 
+  Tags: 385
+  WindupSeconds: 0
+  ActiveSeconds: 5
+  RecoverySeconds: 0
+  Cooldown: 5
+  Icon: {fileID: 21300000, guid: d3c033460b7b56f4d9b9ed4b1e3e8b14, type: 3}
+  Command: 0000000000000000010000000100000002000000030000000200000003000000
+  UsesPerSortie: 0
+  StopScale: 0

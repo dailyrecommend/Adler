@@ -36,8 +36,17 @@ namespace Adler.Core
         }
 
         /// <summary>
+        /// 세상 배율이 내려갈 수 있는 바닥. 나누는 쪽이라 0이 되면 무한대가 나온다.
+        /// <para>
+        /// 매달린 시계에는 걸지 않는다. 그쪽은 나누어지는 쪽이라 0이 아무 문제가 없고,
+        /// 오히려 0이라야 <b>완전히</b> 멈춘다.
+        /// </para>
+        /// </summary>
+        public const float MinScale = 0.0001f;
+
+        /// <summary>
         /// 이 시계에 걸어둔 배율. 디버프처럼 얼마간 이어지는 것이 쓴다.
-        /// 1이면 부모와 같은 속도로 흐른다.
+        /// 1이면 부모와 같은 속도로 흐른다. 0이면 이 아래의 시간이 멎는다.
         /// </summary>
         public float LocalScale { get; set; } = 1f;
 
@@ -64,8 +73,12 @@ namespace Adler.Core
         /// 거기에 이 시계의 배율을 그대로 곱하면 세상 몫이 두 번 들어간다. 세상 몫을
         /// 덜어낸 나머지가 "남들보다 얼마나 느린가"이고, 그것만 물리에 곱해야 한다.
         /// </para>
+        /// <para>
+        /// 세상은 그대로 두고 이 시계만 늦추면 이 값이 1보다 작아지고, 그만큼 덜 움직인다.
+        /// 0이면 아예 서고, 그때도 나누는 쪽은 세상 배율이라 0으로 나눌 일이 없다.
+        /// </para>
         /// </summary>
-        public float Relative => Scale / World.Scale;
+        public float Relative => Scale / Mathf.Max(World.Scale, MinScale);
 
         /// <summary>
         /// 물리 스텝 하나가 이 시계에서 흐른 양(초).

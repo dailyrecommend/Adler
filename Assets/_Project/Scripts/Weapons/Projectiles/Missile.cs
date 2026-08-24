@@ -74,7 +74,7 @@ namespace Adler.Weapons
             Vector3 velocity,
             LayerMask blastMask)
         {
-            _clock = TimeScale.For(this);
+            _clock = TimeScale.Inherited(owner, this);
             _definition = definition;
             _owner = owner;
             _target = target;

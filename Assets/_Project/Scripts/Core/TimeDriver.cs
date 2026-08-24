@@ -20,6 +20,9 @@ namespace Adler.Core
     [AddComponentMenu("")]
     public sealed class TimeDriver : MonoBehaviour
     {
+        /// <summary>물리 스텝이 짧아질 수 있는 한계(초). 바깥 1초에 2000스텝까지만.</summary>
+        private const float MinFixedDelta = 0.0005f;
+
         private float _baseFixedDelta;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -43,7 +46,10 @@ namespace Adler.Core
 
             // 물리 스텝도 같은 비율로 줄인다. 그러지 않으면 늦춘 동안 스텝 수만
             // 줄어들어 기체가 뚝뚝 끊기며 움직인다.
-            Time.fixedDeltaTime = _baseFixedDelta * scale;
+            //
+            // 다만 바닥을 둔다. 시간을 거의 멈추면 이 값이 0에 수렴하는데, 그러면
+            // 바깥 1초에 밟아야 할 물리 스텝이 수천 개가 되어 프레임이 그대로 선다.
+            Time.fixedDeltaTime = Mathf.Max(_baseFixedDelta * scale, MinFixedDelta);
         }
 
         private void OnDestroy()

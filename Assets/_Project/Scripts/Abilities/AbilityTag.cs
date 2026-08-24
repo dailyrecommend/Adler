@@ -43,5 +43,14 @@ namespace Adler.Abilities
 
         /// <summary>커맨드를 쳐서 부른다.</summary>
         Stratagem = 1 << 7,
+
+        /// <summary>
+        /// 시간의 흐름을 건드린다. 화면 효과가 이 꼬리표를 보고 켜진다.
+        /// <para>
+        /// 특정 스트라타젬의 이름이 아니라 꼬리표로 묻게 해야, 시간을 다루는 것을
+        /// 하나 더 만들 때 연출 조건이 조용히 어긋나지 않는다.
+        /// </para>
+        /// </summary>
+        TimeWarp = 1 << 8,
     }
 }

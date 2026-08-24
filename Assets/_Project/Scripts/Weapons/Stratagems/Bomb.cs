@@ -103,7 +103,7 @@ namespace Adler.Weapons
         {
             _definition = definition;
             _owner = owner;
-            _clock = TimeScale.For(this);
+            _clock = TimeScale.Inherited(owner, this);
             _armedAt = _clock.Now + definition.ArmingDelay;
             _previousPosition = transform.position;
 

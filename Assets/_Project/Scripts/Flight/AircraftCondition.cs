@@ -22,6 +22,9 @@ namespace Adler.Flight
 
         /// <summary>얼어붙어 있는 동안.</summary>
         Frozen,
+
+        /// <summary>시간을 건드리는 것이 도는 동안.</summary>
+        TimeWarped,
     }
 
     /// <summary>
@@ -55,6 +58,7 @@ namespace Adler.Flight
                 AircraftCondition.Firing => aircraft.Weapons?.IsFiring == true,
                 AircraftCondition.Frozen => aircraft.Model?.IsFrozen == true,
                 AircraftCondition.Repairing => aircraft.Abilities?.IsRunning(AbilityTag.Repair) == true,
+                AircraftCondition.TimeWarped => aircraft.Abilities?.IsRunning(AbilityTag.TimeWarp) == true,
                 AircraftCondition.Debuff => debuff != null && aircraft.Debuffs?.IsActive(debuff) == true,
                 _ => false,
             };

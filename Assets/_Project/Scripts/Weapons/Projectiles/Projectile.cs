@@ -47,7 +47,7 @@ namespace Adler.Weapons
         /// <summary>쏜 총이 성능과 초기 속도를 넘겨준다.</summary>
         public void Launch(GunDefinition gun, GameObject owner, Vector3 velocity, LayerMask hitMask)
         {
-            _clock = TimeScale.For(this);
+            _clock = TimeScale.Inherited(owner, this);
             _gun = gun;
             _owner = owner;
             _velocity = velocity;
