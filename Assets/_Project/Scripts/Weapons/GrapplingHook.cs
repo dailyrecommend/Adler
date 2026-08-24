@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using Adler.Combat;
 using Adler.Controls;
 using Adler.Core;
 using Adler.Flight;
@@ -39,11 +39,8 @@ namespace Adler.Weapons
     [DisallowMultipleComponent]
     public sealed class GrapplingHook : MonoBehaviour
     {
-        /// <summary>
-        /// 처짐이 목표를 따라가는 속도. 팽팽해지는 것이 한 순간에 끝나지 않을 만큼만
-        /// 늦다 — 이 정도가 눈에는 줄이 채이는 것으로 보인다.
-        /// </summary>
-        private const float SlackResponse = 14f;
+        /// <summary>못 벗어나는 경우를 대비한 안전장치(초). 상대가 나란히 날면 거리가 영영 벌어지지 않는다.</summary>
+        private const float ClearTimeout = 5f;
 
         [Header("참조")]
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
@@ -143,36 +140,6 @@ namespace Adler.Weapons
         [Min(1f)]
         [SerializeField] private float _breakRange = 500f;
 
-        [Header("연출")]
-        [Tooltip("기체와 표적을 잇는 줄. 비워둬도 동작은 한다.")]
-        [SerializeField] private LineRenderer _line;
-
-        [Tooltip("줄을 몇 토막으로 그릴지. 적으면 곡선이 각져 보인다.")]
-        [Range(2, 64)]
-        [SerializeField] private int _segments = 16;
-
-        [Tooltip("줄이 늘어지는 정도. 줄 길이에 대한 비율이다.\n\n" +
-                 "길이에 비례시키는 이유는, 고정값으로 두면 짧을 때는 우스울 만큼\n" +
-                 "늘어지고 길 때는 곧은 선처럼 보이기 때문이다.")]
-        [Range(0f, 0.5f)]
-        [SerializeField] private float _sag = 0.12f;
-
-        [Tooltip("끌려가는 동안 남는 처짐. 0이면 완전히 곧게 펴진다.\n\n" +
-                 "물렸다가 당겨지는 순간 줄이 팽팽해지는 것이 눈에 보여야, 소리와\n" +
-                 "몸으로 느끼는 것과 화면이 같은 이야기를 한다.")]
-        [Range(0f, 1f)]
-        [SerializeField] private float _taut = 0.2f;
-
-        [Tooltip("처지는 방향. 0이면 아래로만, 1이면 지나온 쪽으로만 끌린다.\n\n" +
-                 "빠르게 나는 기체에 매달린 줄은 중력보다 공기에 더 끌리므로,\n" +
-                 "아래로만 늘어뜨리면 멈춰 있는 것처럼 보인다.")]
-        [Range(0f, 1f)]
-        [SerializeField] private float _trail = 0.55f;
-
-        // 점선은 재질이 맡는다. Line Renderer의 Texture Mode를 Tile로 두면 무늬가
-        // 월드 1미터당 한 번씩 깔리므로, 재질 타일링만 정하면 칸 길이가 미터로
-        // 고정된다 — 줄이 늘어나든 휘든 코드가 손댈 일이 없다.
-
         private LockOnTargeting _targeting;
 
         private Transform _hooked;
@@ -189,21 +156,21 @@ namespace Adler.Weapons
         // 날아가는 갈고리 끝의 월드 좌표. 물리기 전까지만 뜻이 있다.
         private Vector3 _tip;
 
-        // 지금 줄이 얼마나 늘어져 있는지 (0~1). 팽팽해지는 것을 눈에 보이게 하려고
-        // 곧바로 바꾸지 않고 따라가게 둔다.
-        private float _slack = 1f;
+        // 걸어둔 상대를 통과시키는 일은 통째로 맡긴다. 되돌리는 시점이 까다로운데,
+        // 그 까다로움은 들이받기도 똑같이 겪는 것이라 한곳에 모아뒀다.
+        private CollisionPassage _passage;
 
-        // 놓은 뒤 아직 통과시켜 둔 상대. 충분히 떨어지면 충돌을 되살린다.
-        private Transform _clearing;
-        private float _clearTimeout;
-
-        // 걸린 동안 통과시킨 콜라이더 짝. 되살릴 때 그대로 되돌린다.
-        private readonly List<(Collider Mine, Collider Theirs)> _ignoredPairs = new();
-        private readonly List<Collider> _myColliders = new();
-        private readonly List<Collider> _theirColliders = new();
 
         /// <summary>쏘아둔 표적. 날아가는 중에도 들어 있다. 없으면 null.</summary>
         public Transform Hooked => _hooked;
+
+        /// <summary>줄이 나가는 자리. 그리는 쪽이 여기서 시작한다.</summary>
+        public Transform Origin => _origin;
+
+        /// <summary>
+        /// 날아가는 갈고리 끝. <see cref="GrapplePhase.Flying"/> 동안만 뜻이 있다.
+        /// </summary>
+        public Vector3 Tip => _tip;
 
         /// <summary>지금 어느 단계인지. 소리와 화면이 이것 하나만 보면 된다.</summary>
         public GrapplePhase Phase => _phase.Current;
@@ -285,14 +252,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            // 줄의 점들을 월드 좌표로 넘기므로 여기가 켜져 있어야 한다. 꺼져 있으면
-            // 기체를 따라 도는 로컬 좌표로 읽혀서, 줄이 엉뚱한 데로 뻗는다.
-            if (_line != null)
-            {
-                _line.useWorldSpace = true;
-            }
-
-            ShowLine(false);
+            _passage = new CollisionPassage(_aircraft.transform);
         }
 
         private void OnDisable()
@@ -301,8 +261,7 @@ namespace Adler.Weapons
 
             // 꺼질 때는 기다리지 않고 바로 되돌린다. 지켜볼 Update가 더는 돌지 않으므로,
             // 미뤄두면 그 짝이 영영 남아 서로를 통과하는 기체가 된다.
-            _clearing = null;
-            SetCollisionIgnored(false);
+            _passage.CloseAll();
         }
 
         private void Update()
@@ -321,8 +280,39 @@ namespace Adler.Weapons
 
             UpdateHook();
             UpdateContact();
-            UpdateClearing();
-            DrawLine();
+
+            _passage.Tick(_clock.Delta);
+        }
+
+        /// <summary>
+        /// 들이받을 수 있는 상태면 통과시키지 않는다.
+        /// <para>
+        /// 서로를 통과시키는 것은 코앞까지 끌어당겼을 때 둘 다 격추되는 것을 막으려는
+        /// 것이었다. 그런데 들이받기가 생기면서 그 전제가 바뀌었다 — 이제 그 상황은
+        /// 사고가 아니라 노린 것이고, 죽지 않게 막아주는 것도 그쪽이 맡는다.
+        /// </para>
+        /// <para>
+        /// 매달린 채로 부스터를 밟는 것이 곧 "이대로 박겠다"는 뜻이 되므로, 통과시켜
+        /// 버리면 그 선택이 화면에서 아무 일도 아닌 것이 된다.
+        /// </para>
+        /// </summary>
+        private void UpdateContact()
+        {
+            if (!IsAttached || !_ignoreCollisionWhileHooked)
+            {
+                return;
+            }
+
+            bool armed = _aircraft.Ram != null && _aircraft.Ram.IsArmed;
+
+            if (armed)
+            {
+                _passage.Close(_hooked);
+            }
+            else
+            {
+                _passage.Open(_hooked);
+            }
         }
 
         /// <summary>
@@ -413,7 +403,6 @@ namespace Adler.Weapons
 
             // 늘어진 채로 시작한다. 지난번에 팽팽했던 값이 남아 있으면 던지자마자
             // 곧게 뻗어서, 아직 날아가는 중인데 이미 당기는 것처럼 보인다.
-            _slack = 1f;
 
             // 통과 처리와 유지 시간은 물릴 때 시작한다. 여기서 켜면 날아가는 동안
             // 상대를 그냥 뚫고 지나가고, 유지 시간도 날아가는 몫만큼 깎여 나간다.
@@ -426,7 +415,10 @@ namespace Adler.Weapons
             _phase.Set(GrapplePhase.Biting);
             _remaining = _duration;
 
-            SetCollisionIgnored(true);
+            if (_ignoreCollisionWhileHooked)
+            {
+                _passage.Open(_hooked);
+            }
 
             // 뜸이 0이면 물자마자 당긴다. 다음 프레임을 기다리면 그 한 프레임 동안
             // 물렸는데도 끌려가지 않는 상태가 생긴다.
@@ -541,7 +533,10 @@ namespace Adler.Weapons
             // 충돌은 여기서 되살리지 않는다. 끊기는 거리가 가까우면 이 순간 두
             // 콜라이더가 겹쳐 있어서, 되살리는 즉시 물리가 둘을 밀어내거나
             // 부딪힌 것으로 쳐서 격추시킨다. 빠져나올 때까지 기다린다.
-            BeginClearing();
+            //
+            // 기한을 함께 주는 것은 상대가 나와 나란히 날면 거리가 영영 벌어지지 않기
+            // 때문이다. 그렇다고 영원히 통과시켜 둘 수는 없다.
+            _passage.Release(_hooked, _clearRange, ClearTimeout);
 
             _hooked = null;
             _hookedBody = null;
@@ -549,217 +544,7 @@ namespace Adler.Weapons
             _phase.Set(GrapplePhase.Idle);
             _cooldownRemaining = Mathf.Max(0f, _cooldown - _relief);
             _relief = 0f;
-
         }
 
-        /// <summary>
-        /// 놓은 상대에게서 빠져나올 때까지 통과를 유지한다.
-        /// <para>
-        /// 걸어둔 짝을 놓는 순간 되돌리지 않는 이유는, 다 감겨서 끊어졌다면 그때 둘이
-        /// 가장 가까이 있기 때문이다. 겹친 채로 충돌을 되살리면 물리가 둘을 밀어내며
-        /// 튕겨 나가거나, 부딪힌 것으로 쳐서 방금 따라잡은 상대와 함께 떨어진다.
-        /// </para>
-        /// </summary>
-        private void BeginClearing()
-        {
-            if (_ignoredPairs.Count == 0)
-            {
-                return;
-            }
-
-            _clearing = _hooked;
-
-            // 못 벗어나는 경우를 대비한 안전장치. 상대가 나와 같은 속도로 나란히 날면
-            // 거리가 영영 벌어지지 않는데, 그렇다고 영원히 통과시켜 둘 수는 없다.
-            _clearTimeout = 5f;
-        }
-
-        private void UpdateClearing()
-        {
-            if (_clearing == null)
-            {
-                // 상대가 사라졌으면 기다릴 것도 없다. 짝만 남기고 되돌리지 않으면
-                // 다음에 같은 상대를 걸었을 때 이유 없이 통과하게 된다.
-                if (_ignoredPairs.Count > 0 && _hooked == null)
-                {
-                    SetCollisionIgnored(false);
-                }
-
-                return;
-            }
-
-            _clearTimeout -= _clock.Delta;
-
-            bool clear = !_clearing.gameObject.activeInHierarchy
-                         || Vector3.Distance(_clearing.position, _origin.position) > _clearRange;
-
-            if (!clear && _clearTimeout > 0f)
-            {
-                return;
-            }
-
-            _clearing = null;
-            SetCollisionIgnored(false);
-        }
-
-        /// <summary>
-        /// 걸려 있는 동안 서로를 통과시킨다.
-        /// <para>
-        /// 콜라이더 짝을 기억해뒀다가 그대로 되돌린다. 다시 찾아서 되돌리면 그 사이에
-        /// 기체가 부서져 콜라이더가 사라졌을 때 짝이 남아, 다음에 같은 상대를 걸었을 때
-        /// 이유 없이 통과하게 된다.
-        /// </para>
-        /// </summary>
-        /// <summary>
-        /// 들이받을 수 있는 상태면 통과시키지 않는다.
-        /// <para>
-        /// 서로를 통과시키는 것은 코앞까지 끌어당겼을 때 둘 다 격추되는 것을 막으려는
-        /// 것이었다. 그런데 들이받기가 생기면서 그 전제가 바뀌었다 — 이제 그 상황은
-        /// 사고가 아니라 노린 것이고, 죽지 않게 막아주는 것도 그쪽이 맡는다.
-        /// </para>
-        /// <para>
-        /// 매달린 채로 부스터를 밟는 것이 곧 "이대로 박겠다"는 뜻이 되므로, 통과시켜
-        /// 버리면 그 선택이 화면에서 아무 일도 아닌 것이 된다.
-        /// </para>
-        /// </summary>
-        private void UpdateContact()
-        {
-            if (!IsAttached || !_ignoreCollisionWhileHooked)
-            {
-                return;
-            }
-
-            bool ignore = _aircraft.Ram == null || !_aircraft.Ram.IsArmed;
-            bool ignoring = _ignoredPairs.Count > 0;
-
-            // 바뀔 때만 손댄다. 매 프레임 다시 걸면 콜라이더를 그때마다 훑게 된다.
-            if (ignore != ignoring)
-            {
-                SetCollisionIgnored(ignore);
-            }
-        }
-
-        private void SetCollisionIgnored(bool ignored)
-        {
-            if (!_ignoreCollisionWhileHooked)
-            {
-                return;
-            }
-
-            if (!ignored)
-            {
-                foreach ((Collider mine, Collider theirs) in _ignoredPairs)
-                {
-                    if (mine != null && theirs != null)
-                    {
-                        Physics.IgnoreCollision(mine, theirs, false);
-                    }
-                }
-
-                _ignoredPairs.Clear();
-                return;
-            }
-
-            if (_hooked == null)
-            {
-                return;
-            }
-
-            _aircraft.GetComponentsInChildren(includeInactive: false, _myColliders);
-            _hooked.root.GetComponentsInChildren(includeInactive: false, _theirColliders);
-
-            foreach (Collider mine in _myColliders)
-            {
-                foreach (Collider theirs in _theirColliders)
-                {
-                    Physics.IgnoreCollision(mine, theirs, true);
-                    _ignoredPairs.Add((mine, theirs));
-                }
-            }
-        }
-
-        /// <summary>
-        /// 줄을 곡선으로 그린다.
-        /// <para>
-        /// 날아가는 동안에는 끝이 표적을 향해 뻗어나간다. 쏘자마자 표적까지 이어
-        /// 그리면 이미 걸린 것처럼 보여서, 정작 물릴 때까지 끌려가지 않는 그 사이가
-        /// 고장으로 읽힌다.
-        /// </para>
-        /// <para>
-        /// 처짐은 단계를 따라간다. 물고 버티는 동안은 늘어져 있다가 당기기 시작하면
-        /// 팽팽해진다. 곧바로 바꾸지 않고 빠르게 따라가게 두는 이유는, 순간이동하면
-        /// 그리는 방식이 바뀐 것처럼 보이고 조금 늦으면 줄이 채이는 것으로 읽히기
-        /// 때문이다 — 소리와 화면이 같은 순간을 가리키게 된다.
-        /// </para>
-        /// </summary>
-        private void DrawLine()
-        {
-            if (_line == null)
-            {
-                return;
-            }
-
-            if (_hooked == null)
-            {
-                ShowLine(false);
-                return;
-            }
-
-            Vector3 start = _origin.position;
-            Vector3 end = _phase.Is(GrapplePhase.Flying) ? _tip : _hooked.position;
-
-            float wanted = _phase.Is(GrapplePhase.Pulling) ? _taut : 1f;
-            _slack = Mathf.Lerp(_slack, wanted, 1f - Mathf.Exp(-SlackResponse * _clock.Delta));
-
-            Vector3 middle = Vector3.Lerp(start, end, 0.5f)
-                             + (SagDirection() * (Vector3.Distance(start, end) * _sag * _slack));
-
-            int count = Mathf.Max(2, _segments);
-            if (_line.positionCount != count)
-            {
-                _line.positionCount = count;
-            }
-
-            ShowLine(true);
-
-            for (int i = 0; i < count; i++)
-            {
-                _line.SetPosition(i, Bend(start, middle, end, (float)i / (count - 1)));
-            }
-        }
-
-        /// <summary>
-        /// 줄이 늘어지는 쪽.
-        /// <para>
-        /// 중력만 쓰지 않는다. 빠르게 나는 기체에 매달린 줄은 무게보다 공기에 훨씬
-        /// 더 끌리므로, 아래로만 늘어뜨리면 기체가 멈춰 있는 것처럼 보인다.
-        /// </para>
-        /// </summary>
-        private Vector3 SagDirection()
-        {
-            Vector3 drift = _aircraft.Body != null ? -_aircraft.Body.linearVelocity : Vector3.zero;
-
-            Vector3 direction = drift.sqrMagnitude > 0.0001f
-                ? Vector3.Lerp(Vector3.down, drift.normalized, _trail)
-                : Vector3.down;
-
-            return direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector3.down;
-        }
-
-        /// <summary>가운데 점 하나로 휘는 2차 베지에. 줄 하나 그리는 데는 이걸로 충분하다.</summary>
-        private static Vector3 Bend(Vector3 start, Vector3 middle, Vector3 end, float t)
-        {
-            float u = 1f - t;
-
-            return (u * u * start) + (2f * u * t * middle) + (t * t * end);
-        }
-
-        private void ShowLine(bool visible)
-        {
-            if (_line != null)
-            {
-                _line.enabled = visible;
-            }
-        }
     }
 }

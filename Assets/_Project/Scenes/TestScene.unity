@@ -12598,6 +12598,7 @@ GameObject:
   - component: {fileID: 1919053225}
   - component: {fileID: 1919053224}
   - component: {fileID: 1919053228}
+  - component: {fileID: 1919053229}
   m_Layer: 10
   m_Name: Weapons
   m_TagString: Untagged
@@ -12716,6 +12717,20 @@ MonoBehaviour:
   _duration: 3
   _cooldown: 5
   _breakRange: 500
+--- !u!114 &1919053229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919053222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d10c69f36ed21bf45a5d7610ad216f19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrappleLine
+  _hook: {fileID: 1919053228}
+  _aircraft: {fileID: 1812182315}
   _line: {fileID: 297140799}
   _segments: 16
   _sag: 0.12

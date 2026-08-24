@@ -132,11 +132,9 @@ namespace Adler.Flight
         private float _shieldedUntil;
         private float _rammedUntil;
 
-        // 지금 뚫고 지나가는 중인 상대들. 한 번에 여럿을 꿰뚫을 수 있으므로 하나로
-        // 두지 않는다 — 뒤엣것이 앞엣것의 짝을 지우면 앞의 상대와 다시 부딪힌다.
-        private readonly List<Passage> _passages = new();
-        private readonly List<Collider> _mine = new();
-        private readonly List<Collider> _theirs = new();
+        // 뚫고 지나가는 일은 통째로 맡긴다. 되돌리는 시점이 까다로운데, 그 까다로움은
+        // 갈고리도 똑같이 겪는 것이라 한곳에 모아뒀다.
+        private CollisionPassage _passage;
 
         /// <summary>
         /// 들이받아 피해가 들어갔을 때. 연출이 구독한다.
@@ -168,7 +166,10 @@ namespace Adler.Flight
                     $"{nameof(RamAttack)}: 이 오브젝트에 Collider가 없어 충돌을 받지 못합니다. " +
                     "기체의 Collider와 Rigidbody가 있는 오브젝트에 붙이세요.", this);
                 enabled = false;
+                return;
             }
+
+            _passage = new CollisionPassage(_aircraft.transform);
         }
 
         /// <summary>
@@ -253,7 +254,7 @@ namespace Adler.Flight
                 _shieldedUntil = _clock.Now + _shieldGrace;
             }
 
-            UpdatePassages();
+            _passage.Tick(_clock.Delta);
         }
 
         /// <summary>
@@ -262,10 +263,7 @@ namespace Adler.Flight
         /// </summary>
         private void OnDisable()
         {
-            for (int i = _passages.Count - 1; i >= 0; i--)
-            {
-                Restore(i);
-            }
+            _passage?.CloseAll();
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -334,20 +332,15 @@ namespace Adler.Flight
         /// 안 죽은 상대는 그 자리에 단단한 것으로 남는다. 밀어붙여 뚫는 연출인데 정작
         /// 거기서 멈춰 비비게 되면, 들이받기가 돌파가 아니라 사고로 읽힌다.
         /// </para>
+        /// <para>
+        /// 줄에 매달아 둔 상대는 건드리지 않는다. 그쪽은 갈고리가 켜고 끄는 중이고,
+        /// 한 짝을 둘이 나눠 쥐면 먼저 놓는 쪽이 다른 쪽의 기록을 거짓말로 만든다.
+        /// 매달린 채로 뚫고 나가는 그림도 이상하다 — 당겨 붙여놓고 통과해 멀어지면,
+        /// 붙잡은 것이 아니라 스쳐 지나간 것으로 보인다.
+        /// </para>
         /// </summary>
         private void Pierce(Transform target)
         {
-            if (target == null || IndexOf(target) >= 0)
-            {
-                return;
-            }
-
-            // 줄에 매달아 둔 상대는 건드리지 않는다. 갈고리가 이미 그 상대와의 충돌을
-            // 켜고 끄고 있는데, Physics.IgnoreCollision은 누가 몇 번 껐는지 세지 않아서
-            // 여기서 되돌리는 순간 갈고리의 기록이 거짓말이 된다. 한 짝의 주인은 하나여야 한다.
-            //
-            // 매달린 채로 뚫고 나가는 그림도 이상하다 — 줄로 당겨 붙여놓고 통과해
-            // 멀어지면, 붙잡은 것이 아니라 스쳐 지나간 것으로 보인다.
             // 루트끼리 견준다. 갈고리가 무는 것은 콜라이더가 달린 자식일 수 있고,
             // 충돌을 끄는 범위는 그 루트 전체다.
             Transform hooked = _aircraft.Grapple != null ? _aircraft.Grapple.Hooked : null;
@@ -357,92 +350,7 @@ namespace Adler.Flight
                 return;
             }
 
-            _aircraft.GetComponentsInChildren(includeInactive: false, _mine);
-            target.GetComponentsInChildren(includeInactive: false, _theirs);
-
-            if (_mine.Count == 0 || _theirs.Count == 0)
-            {
-                return;
-            }
-
-            Passage passage = new(target, _clock.Now + _clearTimeout, _mine.Count * _theirs.Count);
-
-            foreach (Collider mine in _mine)
-            {
-                foreach (Collider theirs in _theirs)
-                {
-                    Physics.IgnoreCollision(mine, theirs, true);
-                    passage.Pairs.Add((mine, theirs));
-                }
-            }
-
-            _passages.Add(passage);
-        }
-
-        /// <summary>
-        /// 충분히 벌어졌으면 충돌을 되살린다.
-        /// <para>
-        /// 겹쳐 있는 동안 되살리면 물리가 둘을 떼어내며 세게 튕겨내서, 뚫고 지나간 것이
-        /// 아니라 걸려서 튕긴 것으로 보인다. 그래서 벌어질 때까지 기다린다 — 다만
-        /// 상대가 따라붙거나 제자리에 멈춰 있으면 영영 벌어지지 않으므로 기한도 둔다.
-        /// </para>
-        /// </summary>
-        private void UpdatePassages()
-        {
-            for (int i = _passages.Count - 1; i >= 0; i--)
-            {
-                Passage passage = _passages[i];
-
-                bool gone = passage.Target == null || !passage.Target.gameObject.activeInHierarchy;
-                bool apart = !gone
-                             && Vector3.Distance(passage.Target.position, transform.position) > _clearRange;
-
-                if (gone || apart || _clock.Now >= passage.Until)
-                {
-                    Restore(i);
-                }
-            }
-        }
-
-        private void Restore(int index)
-        {
-            foreach ((Collider mine, Collider theirs) in _passages[index].Pairs)
-            {
-                if (mine != null && theirs != null)
-                {
-                    Physics.IgnoreCollision(mine, theirs, false);
-                }
-            }
-
-            _passages.RemoveAt(index);
-        }
-
-        private int IndexOf(Transform target)
-        {
-            for (int i = 0; i < _passages.Count; i++)
-            {
-                if (_passages[i].Target == target)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        /// <summary>뚫고 지나가는 중인 상대 하나와, 되돌려야 할 짝들.</summary>
-        private readonly struct Passage
-        {
-            public readonly Transform Target;
-            public readonly float Until;
-            public readonly List<(Collider Mine, Collider Theirs)> Pairs;
-
-            public Passage(Transform target, float until, int capacity)
-            {
-                Target = target;
-                Until = until;
-                Pairs = new List<(Collider, Collider)>(capacity);
-            }
+            _passage.Cross(target, _clearRange, _clearTimeout);
         }
 
         /// <summary>
