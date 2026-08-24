@@ -34,12 +34,19 @@ namespace Adler.Combat
         [Min(0f)]
         [SerializeField] private float _damagePerImpactSpeed = 4f;
 
+        // 이번 충돌을 막아줄 것들. 매번 계층을 뒤지지 않게 한 번만 모아둔다.
+        private IImpactShield[] _shields;
+
         private void Awake()
         {
             if (_health == null)
             {
                 _health = GetComponent<Health>();
             }
+
+            // 자신과 위쪽에서 찾는다. 막아주는 쪽은 기체를 대표하는 자리에 붙으므로
+            // 아래로 뒤질 일이 없고, 아래까지 훑으면 무기나 부품이 끼어들 수 있다.
+            _shields = GetComponentsInParent<IImpactShield>(includeInactive: true);
 
             if (_health == null)
             {
@@ -56,6 +63,11 @@ namespace Adler.Combat
             }
 
             if ((_impactMask.value & (1 << collision.gameObject.layer)) == 0)
+            {
+                return;
+            }
+
+            if (IsShielded(collision))
             {
                 return;
             }
@@ -77,6 +89,20 @@ namespace Adler.Combat
                 contact.point,
                 contact.normal,
                 collision.gameObject));
+        }
+
+        /// <summary>누군가 이 충돌에 손을 들었는지.</summary>
+        private bool IsShielded(Collision collision)
+        {
+            foreach (IImpactShield shield in _shields)
+            {
+                if (shield.Blocks(collision))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

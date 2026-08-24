@@ -25,6 +25,12 @@ namespace Adler.UI
 
         /// <summary>표적이 쓰러졌다. 이 게임에서 가장 값진 순간.</summary>
         Kill,
+
+        /// <summary>
+        /// 몸으로 들이받았다. 거리가 0이 되어야 일어나는 일이라, 무게가 아니라
+        /// 거기까지 파고들었다는 사실이 값이다.
+        /// </summary>
+        Ram,
     }
 
     /// <summary>
@@ -60,6 +66,16 @@ namespace Adler.UI
         [Range(0.01f, 1f)]
         [SerializeField] private float _blastStopScale = 0.15f;
 
+        [Header("들이받기")]
+        [Tooltip("몸으로 들이받았을 때 늦추는 시간(초).\n" +
+                 "폭발보다 길게 잡을 만하다 — 거리를 0까지 좁혀야 일어나는 일이라\n" +
+                 "자주 나오지 않고, 그만큼 한 번이 사건이다.")]
+        [Min(0f)]
+        [SerializeField] private float _ramStopSeconds = 0.09f;
+
+        [Range(0.01f, 1f)]
+        [SerializeField] private float _ramStopScale = 0.08f;
+
         [Header("격추")]
         [Min(0f)]
         [SerializeField] private float _killStopSeconds = 0.11f;
@@ -70,10 +86,24 @@ namespace Adler.UI
         private WeaponBay _bay;
         private Clock _clock;
         private StratagemBay _stratagemBay;
+        private RamAttack _ram;
+        private float _releaseAt;
+        private ImpactWeight _releasingWeight;
+        private bool _releasing;
         private float _nextLightAt;
 
         /// <summary>명중할 때마다. 카메라 흔들림이 구독한다.</summary>
         public event Action<ImpactWeight> Impact;
+
+        /// <summary>
+        /// 늦춰뒀던 시간이 풀리는 순간. 시간이 멎지 않는 가벼운 명중은 오지 않는다.
+        /// <para>
+        /// 늦춤의 시작과 끝은 다른 사건이다. 숨을 들이켜는 소리는 멎는 순간에 나야 하고
+        /// 내리치는 소리는 풀리는 순간에 나야, 멎어 있던 그 짧은 시간이 뜸이 된다.
+        /// 둘 다 시작에 몰아 내면 그냥 겹친 소리 하나가 된다.
+        /// </para>
+        /// </summary>
+        public event Action<ImpactWeight> Released;
 
         private void Awake()
         {
@@ -81,6 +111,7 @@ namespace Adler.UI
             _clock = TimeScale.For(this);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
             _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
+            _ram = _aircraft != null ? _aircraft.Ram : null;
 
             if (_bay == null)
             {
@@ -105,6 +136,11 @@ namespace Adler.UI
             {
                 _stratagemBay.Detonated += OnDetonated;
             }
+
+            if (_ram != null)
+            {
+                _ram.Rammed += OnRammed;
+            }
         }
 
         private void OnDisable()
@@ -123,6 +159,11 @@ namespace Adler.UI
             {
                 _stratagemBay.Detonated -= OnDetonated;
             }
+
+            if (_ram != null)
+            {
+                _ram.Rammed -= OnRammed;
+            }
         }
 
         /// <summary>
@@ -138,6 +179,12 @@ namespace Adler.UI
 
             React(result.Killed ? ImpactWeight.Kill : ImpactWeight.Light);
         }
+
+        /// <summary>
+        /// 들이받은 것은 쓰러뜨렸어도 들이받기로 남긴다. 격추로 바꿔 부르면 기총으로
+        /// 마무리한 것과 같은 연출이 나가서, 몸으로 밀어붙였다는 사실이 지워진다.
+        /// </summary>
+        private void OnRammed(Collision collision, DamageResult result) => React(ImpactWeight.Ram);
 
         private void OnDetonated(BombDefinition bomb, BlastReport report) => ReactToBlast(report);
 
@@ -171,13 +218,63 @@ namespace Adler.UI
             }
             else
             {
-                bool killed = weight == ImpactWeight.Kill;
-                Clock.World.Hold(
-                    killed ? _killStopSeconds : _blastStopSeconds,
-                    killed ? _killStopScale : _blastStopScale);
+                float seconds = StopSecondsFor(weight);
+
+                Clock.World.Hold(seconds, StopScaleFor(weight));
+                Schedule(weight, seconds);
             }
 
             Impact?.Invoke(weight);
         }
+
+        /// <summary>
+        /// 언제 풀릴지 적어둔다.
+        /// <para>
+        /// 바깥 시간으로 잰다. 늦추는 그 배율로 재면 늦출수록 오래 걸려서 풀림이 한참
+        /// 뒤에 오는데, 시계가 늦춤을 세는 방식도 바깥 시간이라 그쪽과 어긋나 버린다.
+        /// </para>
+        /// <para>
+        /// 더 긴 요청만 갈아탄다. 시계가 짧은 요청을 무시하므로 여기서도 무시해야,
+        /// 무거운 한 방이 도는 중에 잔챙이가 끼어들어 풀림을 앞당기지 않는다.
+        /// </para>
+        /// </summary>
+        private void Schedule(ImpactWeight weight, float seconds)
+        {
+            float at = Time.unscaledTime + seconds;
+
+            if (_releasing && at <= _releaseAt)
+            {
+                return;
+            }
+
+            _releasing = true;
+            _releaseAt = at;
+            _releasingWeight = weight;
+        }
+
+        private void Update()
+        {
+            if (!_releasing || Time.unscaledTime < _releaseAt)
+            {
+                return;
+            }
+
+            _releasing = false;
+            Released?.Invoke(_releasingWeight);
+        }
+
+        private float StopSecondsFor(ImpactWeight weight) => weight switch
+        {
+            ImpactWeight.Kill => _killStopSeconds,
+            ImpactWeight.Ram => _ramStopSeconds,
+            _ => _blastStopSeconds,
+        };
+
+        private float StopScaleFor(ImpactWeight weight) => weight switch
+        {
+            ImpactWeight.Kill => _killStopScale,
+            ImpactWeight.Ram => _ramStopScale,
+            _ => _blastStopScale,
+        };
     }
 }

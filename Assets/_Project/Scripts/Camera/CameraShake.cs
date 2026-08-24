@@ -76,6 +76,11 @@ namespace Adler.CameraRig
         [Min(0f)]
         [SerializeField] private float _killAmplitude = 1.8f;
 
+        [Tooltip("몸으로 들이받았을 때의 흔들림 폭.\n" +
+                 "쏜 것과 달리 내 기체가 직접 부딪힌 것이라 가장 세게 잡아도 된다.")]
+        [Min(0f)]
+        [SerializeField] private float _ramAmplitude = 2.2f;
+
         private CinemachineBasicMultiChannelPerlin _noise;
         private float _amplitude;
         private float _frequency;
@@ -170,6 +175,7 @@ namespace Adler.CameraRig
         private void OnImpact(ImpactWeight weight) => AddImpulse(weight switch
         {
             ImpactWeight.Kill => _killAmplitude,
+            ImpactWeight.Ram => _ramAmplitude,
             ImpactWeight.Blast => _blastAmplitude,
             _ => _hitAmplitude,
         });

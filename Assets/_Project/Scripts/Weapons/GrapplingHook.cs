@@ -180,6 +180,10 @@ namespace Adler.Weapons
         private float _remaining;
         private float _cooldownRemaining;
 
+        // 줄이 나가 있는 동안 받아둔 쿨다운 감면(초). 놓을 때 한꺼번에 깎는다 —
+        // 그전에는 깎을 쿨다운 자체가 아직 시작되지 않았다.
+        private float _relief;
+
         private readonly StateMachine<GrapplePhase> _phase = new(GrapplePhase.Idle);
 
         // 날아가는 갈고리 끝의 월드 좌표. 물리기 전까지만 뜻이 있다.
@@ -222,6 +226,42 @@ namespace Adler.Weapons
 
         /// <summary>다시 걸 수 있을 때까지 남은 시간(초).</summary>
         public float CooldownRemaining => _cooldownRemaining;
+
+        /// <summary>
+        /// 쿨다운을 정해진 몫만큼 깎아준다. 잘한 것에 대한 값으로 돌려주는 쪽이 부른다.
+        /// </summary>
+        /// <param name="fraction">전체 쿨다운에 대한 비율. 0.5면 절반을 돌려준다.</param>
+        /// <remarks>
+        /// <para>
+        /// 지금 깎는 것만으로는 모자란다. 쿨다운은 놓은 뒤에 흐르기 시작하므로 줄이
+        /// 걸려 있는 동안 깎아봐야 놓는 순간 제 값으로 채워져, 깎은 적이 없는 것이 된다.
+        /// 그런데 매달린 채로 들이받는 것이야말로 값을 치를 만한 일이라, 그 경우가
+        /// 빠지면 되돌려주는 뜻이 없어진다.
+        /// </para>
+        /// <para>
+        /// 그래서 줄이 나가 있는 동안 받은 몫은 적어뒀다가 놓을 때 깎는다. 그 사이에
+        /// 여러 번 박았다면 그만큼 쌓인다 — 한 번의 돌진으로 붙어서 계속 갈았다면
+        /// 돌려받는 것도 그만큼이어야 한다.
+        /// </para>
+        /// </remarks>
+        public void ReduceCooldown(float fraction)
+        {
+            float relief = _cooldown * Mathf.Clamp01(fraction);
+
+            if (relief <= 0f)
+            {
+                return;
+            }
+
+            // 줄이 나가 있으면 아직 쿨다운이 시작되지 않았다.
+            if (Phase != GrapplePhase.Idle)
+            {
+                _relief += relief;
+                return;
+            }
+
+            _cooldownRemaining = Mathf.Max(0f, _cooldownRemaining - relief);
+        }
 
         private Clock _clock;
 
@@ -280,6 +320,7 @@ namespace Adler.Weapons
             }
 
             UpdateHook();
+            UpdateContact();
             UpdateClearing();
             DrawLine();
         }
@@ -361,6 +402,10 @@ namespace Adler.Weapons
 
             _hooked = target;
             _hookedBody = _hooked.GetComponentInParent<Rigidbody>();
+
+            // 던지는 순간 지난 몫을 버린다. 줄이 나가 있지 않을 때 받은 것은 그 자리에서
+            // 이미 깎았으므로, 들고 있으면 한 번 잘한 것으로 두 번 받는다.
+            _relief = 0f;
             _remaining = 0f;
 
             _phase.Set(GrapplePhase.Flying);
@@ -502,7 +547,8 @@ namespace Adler.Weapons
             _hookedBody = null;
             _remaining = 0f;
             _phase.Set(GrapplePhase.Idle);
-            _cooldownRemaining = _cooldown;
+            _cooldownRemaining = Mathf.Max(0f, _cooldown - _relief);
+            _relief = 0f;
 
         }
 
@@ -564,6 +610,35 @@ namespace Adler.Weapons
         /// 이유 없이 통과하게 된다.
         /// </para>
         /// </summary>
+        /// <summary>
+        /// 들이받을 수 있는 상태면 통과시키지 않는다.
+        /// <para>
+        /// 서로를 통과시키는 것은 코앞까지 끌어당겼을 때 둘 다 격추되는 것을 막으려는
+        /// 것이었다. 그런데 들이받기가 생기면서 그 전제가 바뀌었다 — 이제 그 상황은
+        /// 사고가 아니라 노린 것이고, 죽지 않게 막아주는 것도 그쪽이 맡는다.
+        /// </para>
+        /// <para>
+        /// 매달린 채로 부스터를 밟는 것이 곧 "이대로 박겠다"는 뜻이 되므로, 통과시켜
+        /// 버리면 그 선택이 화면에서 아무 일도 아닌 것이 된다.
+        /// </para>
+        /// </summary>
+        private void UpdateContact()
+        {
+            if (!IsAttached || !_ignoreCollisionWhileHooked)
+            {
+                return;
+            }
+
+            bool ignore = _aircraft.Ram == null || !_aircraft.Ram.IsArmed;
+            bool ignoring = _ignoredPairs.Count > 0;
+
+            // 바뀔 때만 손댄다. 매 프레임 다시 걸면 콜라이더를 그때마다 훑게 된다.
+            if (ignore != ignoring)
+            {
+                SetCollisionIgnored(ignore);
+            }
+        }
+
         private void SetCollisionIgnored(bool ignored)
         {
             if (!_ignoreCollisionWhileHooked)

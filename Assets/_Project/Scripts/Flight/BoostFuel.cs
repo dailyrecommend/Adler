@@ -191,6 +191,38 @@ namespace Adler.Flight
             }
         }
 
+        /// <summary>
+        /// 용량의 일부만 채운다. 잘한 것에 값으로 돌려주는 쪽이 부른다.
+        /// <para>
+        /// 잠금은 임계를 넘어야 풀린다. 가득 채울 때와 달리 조금 넣어준 것만으로
+        /// 풀어주면, 바닥까지 태워 잠긴 사람이 한 방울로 다시 켤 수 있게 되어
+        /// 바닥내는 것에 값이 없어진다.
+        /// </para>
+        /// <para>
+        /// 손을 떼야 한다는 표는 지운다. 되돌려주는 뜻이 이어서 쓰라는 것인데 손을
+        /// 떼라고 하면, 밟은 채로 받은 사람은 받은 줄도 모른 채 끊긴다.
+        /// </para>
+        /// </summary>
+        public void Restore(float fraction)
+        {
+            if (fraction <= 0f)
+            {
+                return;
+            }
+
+            _remaining = Mathf.Min(Capacity, _remaining + (Capacity * fraction));
+            _rechargeAt = 0f;
+            _awaitingRelease = false;
+
+            if (_lockedOut && _remaining >= Capacity * _aircraft.Airframe.BoostReengageFraction)
+            {
+                _lockedOut = false;
+                Restored?.Invoke(this);
+            }
+
+            Changed?.Invoke(this);
+        }
+
         /// <summary>리스폰이나 재보급 때 가득 채운다.</summary>
         public void Refill()
         {

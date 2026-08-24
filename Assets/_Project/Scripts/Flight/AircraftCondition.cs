@@ -25,6 +25,18 @@ namespace Adler.Flight
 
         /// <summary>시간을 건드리는 것이 도는 동안.</summary>
         TimeWarped,
+
+        /// <summary>갈고리가 무언가에 걸려 있는 동안. 물어 들어간 뒤부터 끌리는 내내.</summary>
+        Grappling,
+
+        /// <summary>
+        /// 방금 몸으로 들이받았을 때. 부딪힌 뒤 잠깐 참으로 남는다.
+        /// <para>
+        /// 부딪히는 것은 한 순간이라 이어지는 상태가 없다. 잔상처럼 켜져 있어야 하는
+        /// 연출이 붙잡을 것이 필요해서, 들이받기 쪽이 짧은 창을 남겨준다.
+        /// </para>
+        /// </summary>
+        JustRammed,
     }
 
     /// <summary>
@@ -59,6 +71,8 @@ namespace Adler.Flight
                 AircraftCondition.Frozen => aircraft.Model?.IsFrozen == true,
                 AircraftCondition.Repairing => aircraft.Abilities?.IsRunning(AbilityTag.Repair) == true,
                 AircraftCondition.TimeWarped => aircraft.Abilities?.IsRunning(AbilityTag.TimeWarp) == true,
+                AircraftCondition.Grappling => aircraft.Grapple?.IsAttached == true,
+                AircraftCondition.JustRammed => aircraft.Ram?.IsRamming == true,
                 AircraftCondition.Debuff => debuff != null && aircraft.Debuffs?.IsActive(debuff) == true,
                 _ => false,
             };

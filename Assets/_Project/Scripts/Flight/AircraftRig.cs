@@ -50,6 +50,12 @@ namespace Adler.Flight
         /// <summary>이 기체가 할 수 있는 행동들. 스트라타젬의 실행도 여기서 돈다.</summary>
         public AbilityRunner Abilities { get; private set; }
 
+        /// <summary>갈고리. 걸려 있는지는 <c>Grapple.IsAttached</c>로 읽는다.</summary>
+        public GrapplingHook Grapple { get; private set; }
+
+        /// <summary>몸으로 들이받는 것. 없으면 부딪히는 것은 그냥 죽는 일이다.</summary>
+        public RamAttack Ram { get; private set; }
+
         /// <summary>지금 걸려 있는 나쁜 상태들. 무엇이 걸리는지는 각 시스템이 알린다.</summary>
         public AircraftDebuffs Debuffs { get; private set; }
 
@@ -78,6 +84,8 @@ namespace Adler.Flight
             Aim = GetComponentInChildren<SoftLock>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
             Abilities = GetComponentInChildren<AbilityRunner>(includeInactive: true);
+            Grapple = GetComponentInChildren<GrapplingHook>(includeInactive: true);
+            Ram = GetComponentInChildren<RamAttack>(includeInactive: true);
             Debuffs = GetComponentInChildren<AircraftDebuffs>(includeInactive: true);
         }
 
