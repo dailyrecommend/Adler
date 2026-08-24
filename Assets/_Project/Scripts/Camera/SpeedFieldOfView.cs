@@ -36,6 +36,23 @@ namespace Adler.CameraRig
         [Tooltip("기준 속도를 직접 지정할 때 쓴다 (m/s). 위 항목을 끄면 이 값이 쓰인다.")]
         [SerializeField] private float _maxSpeed = 32f;
 
+        [Header("부스터 시작")]
+        [Tooltip("부스터를 막 켠 순간 카메라가 기체에서 밀려나는 거리 (m).\n\n" +
+                 "빨라졌다는 느낌은 빠른 상태가 아니라 빨라지는 순간에서 온다.\n" +
+                 "켜고 있는 내내 멀어져 있으면 그냥 다른 거리일 뿐이다.")]
+        [Min(0f)]
+        [SerializeField] private float _boostKickDistance = 2.5f;
+
+        [Tooltip("그 순간 화각에 더해지는 각도.\n" +
+                 "거리와 함께 튕겨야 한 번의 사건으로 읽힌다.")]
+        [Min(0f)]
+        [SerializeField] private float _boostKickFieldOfView = 8f;
+
+        [Tooltip("튕긴 것이 돌아오는 속도. 클수록 짧게 끝난다.\n" +
+                 "느리게 두면 부스터를 끊어 쓸 때 돌아오기 전에 또 튕겨 계속 멀어져 있게 된다.")]
+        [Min(0.1f)]
+        [SerializeField] private float _boostKickDecay = 3.5f;
+
         [Tooltip("클수록 화각 변화가 빠르게 따라붙는다.")]
         [SerializeField] private float _responsiveness = 3f;
 
@@ -102,7 +119,66 @@ namespace Adler.CameraRig
                     extra.SmoothedGain, target, 1f - Mathf.Exp(-_responsiveness * deltaTime));
             }
 
-            state.Lens.FieldOfView += extra.SmoothedGain;
+            ApplyBoostKick(vcam, extra, ref state, deltaTime);
+
+            state.Lens.FieldOfView += extra.SmoothedGain + (_boostKickFieldOfView * extra.Kick);
+        }
+
+        /// <summary>
+        /// 부스터가 켜지는 순간에만 카메라를 뒤로 튕긴다.
+        /// <para>
+        /// 켜져 있는 동안 내내 밀어두지 않는 이유는, 그러면 부스터 중의 거리가 그냥 다른
+        /// 거리일 뿐이기 때문이다. 빨라졌다는 감각은 빠른 상태가 아니라 빨라지는 변화에서
+        /// 오므로, 모서리에서 한 번 튕기고 곧 돌아와야 그 변화가 눈에 남는다.
+        /// </para>
+        /// <para>
+        /// 미는 방향은 기체에서 카메라로 향하는 쪽이다. 카메라의 뒤쪽으로 밀면 아직 회전이
+        /// 확정되지 않은 단계라 조준 계산 뒤에 어긋나고, 급선회하는 동안 엉뚱한 데로 밀린다.
+        /// </para>
+        /// </summary>
+        private void ApplyBoostKick(
+            CinemachineVirtualCameraBase vcam,
+            VcamExtraState extra,
+            ref CameraState state,
+            float deltaTime)
+        {
+            bool boosting = _aircraft.Model.IsBoosting;
+
+            // 켜지는 모서리에서만 채운다. 누르고 있는 동안 계속 채우면 돌아올 틈이 없다.
+            if (boosting && !extra.WasBoosting)
+            {
+                extra.Kick = 1f;
+            }
+
+            extra.WasBoosting = boosting;
+
+            // 잘리거나 새로 켜진 프레임에는 남은 튕김을 버린다. 그 상태로 보간하면
+            // 카메라가 붙는 순간 뒤로 밀린 채 나타난다.
+            if (deltaTime < 0f || !vcam.PreviousStateIsValid)
+            {
+                extra.Kick = 0f;
+                return;
+            }
+
+            if (extra.Kick <= 0.001f)
+            {
+                extra.Kick = 0f;
+                return;
+            }
+
+            extra.Kick = Mathf.Lerp(extra.Kick, 0f, 1f - Mathf.Exp(-_boostKickDecay * deltaTime));
+
+            if (_boostKickDistance <= 0f || vcam.Follow == null)
+            {
+                return;
+            }
+
+            Vector3 away = state.RawPosition - vcam.Follow.position;
+
+            if (away.sqrMagnitude > 0.0001f)
+            {
+                state.RawPosition += away.normalized * (_boostKickDistance * extra.Kick);
+            }
         }
 
         private float ResolveMaxSpeed()
@@ -120,6 +196,8 @@ namespace Adler.CameraRig
         private class VcamExtraState : VcamExtraStateBase
         {
             public float SmoothedGain;
+            public float Kick;
+            public bool WasBoosting;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Adler.Combat;
 using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
@@ -68,12 +69,25 @@ namespace Adler.CameraRig
         [Min(0f)]
         [SerializeField] private float _autoRecenterDelay = 1.2f;
 
+        [Tooltip("이 상태가 시작되는 순간 정면으로 돌려보낸다.\n\n" +
+                 "부스터가 대표적이다. 가속하는 순간 시야가 옆을 보고 있으면 어디로\n" +
+                 "튀어나가는지 알 수 없어서, 빨라졌다는 감각이 불안으로 바뀐다.")]
+        [SerializeField] private bool _recenterOnCondition = true;
+
+        [Tooltip("무엇이 시작될 때 돌려보낼지.")]
+        [SerializeField] private AircraftCondition _recenterWhen = AircraftCondition.Boosting;
+
+        [Tooltip("Debuff를 고른 경우에만 쓴다.")]
+        [SerializeField] private DebuffDefinition _recenterDebuff;
+
+
         private InputAction _lookAction;
         private InputAction _recenterAction;
 
         private float _yaw;
         private float _pitch;
         private bool _recentering;
+        private bool _conditionWasMet;
         private float _idleTime;
 
         /// <summary>지금 정면을 보고 있는지. 조준 보조나 HUD 표시가 참조할 수 있다.</summary>
@@ -151,7 +165,11 @@ namespace Adler.CameraRig
 
         private void Update()
         {
-            if (_recenterAction.WasPressedThisFrame())
+            // 먼저 재둔다. 단락 평가에 맡기면 복귀 키를 누른 프레임에는 모서리
+            // 판정이 건너뛰어져, 그다음 프레임에 한 번 더 돌아간다.
+            bool started = ConditionJustStarted();
+
+            if (_recenterAction.WasPressedThisFrame() || started)
             {
                 _recentering = true;
             }
@@ -200,6 +218,28 @@ namespace Adler.CameraRig
         /// 마우스 델타는 그 프레임에 움직인 픽셀 수라 이미 프레임과 무관하지만,
         /// 스틱은 기울인 정도라서 시간을 곱해야 프레임률에 따라 속도가 달라지지 않는다.
         /// </summary>
+        /// <summary>
+        /// 정해둔 상태가 이번 프레임에 <b>시작됐는지</b>.
+        /// <para>
+        /// 이어지는 동안이 아니라 시작하는 모서리만 본다. 부스터를 켜고 있는 내내
+        /// 정면으로 끌어당기면 그동안 둘러볼 수가 없어서, 시야를 되찾아주는 것이
+        /// 아니라 빼앗는 것이 된다.
+        /// </para>
+        /// </summary>
+        private bool ConditionJustStarted()
+        {
+            if (!_recenterOnCondition)
+            {
+                return false;
+            }
+
+            bool met = AircraftConditions.IsMet(_aircraft, _recenterWhen, _recenterDebuff);
+            bool started = met && !_conditionWasMet;
+
+            _conditionWasMet = met;
+            return started;
+        }
+
         private Vector2 ReadLook()
         {
             Vector2 raw = _lookAction.ReadValue<Vector2>();

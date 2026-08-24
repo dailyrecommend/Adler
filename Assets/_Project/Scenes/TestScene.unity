@@ -3155,7 +3155,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 01540d0807cd1364c857d115d709853b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2022929757}
   m_SourcePrefab: {fileID: 100100000, guid: 01540d0807cd1364c857d115d709853b, type: 3}
 --- !u!1 &379072499
 GameObject:
@@ -6829,6 +6832,9 @@ MonoBehaviour:
   _fieldOfViewGain: 50
   _useTopSpeedAsReference: 1
   _maxSpeed: 0
+  _boostKickDistance: 2.5
+  _boostKickFieldOfView: 8
+  _boostKickDecay: 3.5
   _responsiveness: 3
 --- !u!114 &898042527
 MonoBehaviour:
@@ -7852,6 +7858,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e16076126986f34497a8da4b0f0e0a1, type: 3}
+--- !u!1 &1128757591 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 01540d0807cd1364c857d115d709853b, type: 3}
+  m_PrefabInstance: {fileID: 358488428}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1213268840
 GameObject:
   m_ObjectHideFlags: 0
@@ -12396,6 +12407,33 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 01540d0807cd1364c857d115d709853b, type: 3}
   m_PrefabInstance: {fileID: 358488428}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &2022929755 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 01540d0807cd1364c857d115d709853b, type: 3}
+  m_PrefabInstance: {fileID: 358488428}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2022929757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1128757591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32fe0596cefcc6572ad45b126333f484, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Effects.GhostTrail
+  _aircraft: {fileID: 1812182315}
+  _renderers:
+  - {fileID: 2022929755}
+  _when: 0
+  _debuff: {fileID: 0}
+  _material: {fileID: 2100000, guid: 016b03e840a4bdd449dbd6f1e37eb673, type: 2}
+  _interval: 0.05
+  _lifetime: 0.35
+  _startAlpha: 0.5
+  _colorProperty: _BaseColor
 --- !u!1 &2035002038
 GameObject:
   m_ObjectHideFlags: 0
@@ -12784,6 +12822,9 @@ MonoBehaviour:
   _recenterSpeed: 8
   _autoRecenter: 1
   _autoRecenterDelay: 1.2
+  _recenterOnCondition: 1
+  _recenterWhen: 0
+  _recenterDebuff: {fileID: 0}
 --- !u!1 &2083879040
 GameObject:
   m_ObjectHideFlags: 0
