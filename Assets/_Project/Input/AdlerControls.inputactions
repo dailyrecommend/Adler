@@ -106,15 +106,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "DropBomb",
-                    "type": "Button",
-                    "id": "11000000-0000-4000-8000-00000000000f",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Respawn",
                     "type": "Button",
                     "id": "11000000-0000-4000-8000-000000000010",
@@ -523,39 +514,6 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "CommandRight",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "20000000-0000-4000-8000-00000000002d",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "DropBomb",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "20000000-0000-4000-8000-00000000002b",
-                    "path": "<Keyboard>/b",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "DropBomb",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "20000000-0000-4000-8000-00000000002c",
-                    "path": "<Gamepad>/leftTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "DropBomb",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

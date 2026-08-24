@@ -917,8 +917,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d2e43fd690a5ff41bffd3dbfc5845b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.ImpactFlash
-  _aircraft: {fileID: 1812182315}
-  _impact: {fileID: 881712670}
   _screen: {fileID: 281800382}
   _bursts:
   - When: 3
@@ -2845,11 +2843,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 49589782}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &299142187 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 9e16076126986f34497a8da4b0f0e0a1, type: 3}
-  m_PrefabInstance: {fileID: 1128048974}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &304789283
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7117,10 +7110,8 @@ MonoBehaviour:
   _boostFrequency: 1.4
   _rampUpSpeed: 8
   _rampDownSpeed: 3
-  _damage: {fileID: 881712671}
   _damageAmplitude: 2.5
   _impulseDecay: 6
-  _hitImpact: {fileID: 881712670}
   _hitAmplitude: 0.5
   _blastAmplitude: 1
   _killAmplitude: 1.6
@@ -12146,7 +12137,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1870984622}
   - component: {fileID: 1870984625}
-  - component: {fileID: 1870984623}
   - component: {fileID: 1870984626}
   m_Layer: 10
   m_Name: Stratagem
@@ -12170,33 +12160,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1812182287}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1870984623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1870984621}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ee592243c77de9448c9a4369b810ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombImpactPredictor
-  _aircraft: {fileID: 1812182315}
-  _dropPoint: {fileID: 1812182287}
-  _marker: {fileID: 299142187}
-  _markerSurfaceOffset: 0.05
-  _onlyWhenArmed: 1
-  _constantScreenSize: 1
-  _screenHeightFraction: 0.06
-  _worldSizeRange: {x: 1, y: 60}
-  _camera: {fileID: 330585545}
-  _groundMask:
-    serializedVersion: 2
-    m_Bits: 128
-  _stepSeconds: 0.05
-  _maxFlightTime: 15
-  _castRadius: 0.1
 --- !u!114 &1870984625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12210,12 +12173,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.StratagemBay
   _input: {fileID: 1812182311}
-  _dropPoint: {fileID: 1812182287}
   _aircraft: {fileID: 1812182315}
   _jammedDebuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
   _loadout:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
-  - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
   - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
   - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   - {fileID: 11400000, guid: 848b47f07bf8f2349a0a8b44024e8ead, type: 2}
@@ -13397,7 +13358,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.DamageAudio
   _aircraft: {fileID: 1812182315}
-  _feedback: {fileID: 881712671}
   _source: {fileID: 31974038}
   _hit: {fileID: 8300000, guid: b1614c36717a4494a9e11b5ebd56bd7d, type: 3}
   _destroyed: {fileID: 8300000, guid: 50dbe5d57e1227841b6d55ac43ee2a72, type: 3}
@@ -13486,8 +13446,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c075e86d209e994aa5d6573c00af9b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.ImpactAudio
-  _aircraft: {fileID: 1812182315}
-  _impact: {fileID: 881712670}
   _source: {fileID: 1973524273}
   _cues:
   - When: 3
@@ -14436,67 +14394,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 02190d97decfa84458e628e4317c3f9b, type: 3}
---- !u!1001 &6240447987958706454
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -11.612
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -4.159
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073966378127325071, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_Name
-      value: DN-01
-      objectReference: {fileID: 0}
-    - target: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
 --- !u!1001 &6932584240465851262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14579,7 +14476,6 @@ SceneRoots:
   - {fileID: 1389705169}
   - {fileID: 1279401472}
   - {fileID: 134741785}
-  - {fileID: 6240447987958706454}
   - {fileID: 6932584240465851262}
   - {fileID: 819950027}
   - {fileID: 583552690}

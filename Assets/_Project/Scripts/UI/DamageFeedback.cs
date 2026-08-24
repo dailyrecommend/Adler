@@ -1,4 +1,3 @@
-using System;
 using Adler.Combat;
 using Adler.Core;
 using Adler.Flight;
@@ -47,9 +46,6 @@ namespace Adler.UI
         private Clock _clock;
         private float _nextReactionAt;
 
-        /// <summary>피격 반응이 일어날 때. 0~1로 정규화된 세기. 소리나 효과가 구독한다.</summary>
-        public event Action<float> Reacted;
-
         private void Awake()
         {
             _clock = TimeScale.For(this);
@@ -93,9 +89,9 @@ namespace Adler.UI
                 _hudShake.AddImpulse(Mathf.Max(_minimumShake, _shakeAtFullLoss * fraction));
             }
 
-            // 카메라 흔들림이나 소리는 이 신호를 듣는 쪽이 알아서 한다. 여기서 하나씩
+            // 카메라 흔들림이나 소리는 통로를 듣는 쪽이 알아서 한다. 여기서 하나씩
             // 불러주면 반응을 붙일 때마다 이 파일이 그것을 알아야 한다.
-            Reacted?.Invoke(fraction);
+            ImpactChannel.ReportSuffered(fraction);
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using Adler.Combat;
 using Adler.Core;
 using Adler.Flight;
@@ -7,32 +6,6 @@ using UnityEngine;
 
 namespace Adler.UI
 {
-    /// <summary>
-    /// 명중 한 번의 무게.
-    /// <para>
-    /// 맞혔다는 사실만으로는 어떤 반응이 어울리는지 정할 수 없다. 기총 한 발과
-    /// 미사일 한 발은 같은 "명중"이지만, 둘에 같은 연출을 주면 한쪽은 과하고
-    /// 다른 쪽은 밋밋해진다.
-    /// </para>
-    /// </summary>
-    public enum ImpactWeight
-    {
-        /// <summary>기총 한 발이 스친 정도. 자주 일어난다.</summary>
-        Light,
-
-        /// <summary>폭발이 표적을 덮었다. 드물고, 한 발이 곧 한 사건이다.</summary>
-        Blast,
-
-        /// <summary>표적이 쓰러졌다. 이 게임에서 가장 값진 순간.</summary>
-        Kill,
-
-        /// <summary>
-        /// 몸으로 들이받았다. 거리가 0이 되어야 일어나는 일이라, 무게가 아니라
-        /// 거기까지 파고들었다는 사실이 값이다.
-        /// </summary>
-        Ram,
-    }
-
     /// <summary>
     /// 명중과 격추를 손맛으로 옮긴다.
     /// <para>
@@ -85,32 +58,20 @@ namespace Adler.UI
 
         private WeaponBay _bay;
         private Clock _clock;
-        private StratagemBay _stratagemBay;
         private RamAttack _ram;
         private float _releaseAt;
         private ImpactWeight _releasingWeight;
         private bool _releasing;
         private float _nextLightAt;
 
-        /// <summary>명중할 때마다. 카메라 흔들림이 구독한다.</summary>
-        public event Action<ImpactWeight> Impact;
-
-        /// <summary>
-        /// 늦춰뒀던 시간이 풀리는 순간. 시간이 멎지 않는 가벼운 명중은 오지 않는다.
-        /// <para>
-        /// 늦춤의 시작과 끝은 다른 사건이다. 숨을 들이켜는 소리는 멎는 순간에 나야 하고
-        /// 내리치는 소리는 풀리는 순간에 나야, 멎어 있던 그 짧은 시간이 뜸이 된다.
-        /// 둘 다 시작에 몰아 내면 그냥 겹친 소리 하나가 된다.
-        /// </para>
-        /// </summary>
-        public event Action<ImpactWeight> Released;
+        // 잰 무게는 통로로 내보낸다. 여기에 이벤트를 두면 카메라와 소리가 이 클래스를,
+        // 그러니까 화면 계층을 올려다봐야 한다.
 
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _clock = TimeScale.For(this);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
-            _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
             _ram = _aircraft != null ? _aircraft.Ram : null;
 
             if (_bay == null)
@@ -132,10 +93,6 @@ namespace Adler.UI
                 }
             }
 
-            if (_stratagemBay != null)
-            {
-                _stratagemBay.Detonated += OnDetonated;
-            }
 
             if (_ram != null)
             {
@@ -155,10 +112,6 @@ namespace Adler.UI
                 }
             }
 
-            if (_stratagemBay != null)
-            {
-                _stratagemBay.Detonated -= OnDetonated;
-            }
 
             if (_ram != null)
             {
@@ -185,8 +138,6 @@ namespace Adler.UI
         /// 마무리한 것과 같은 연출이 나가서, 몸으로 밀어붙였다는 사실이 지워진다.
         /// </summary>
         private void OnRammed(Collision collision, DamageResult result) => React(ImpactWeight.Ram);
-
-        private void OnDetonated(BombDefinition bomb, BlastReport report) => ReactToBlast(report);
 
         private void OnMissileDetonated(MissileDefinition missile, BlastReport report) => ReactToBlast(report);
 
@@ -224,7 +175,7 @@ namespace Adler.UI
                 Schedule(weight, seconds);
             }
 
-            Impact?.Invoke(weight);
+            ImpactChannel.ReportLanded(weight);
         }
 
         /// <summary>
@@ -260,7 +211,7 @@ namespace Adler.UI
             }
 
             _releasing = false;
-            Released?.Invoke(_releasingWeight);
+            ImpactChannel.ReportReleased(_releasingWeight);
         }
 
         private float StopSecondsFor(ImpactWeight weight) => weight switch

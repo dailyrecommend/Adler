@@ -33,9 +33,5 @@ namespace Adler.Weapons
             CommandDirection.Right,
         };
 
-        [Tooltip("출격 한 번에 부를 수 있는 횟수. 0 이하면 무제한.\n\n" +
-                 "쿨타임과 다르다. 쿨타임은 기다리면 풀리지만 이것은 출격이 끝나야\n" +
-                 "돌아오므로, 아껴 쓸지 지금 쓸지를 판단하게 만든다.")]
-        public int UsesPerSortie;
     }
 }

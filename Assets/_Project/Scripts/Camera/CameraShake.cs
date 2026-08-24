@@ -1,6 +1,6 @@
 using Adler.Core;
 using Adler.Flight;
-using Adler.UI;
+using Adler.Combat;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -48,9 +48,6 @@ namespace Adler.CameraRig
         [SerializeField] private float _rampDownSpeed = 3f;
 
         [Header("충격")]
-        [Tooltip("피격 반응을 내보내는 쪽. 비워두면 기체 아래에서 찾는다.")]
-        [SerializeField] private DamageFeedback _damage;
-
         [Tooltip("내구도를 한 번에 전부 잃을 만큼 맞았을 때의 흔들림 폭.\n" +
                  "실제로는 받은 피해가 최대 내구도에서 차지하는 비율에 비례한다.")]
         [Min(0f)]
@@ -61,9 +58,6 @@ namespace Adler.CameraRig
         [SerializeField] private float _impulseDecay = 6f;
 
         [Header("명중")]
-        [Tooltip("명중과 격추 반응을 내보내는 쪽. 비워두면 기체 아래에서 찾는다.")]
-        [SerializeField] private HitImpact _hitImpact;
-
         [Tooltip("기총이 맞았을 때의 흔들림 폭. 자주 일어나므로 작게 둔다.")]
         [Min(0f)]
         [SerializeField] private float _hitAmplitude = 0.35f;
@@ -124,50 +118,26 @@ namespace Adler.CameraRig
 
             _amplitude = _idleAmplitude;
             _frequency = _boostFrequency;
-
-            if (_damage == null)
-            {
-                _damage = _aircraft.GetComponentInChildren<DamageFeedback>(includeInactive: true);
-            }
-
-            if (_hitImpact == null)
-            {
-                _hitImpact = _aircraft.GetComponentInChildren<HitImpact>(includeInactive: true);
-            }
         }
 
         /// <summary>
-        /// 피격 반응을 지켜본다.
+        /// 손맛 통로를 지켜본다.
         /// <para>
-        /// 맞은 쪽이 카메라를 흔드는 것이 아니라 카메라가 맞는 것을 지켜본다. 반대로
-        /// 두면 반응을 하나 붙일 때마다 피격 쪽이 그것을 알아야 하고, 연출이 늘어날수록
-        /// 그 목록이 길어진다.
+        /// 맞은 쪽이 카메라를 흔드는 것이 아니라 카메라가 통로를 지켜본다. 반대로
+        /// 두면 반응을 하나 붙일 때마다 피격 쪽이 그것을 알아야 하고, 통로 대신
+        /// 내보내는 클래스를 직접 잡으면 카메라가 화면 계층을 올려다보게 된다.
         /// </para>
         /// </summary>
         private void OnEnable()
         {
-            if (_damage != null)
-            {
-                _damage.Reacted += OnDamaged;
-            }
-
-            if (_hitImpact != null)
-            {
-                _hitImpact.Impact += OnImpact;
-            }
+            ImpactChannel.Suffered += OnDamaged;
+            ImpactChannel.Landed += OnImpact;
         }
 
         private void OnDisable()
         {
-            if (_damage != null)
-            {
-                _damage.Reacted -= OnDamaged;
-            }
-
-            if (_hitImpact != null)
-            {
-                _hitImpact.Impact -= OnImpact;
-            }
+            ImpactChannel.Suffered -= OnDamaged;
+            ImpactChannel.Landed -= OnImpact;
         }
 
         private void OnDamaged(float strength) => AddImpulse(_damageAmplitude * strength);

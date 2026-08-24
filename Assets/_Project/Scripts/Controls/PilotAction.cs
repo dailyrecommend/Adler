@@ -17,7 +17,10 @@ namespace Adler.Controls
         Fire = 0,
         Boost = 1,
         Grapple = 2,
-        DropBomb = 3,
+
+        // 3은 투하(DropBomb)가 쓰던 자리다. 번호는 인스펙터에 저장되므로 재사용하면
+        // 옛 배선이 소리 없이 새 조작으로 이어진다 — 새 조작은 8부터 단다.
+
         ToggleCommands = 4,
         SwitchWeapon = 5,
         SwitchTarget = 6,

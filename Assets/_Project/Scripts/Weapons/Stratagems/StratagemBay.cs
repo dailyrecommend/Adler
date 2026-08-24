@@ -10,11 +10,11 @@ using UnityEngine;
 namespace Adler.Weapons
 {
     /// <summary>
-    /// 커맨드를 받아 스트라타젬을 승인한다. 폭탄 장전과 투하도 여기서 맡는다.
+    /// 커맨드를 받아 스트라타젬을 승인한다.
     /// <para>
     /// 무엇을 요청하든 절차는 같다. 방향키를 맞게 눌러야 하고, 그동안 손이 조종에서
-    /// 떠난다. 그래서 판정을 폭탄 전용으로 두지 않고 한곳에 모았다 — 재보급이든
-    /// 나중에 붙일 수리든 커맨드 처리를 다시 짤 일이 없다.
+    /// 떠난다. 승인까지가 이곳의 일이고, 무엇이 일어나는지는 행동 쪽이 맡는다 —
+    /// 그래서 스트라타젬이 늘어도 여기는 그대로다.
     /// </para>
     /// <para>
     /// 조종은 커맨드를 입력하는 동안에도 살아 있다. 대신 그 몇 초가 대가다.
@@ -26,9 +26,6 @@ namespace Adler.Weapons
         [Header("참조")]
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
         [SerializeField] private PilotInput _input;
-
-        [Tooltip("폭탄이 떨어져 나오는 자리. 기체 아래쪽에 빈 오브젝트를 두면 된다.")]
-        [SerializeField] private Transform _dropPoint;
 
         [Tooltip("이 장비를 실은 기체. 비워두면 위로 거슬러 올라가 찾는다.")]
         [SerializeField] private AircraftRig _aircraft;
@@ -72,10 +69,6 @@ namespace Adler.Weapons
         private Clock _clock;
         private float _inputGuardUntil;
 
-        // 스트라타젬별 재사용 시각과 쓴 횟수. 요청 절차를 여기서 다루므로 제한도 함께 맡는다.
-        private readonly Dictionary<StratagemDefinition, float> _readyAt = new();
-        private readonly Dictionary<StratagemDefinition, int> _used = new();
-
         /// <summary>
         /// 커맨드 입력을 받는 중인지. 꺼져 있으면 방향키가 커맨드로 해석되지 않는다.
         /// </summary>
@@ -100,25 +93,8 @@ namespace Adler.Weapons
         /// <summary>입력이 틀렸거나 시간이 지나 처음으로 돌아갔을 때.</summary>
         public event Action CommandReset;
 
-        /// <summary>커맨드가 완성됐을 때. 재보급처럼 폭탄이 아닌 것들이 여기서 받아 간다.</summary>
+        /// <summary>커맨드가 완성돼 승인됐을 때. 화면 표시가 받아 간다.</summary>
         public event Action<StratagemDefinition> Authorized;
-
-        /// <summary>폭탄을 투하했을 때.</summary>
-        public event Action<BombDefinition> Dropped;
-
-        /// <summary>떨구지 못한 채 장전이 풀렸을 때. 지금은 봉인에 걸린 경우뿐이다.</summary>
-        public event Action<BombDefinition> Disarmed;
-
-        /// <summary>
-        /// 투하한 폭탄이 터졌을 때. 폭탄은 던져지고 나면 사라지는 물건이라
-        /// 화면 표시가 직접 구독할 수 없으므로, 여기서 대신 받아 전달한다.
-        /// </summary>
-        public event Action<BombDefinition, BlastReport> Detonated;
-
-        /// <summary>장전된 폭탄. 없으면 null.</summary>
-        public BombDefinition ArmedBomb { get; private set; }
-
-        public bool IsArmed => ArmedBomb != null;
 
         /// <summary>지금까지 입력된 커맨드.</summary>
         public IReadOnlyList<CommandDirection> EnteredCommand => _recognizer.Entered;
@@ -134,7 +110,6 @@ namespace Adler.Weapons
 
         /// <summary>
         /// 재머 범위 안이라 스트라타젬을 쓸 수 없는 상태인지.
-        /// 장전해 둔 폭탄도 이때 풀린다.
         /// </summary>
         public bool IsJammed { get; private set; }
 
@@ -156,53 +131,32 @@ namespace Adler.Weapons
             }
         }
 
+        // 쿨타임과 횟수의 주인은 실행기다. 여기는 화면이 묻기 좋게 창구만 내준다 —
+        // 화면이 실행기를 직접 알게 하면, 커맨드 화면이 스트라타젬 아닌 행동까지
+        // 뒤질 수 있는 문이 열린다.
+
         /// <summary>남은 쿨타임(초). 쓸 수 있으면 0.</summary>
         public float RemainingCooldown(StratagemDefinition stratagem)
-        {
-            if (stratagem == null || !_readyAt.TryGetValue(stratagem, out float readyAt))
-            {
-                return 0f;
-            }
-
-            return Mathf.Max(0f, readyAt - _clock.Now);
-        }
+            => _abilities != null ? _abilities.RemainingCooldown(stratagem) : 0f;
 
         /// <summary>쿨타임 진행도. 1이면 방금 썼고 0이면 다 찼다. 게이지에 그대로 넣는다.</summary>
         public float CooldownNormalized(StratagemDefinition stratagem)
-        {
-            if (stratagem == null || stratagem.Cooldown <= 0f)
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp01(RemainingCooldown(stratagem) / stratagem.Cooldown);
-        }
+            => _abilities != null ? _abilities.CooldownNormalized(stratagem) : 0f;
 
         /// <summary>출격 횟수 제한까지 다 써버렸는지.</summary>
         public bool IsExhausted(StratagemDefinition stratagem)
-        {
-            if (stratagem == null || stratagem.UsesPerSortie <= 0)
-            {
-                return false;
-            }
+            => _abilities != null && _abilities.IsExhausted(stratagem);
 
-            return _used.TryGetValue(stratagem, out int used) && used >= stratagem.UsesPerSortie;
-        }
-
-        /// <summary>지금 부를 수 있는지.</summary>
+        /// <summary>
+        /// 지금 부를 수 있는지. 제한만 본다.
+        /// <para>
+        /// 행동 스스로의 조건은 묻지 않는다. 그것까지 물으면 가득 찬 기체의 수리
+        /// 커맨드가 아예 안 쳐지는 것처럼 보이는데, 그때 알려야 할 것은 "입력이
+        /// 틀렸다"가 아니라 "맞았지만 거절됐다"다.
+        /// </para>
+        /// </summary>
         public bool IsReady(StratagemDefinition stratagem)
-        {
-            return stratagem != null
-                   && RemainingCooldown(stratagem) <= 0f
-                   && !IsExhausted(stratagem);
-        }
-
-        /// <summary>출격을 다시 시작할 때 제한을 되돌린다.</summary>
-        public void ResetRestrictions()
-        {
-            _readyAt.Clear();
-            _used.Clear();
-        }
+            => stratagem != null && (_abilities == null || !_abilities.IsRestricted(stratagem));
 
         private void Awake()
         {
@@ -219,13 +173,8 @@ namespace Adler.Weapons
                 enabled = false;
             }
 
-            // 쿨타임과 횟수는 여기서 세고, 인식기는 그 결과만 물어본다.
+            // 제한은 실행기가 세고, 인식기는 그 결과만 물어본다.
             _recognizer = new CommandRecognizer(_loadout, IsReady);
-
-            if (_dropPoint == null)
-            {
-                _dropPoint = transform;
-            }
         }
 
         private void Update()
@@ -262,11 +211,6 @@ namespace Adler.Weapons
                 ReadCommandInput();
             }
 
-            // 투하는 커맨드 창과 무관하다. 장전해 둔 폭탄은 창을 닫은 뒤에 떨구게 된다.
-            if (!IsJammed && _input.DropPressed)
-            {
-                TryDrop();
-            }
         }
 
         /// <summary>
@@ -274,15 +218,6 @@ namespace Adler.Weapons
         /// <para>
         /// 봉인에 걸리면 치던 커맨드를 버린다. 창은 닫지 않는다 — 열려 있던 것이 저절로
         /// 닫히면 무엇 때문에 닫혔는지 알 수 없고, 봉인당한 목록을 보여줄 자리도 사라진다.
-        /// </para>
-        /// <para>
-        /// 장전해 둔 폭탄도 함께 풀린다. 남겨두면 재머 밖에서 미리 불러 두었다가 안으로
-        /// 날아 들어와 떨구는 길이 열려서, 봉인이 있으나 마나 해진다. 재머를 먼저
-        /// 처리해야 한다는 것이 이 표적의 전부다.
-        /// </para>
-        /// <para>
-        /// 대신 쿨타임과 출격 횟수는 걸리지 않는다. 그것들은 실제로 떨군 시점에만 세므로,
-        /// 풀려도 잃는 것은 커맨드를 다시 치는 수고뿐이다.
         /// </para>
         /// </summary>
         private void UpdateJamming()
@@ -303,7 +238,6 @@ namespace Adler.Weapons
             {
                 _autoOpened = false;
                 ResetCommand();
-                Disarm();
             }
 
             JammedChanged?.Invoke(jammed);
@@ -429,24 +363,9 @@ namespace Adler.Weapons
                 return;
             }
 
-            // 폭탄은 여기서 장전만 해 둔다. 쿨타임은 실제로 떨군 뒤에 흐르기 시작한다.
-            // 승인 시점부터 재면 장전해 두고 기회를 기다리는 동안 쿨타임이 소진되어,
-            // 좋은 진입각을 노리는 것이 손해가 된다.
-            if (stratagem is BombDefinition bomb)
-            {
-                ArmedBomb = bomb;
-            }
-            // 실행은 행동 쪽이 맡는다. 여기서 무엇을 하는지까지 알면 스트라타젬을
-            // 늘릴 때마다 이 분기가 함께 늘어난다.
-            //
-            // 실제로 시작됐을 때만 쓴 것으로 친다. 먼저 세어두고 결과를 버리면, 행동
-            // 쪽이 거절했을 때 출격 횟수만 깎이고 아무 일도 일어나지 않는다 —
-            // 플레이어에게는 한 번이 그냥 사라진 것으로 보인다.
-            else if (_abilities == null || _abilities.TryUse(stratagem))
-            {
-                MarkUsed(stratagem);
-            }
-            else
+            // 실행도 셈도 행동 쪽이 맡는다. 여기서 무엇을 하는지까지 알면 스트라타젬을
+            // 늘릴 때마다 이 분기가 함께 늘어나고, 여기서 세면 세는 곳이 둘이 된다.
+            if (_abilities != null && !_abilities.TryUse(stratagem))
             {
                 // 커맨드는 맞았으니 창은 닫는다. 다만 쓴 것으로 치지는 않는다.
                 Refused?.Invoke(stratagem);
@@ -464,83 +383,10 @@ namespace Adler.Weapons
             _autoOpened = false;
             SetCommandMode(false);
         }
-
-        /// <summary>
-        /// 떨구지 못한 장전을 푼다.
-        /// <para>
-        /// 쿨타임을 걸지 않는다. 쓰지 못한 것에 값을 물리면 재머 근처를 지나가기만 해도
-        /// 손해라, 지도의 절반이 다가가면 안 되는 곳이 된다.
-        /// </para>
-        /// </summary>
-        private void Disarm()
-        {
-            if (!IsArmed)
-            {
-                return;
-            }
-
-            BombDefinition bomb = ArmedBomb;
-            ArmedBomb = null;
-            Disarmed?.Invoke(bomb);
-        }
-
-        /// <summary>쿨타임을 걸고 사용 횟수를 센다. 실제로 쓰인 시점에 부른다.</summary>
-        private void MarkUsed(StratagemDefinition stratagem)
-        {
-            if (stratagem.Cooldown > 0f)
-            {
-                _readyAt[stratagem] = _clock.Now + stratagem.Cooldown;
-            }
-
-            if (stratagem.UsesPerSortie > 0)
-            {
-                _used[stratagem] = (_used.TryGetValue(stratagem, out int used) ? used : 0) + 1;
-            }
-        }
-
         private void ResetCommand()
         {
             _recognizer.Reset();
             CommandReset?.Invoke();
-        }
-
-        private void TryDrop()
-        {
-            if (!IsArmed)
-            {
-                return;
-            }
-
-            BombDefinition bomb = ArmedBomb;
-            if (bomb.Prefab == null)
-            {
-                Debug.LogError($"{nameof(StratagemBay)}: '{bomb.DisplayName}'에 프리팹이 지정되지 않았습니다.", this);
-                return;
-            }
-
-            GameObject instance = Instantiate(bomb.Prefab, _dropPoint.position, _dropPoint.rotation);
-
-            // 기체의 속도를 물려받아야 앞으로 던져진다. 그냥 놓으면 제자리에서 떨어져
-            // 조준한 곳보다 한참 뒤에 떨어진다.
-            Rigidbody carrier = _aircraft != null ? _aircraft.Body : null;
-            if (instance.TryGetComponent(out Rigidbody body) && carrier != null)
-            {
-                body.linearVelocity = carrier.linearVelocity;
-            }
-
-            if (instance.TryGetComponent(out Bomb component))
-            {
-                component.Detonated += report => Detonated?.Invoke(bomb, report);
-                component.Arm(bomb, _aircraft != null ? _aircraft.gameObject : gameObject);
-            }
-            else
-            {
-                Debug.LogError($"{nameof(StratagemBay)}: '{bomb.DisplayName}'의 프리팹에 {nameof(Bomb)}이 없습니다.", this);
-            }
-
-            ArmedBomb = null;
-            MarkUsed(bomb);
-            Dropped?.Invoke(bomb);
         }
     }
 }

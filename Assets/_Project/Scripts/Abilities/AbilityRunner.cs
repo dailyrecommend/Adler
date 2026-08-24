@@ -30,7 +30,13 @@ namespace Adler.Abilities
         [SerializeField] private List<AbilitySpec> _granted = new();
 
         private readonly Dictionary<AbilitySpec, Ability> _abilities = new();
+
+        // 쿨타임과 출격 횟수의 주인은 여기 하나다. 요청 창구가 따로 세게 두면 세는
+        // 시점이 어긋나는 순간 "다 찼다고 보이는데 안 써지는" 구간이 생긴다 — 실제로
+        // 그랬다. 화면이든 커맨드든 남들은 전부 여기에 물어본다.
         private readonly Dictionary<AbilitySpec, float> _readyAt = new();
+        private readonly Dictionary<AbilitySpec, int> _used = new();
+
         private readonly List<Ability> _running = new();
 
         // 돌면서 지우면 순회가 깨지므로 먼저 모아둔다.
@@ -78,7 +84,60 @@ namespace Adler.Abilities
             return false;
         }
 
-        /// <summary>이 행동을 지금 시작할 수 있는지. 쿨타임과 스스로의 조건을 본다.</summary>
+        /// <summary>남은 쿨타임(초). 쓸 수 있으면 0.</summary>
+        public float RemainingCooldown(AbilitySpec spec)
+        {
+            if (spec == null || _clock == null || !_readyAt.TryGetValue(spec, out float readyAt))
+            {
+                return 0f;
+            }
+
+            return Mathf.Max(0f, readyAt - _clock.Now);
+        }
+
+        /// <summary>쿨타임 진행도. 1이면 방금 썼고 0이면 다 찼다. 게이지에 그대로 넣는다.</summary>
+        public float CooldownNormalized(AbilitySpec spec)
+        {
+            if (spec == null || spec.Cooldown <= 0f)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp01(RemainingCooldown(spec) / spec.Cooldown);
+        }
+
+        /// <summary>출격 횟수 제한까지 다 써버렸는지.</summary>
+        public bool IsExhausted(AbilitySpec spec)
+        {
+            if (spec == null || spec.UsesPerSortie <= 0)
+            {
+                return false;
+            }
+
+            return _used.TryGetValue(spec, out int used) && used >= spec.UsesPerSortie;
+        }
+
+        /// <summary>
+        /// 쿨타임이나 횟수 제한에 걸려 있는지.
+        /// <para>
+        /// <see cref="CanUse"/>와 다른 질문이다. 저쪽은 행동 스스로의 조건까지 보므로
+        /// "가득 찬 기체의 수리"도 못 쓴다고 답하는데, 커맨드 화면이 그 답을 쓰면
+        /// 멀쩡한 커맨드가 입력 자체가 안 되는 것처럼 보인다. 제한은 제한만 묻는다.
+        /// </para>
+        /// </summary>
+        public bool IsRestricted(AbilitySpec spec)
+            => RemainingCooldown(spec) > 0f || IsExhausted(spec);
+
+        /// <summary>
+        /// 출격을 다시 시작할 때 제한을 되돌린다. 쿨타임도 횟수도 새 출격에는 새것이다.
+        /// </summary>
+        public void ResetSortie()
+        {
+            _readyAt.Clear();
+            _used.Clear();
+        }
+
+        /// <summary>이 행동을 지금 시작할 수 있는지. 제한과 스스로의 조건을 함께 본다.</summary>
         public bool CanUse(AbilitySpec spec)
         {
             if (spec == null || !_abilities.TryGetValue(spec, out Ability ability) || ability.IsRunning)
@@ -86,7 +145,7 @@ namespace Adler.Abilities
                 return false;
             }
 
-            if (_clock != null && _readyAt.TryGetValue(spec, out float readyAt) && _clock.Now < readyAt)
+            if (IsRestricted(spec))
             {
                 return false;
             }
@@ -122,6 +181,13 @@ namespace Adler.Abilities
             if (spec.Cooldown > 0f && _clock != null)
             {
                 _readyAt[spec] = _clock.Now + spec.Cooldown;
+            }
+
+            // 횟수도 시작이 확정된 여기서만 센다. 요청 창구에서 세면 거절당한 요청이
+            // 한 번을 깎아 먹는다 — 실제로 그랬다.
+            if (spec.UsesPerSortie > 0)
+            {
+                _used[spec] = (_used.TryGetValue(spec, out int used) ? used : 0) + 1;
             }
 
             Started?.Invoke(ability);

@@ -1,6 +1,5 @@
 using Adler.Combat;
 using Adler.Flight;
-using Adler.UI;
 using UnityEngine;
 
 namespace Adler.Audio
@@ -8,10 +7,10 @@ namespace Adler.Audio
     /// <summary>
     /// 피격과 격추 소리.
     /// <para>
-    /// <see cref="DamageFeedback"/>이 내보내는 세기를 그대로 쓴다. 그쪽은 짧은 시간에
-    /// 들어온 피해를 한 번으로 묶는데, 기총에 긁히면 초당 스무 번씩 맞으므로 피해마다
-    /// 울리면 소리가 쌓이다 잘려 나간다. 화면 흔들림과 같은 박자로 울리는 것이
-    /// 맞기도 하다 — 눈과 귀가 따로 놀면 두 번 맞은 것처럼 느껴진다.
+    /// 통로로 오는 피격 세기를 그대로 쓴다. 내보내는 쪽이 짧은 시간에 들어온 피해를
+    /// 한 번으로 묶는데, 기총에 긁히면 초당 스무 번씩 맞으므로 피해마다 울리면
+    /// 소리가 쌓이다 잘려 나간다. 화면 흔들림과 같은 박자로 울리는 것이 맞기도
+    /// 하다 — 눈과 귀가 따로 놀면 두 번 맞은 것처럼 느껴진다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
@@ -19,9 +18,6 @@ namespace Adler.Audio
     {
         [Header("읽어올 대상")]
         [SerializeField] private AircraftRig _aircraft;
-
-        [Tooltip("피격 반응을 내보내는 쪽. 비워두면 기체 아래에서 찾는다.")]
-        [SerializeField] private DamageFeedback _feedback;
 
         [Header("소리")]
         [Tooltip("소리가 나올 소스. Loop은 끄고 Play On Awake도 끌 것.")]
@@ -57,15 +53,9 @@ namespace Adler.Audio
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _health = _aircraft != null ? _aircraft.Health : null;
 
-            if (_feedback == null && _aircraft != null)
+            if (_source == null)
             {
-                _feedback = _aircraft.GetComponentInChildren<DamageFeedback>(includeInactive: true);
-            }
-
-            if (_source == null || _feedback == null)
-            {
-                Debug.LogError(
-                    $"{nameof(DamageAudio)}: Audio Source 또는 {nameof(DamageFeedback)}이 없습니다.", this);
+                Debug.LogError($"{nameof(DamageAudio)}: Audio Source가 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -76,7 +66,7 @@ namespace Adler.Audio
 
         private void OnEnable()
         {
-            _feedback.Reacted += OnReacted;
+            ImpactChannel.Suffered += OnReacted;
 
             if (_health != null)
             {
@@ -86,7 +76,7 @@ namespace Adler.Audio
 
         private void OnDisable()
         {
-            _feedback.Reacted -= OnReacted;
+            ImpactChannel.Suffered -= OnReacted;
 
             if (_health != null)
             {

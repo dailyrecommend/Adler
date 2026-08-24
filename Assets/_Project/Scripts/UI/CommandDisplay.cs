@@ -42,7 +42,6 @@ namespace Adler.UI
         private readonly List<CommandSlot> _slots = new();
 
         // 창이 닫혀도 남아 있어야 하는 칸. 장전된 폭탄은 쓸 때까지 화면에 붙어 있는다.
-        private StratagemDefinition _armed;
 
         // 승인 직후 잠시 혼자 남는 칸. 장전되지 않는 것도 확인할 시간은 준다.
         private StratagemDefinition _confirming;
@@ -90,8 +89,6 @@ namespace Adler.UI
             _stratagemBay.CommandProgressed += OnCommandProgressed;
             _stratagemBay.CommandReset += OnCommandReset;
             _stratagemBay.Authorized += OnAuthorized;
-            _stratagemBay.Dropped += OnDropped;
-            _stratagemBay.Disarmed += OnDropped;
             _stratagemBay.CommandModeChanged += OnCommandModeChanged;
             _stratagemBay.JammedChanged += OnJammedChanged;
         }
@@ -101,8 +98,6 @@ namespace Adler.UI
             _stratagemBay.CommandProgressed -= OnCommandProgressed;
             _stratagemBay.CommandReset -= OnCommandReset;
             _stratagemBay.Authorized -= OnAuthorized;
-            _stratagemBay.Dropped -= OnDropped;
-            _stratagemBay.Disarmed -= OnDropped;
             _stratagemBay.CommandModeChanged -= OnCommandModeChanged;
             _stratagemBay.JammedChanged -= OnJammedChanged;
         }
@@ -157,8 +152,7 @@ namespace Adler.UI
             foreach (CommandSlot slot in _slots)
             {
                 bool visible = _commandModeActive
-                               || (_confirming != null && slot.Stratagem == _confirming)
-                               || (_armed != null && slot.Stratagem == _armed);
+                               || (_confirming != null && slot.Stratagem == _confirming);
 
                 slot.SetHidden(!visible);
             }
@@ -230,17 +224,9 @@ namespace Adler.UI
             }
         }
 
-        /// <summary>
-        /// 폭탄만 장전 상태로 남는다. 재보급처럼 즉시 처리되는 것은 승인과 동시에 끝나므로
-        /// 켜둘 표시가 없다.
-        /// </summary>
-        /// <summary>
-        /// 장전되는 것은 쓸 때까지 화면에 남고, 즉시 끝나는 것은 잠깐 보였다 사라진다.
-        /// </summary>
+        /// <summary>승인된 것은 잠깐 보였다 사라진다. 받았다는 확인이면 충분하다.</summary>
         private void OnAuthorized(StratagemDefinition stratagem)
         {
-            bool arms = stratagem is BombDefinition;
-            _armed = arms ? stratagem : null;
             _confirming = stratagem;
             _confirmRemaining = _confirmSeconds;
 
@@ -248,23 +234,6 @@ namespace Adler.UI
             {
                 slot.SetMatchedCount(0);
                 slot.SetDimmed(false);
-                slot.SetArmed(arms && slot.Stratagem == stratagem);
-            }
-
-            RefreshVisibility();
-        }
-
-        /// <summary>
-        /// 장전이 끝났을 때. 떨궈서든 봉인에 풀려서든 표시는 똑같이 내린다 —
-        /// 어느 쪽이든 이제 쓸 수 없다는 사실은 하나다.
-        /// </summary>
-        private void OnDropped(BombDefinition bomb)
-        {
-            _armed = null;
-
-            foreach (CommandSlot slot in _slots)
-            {
-                slot.SetArmed(false);
             }
 
             RefreshVisibility();

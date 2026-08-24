@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Adler.Flight;
-using Adler.UI;
+using Adler.Combat;
 using UnityEngine;
 
 namespace Adler.Audio
@@ -10,7 +9,7 @@ namespace Adler.Audio
     /// 타격의 무게에 맞춰 한 번짜리 소리를 낸다.
     /// <para>
     /// <see cref="AircraftSounds"/>와 나뉘어 있는 것은 보고 있는 것이 다르기 때문이다.
-    /// 그쪽은 이어지는 상태를 보고 켜고 끄지만, 이쪽이 듣는 것은 일어난 사건이라
+    /// 그쪽은 이어지는 상태를 보고 켜고 끄지만, 이쪽이 듣는 것은 통로로 오는 사건이라
     /// 끄는 일 자체가 없다.
     /// </para>
     /// <para>
@@ -61,12 +60,6 @@ namespace Adler.Audio
             public float PitchJitter;
         }
 
-        [Header("읽어올 대상")]
-        [SerializeField] private AircraftRig _aircraft;
-
-        [Tooltip("타격을 알리는 쪽. 비워두면 기체 아래에서 찾는다.")]
-        [SerializeField] private HitImpact _impact;
-
         [Header("소리")]
         [Tooltip("소리가 나올 소스. Loop은 끄고 Play On Awake도 끌 것.")]
         [SerializeField] private AudioSource _source;
@@ -75,16 +68,9 @@ namespace Adler.Audio
 
         private void Awake()
         {
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
-
-            if (_impact == null && _aircraft != null)
+            if (_source == null)
             {
-                _impact = _aircraft.GetComponentInChildren<HitImpact>(includeInactive: true);
-            }
-
-            if (_impact == null || _source == null)
-            {
-                Debug.LogError($"{nameof(ImpactAudio)}: {nameof(HitImpact)} 또는 Audio Source가 비어 있습니다.", this);
+                Debug.LogError($"{nameof(ImpactAudio)}: Audio Source가 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -95,14 +81,14 @@ namespace Adler.Audio
 
         private void OnEnable()
         {
-            _impact.Impact += OnImpact;
-            _impact.Released += OnReleased;
+            ImpactChannel.Landed += OnImpact;
+            ImpactChannel.Released += OnReleased;
         }
 
         private void OnDisable()
         {
-            _impact.Impact -= OnImpact;
-            _impact.Released -= OnReleased;
+            ImpactChannel.Landed -= OnImpact;
+            ImpactChannel.Released -= OnReleased;
         }
 
         private void OnImpact(ImpactWeight weight) => Play(weight, Moment.OnHit);

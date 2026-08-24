@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Adler.Core;
-using Adler.Flight;
+using Adler.Combat;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,12 +52,6 @@ namespace Adler.UI
             public Color Tint;
         }
 
-        [Header("읽어올 대상")]
-        [SerializeField] private AircraftRig _aircraft;
-
-        [Tooltip("타격을 알리는 쪽. 비워두면 기체 아래에서 찾는다.")]
-        [SerializeField] private HitImpact _impact;
-
         [Header("화면")]
         [Tooltip("화면을 덮을 것. 보통 화면 전체를 채운 흰 Image다.\n" +
                  "Raycast Target은 꺼둘 것 — 켜두면 번쩍이는 동안 클릭이 막힌다.")]
@@ -74,16 +68,10 @@ namespace Adler.UI
         private void Awake()
         {
             _clock = TimeScale.For(this);
-            _aircraft = AircraftRig.Resolve(this, _aircraft);
 
-            if (_impact == null && _aircraft != null)
+            if (_screen == null)
             {
-                _impact = _aircraft.GetComponentInChildren<HitImpact>(includeInactive: true);
-            }
-
-            if (_impact == null || _screen == null)
-            {
-                Debug.LogError($"{nameof(ImpactFlash)}: {nameof(HitImpact)} 또는 덮을 화면이 비어 있습니다.", this);
+                Debug.LogError($"{nameof(ImpactFlash)}: 덮을 화면이 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -91,11 +79,11 @@ namespace Adler.UI
             Clear();
         }
 
-        private void OnEnable() => _impact.Impact += OnImpact;
+        private void OnEnable() => ImpactChannel.Landed += OnImpact;
 
         private void OnDisable()
         {
-            _impact.Impact -= OnImpact;
+            ImpactChannel.Landed -= OnImpact;
 
             // 꺼질 때 덮인 채로 두면 화면이 하얀 채로 남는다.
             Clear();

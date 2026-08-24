@@ -220,11 +220,11 @@ namespace Adler.Flight
 
             _aircraft.Weapons?.RestockAll();
             _aircraft.Boost?.Refill();
-            _aircraft.Stratagems?.ResetRestrictions();
 
-            // 죽기 전에 걸어둔 수리가 남아 있으면 가득 찬 기체를 계속 채우게 된다.
-            // 죽기 전에 걸어둔 행동이 남아 있으면 되살아난 기체에 그대로 이어진다.
+            // 죽기 전에 걸어둔 행동이 남아 있으면 되살아난 기체에 그대로 이어지고,
+            // 지난 출격의 쿨타임과 횟수가 남아 있으면 새 출격이 빚을 안고 시작한다.
             _aircraft.Abilities?.Stop();
+            _aircraft.Abilities?.ResetSortie();
 
             // 연출은 이 신호를 듣는 쪽이 알아서 한다. 여기서 하나씩 불러주면 연출을
             // 붙일 때마다 기체가 그것을 알아야 해서, 목록이 계속 늘어난다.

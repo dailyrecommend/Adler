@@ -27,18 +27,12 @@ namespace Adler.UI
         [Tooltip("칸 전체를 흐리게 만들 때 쓴다.")]
         [SerializeField] private CanvasGroup _group;
 
-        [Tooltip("장전됐을 때 켤 요소. 테두리나 발광 같은 것. 비워둬도 된다.")]
-        [SerializeField] private GameObject _armedHighlight;
-
         [Header("이름 / 쿨타임")]
         [Tooltip("평소에는 이름을, 쿨타임 중에는 남은 시간을 보여주는 글자.")]
         [SerializeField] private TMP_Text _label;
 
         [Tooltip("{0}에 분, {1}에 초가 들어간다. 초는 두 자리로 채워야 4:9처럼 보이지 않는다.")]
         [SerializeField] private string _cooldownFormat = "Cooldown {0}:{1:00}";
-
-        [Tooltip("장전되어 쓸 수 있을 때 보여줄 글자.")]
-        [SerializeField] private string _armedText = "READY";
 
         [Tooltip("출격 횟수를 다 썼을 때 보여줄 글자.")]
         [SerializeField] private string _exhaustedText = "Expended";
@@ -51,9 +45,6 @@ namespace Adler.UI
 
         [Tooltip("쿨타임 중일 때의 글자색.")]
         [SerializeField] private Color _cooldownTextColor = new Color(1f, 0.6f, 0.35f, 1f);
-
-        [Tooltip("장전됐을 때의 글자색.")]
-        [SerializeField] private Color _armedTextColor = new Color(0.4f, 1f, 0.5f, 1f);
 
         [SerializeField] private Color _readyTextColor = Color.white;
 
@@ -114,8 +105,6 @@ namespace Adler.UI
         private bool _hidden;
         private float _targetAlpha = 1f;
         private LayoutElement _layout;
-        private bool _shownArmed;
-        private bool _armed;
 
         private bool _jammed;
         private bool _shownJammed;
@@ -172,7 +161,6 @@ namespace Adler.UI
             BuildArrows(stratagem, arrowPrefab);
             SetMatchedCount(0);
             SetDimmed(false);
-            SetArmed(false);
 
             _shownSeconds = -1;
             _shownExhausted = false;
@@ -201,30 +189,21 @@ namespace Adler.UI
             // 올림해서 보여준다. 0.4초 남았는데 0으로 뜨면 눌러도 안 되는 순간이 생긴다.
             int seconds = Mathf.CeilToInt(remainingSeconds);
 
-            if (seconds == _shownSeconds && exhausted == _shownExhausted
-                && _armed == _shownArmed && _jammed == _shownJammed)
+            if (seconds == _shownSeconds && exhausted == _shownExhausted && _jammed == _shownJammed)
             {
                 return;
             }
 
             _shownSeconds = seconds;
             _shownExhausted = exhausted;
-            _shownArmed = _armed;
             _shownJammed = _jammed;
 
-            // 봉인이 모든 것을 덮는다. 장전됐든 쿨타임이 남았든 지금은 쓸 수 없고,
+            // 봉인이 모든 것을 덮는다. 쿨타임이 남았든 아니든 지금은 쓸 수 없고,
             // 그 사실 하나만 알면 되는 상황이다.
             if (_jammed)
             {
                 _label.SetText(_jammedText);
                 _label.color = _jammedTextColor;
-                return;
-            }
-
-            if (_armed)
-            {
-                _label.SetText(_armedText);
-                _label.color = _armedTextColor;
                 return;
             }
 
@@ -536,16 +515,6 @@ namespace Adler.UI
             }
 
             SetOccupiesLayout(_targetAlpha > 0f);
-        }
-
-        public void SetArmed(bool armed)
-        {
-            _armed = armed;
-
-            if (_armedHighlight != null)
-            {
-                _armedHighlight.SetActive(armed);
-            }
         }
 
         /// <summary>

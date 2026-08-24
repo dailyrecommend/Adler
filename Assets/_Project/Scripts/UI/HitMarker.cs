@@ -24,7 +24,6 @@ namespace Adler.UI
         [SerializeField] private AircraftRig _aircraft;
 
         private WeaponBay _bay;
-        private StratagemBay _stratagemBay;
 
 
         [Header("표식")]
@@ -51,7 +50,6 @@ namespace Adler.UI
             _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
-            _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
 
             if (_bay == null)
             {
@@ -80,10 +78,6 @@ namespace Adler.UI
                 }
             }
 
-            if (_stratagemBay != null)
-            {
-                _stratagemBay.Detonated += OnDetonated;
-            }
         }
 
         private void OnDisable()
@@ -98,10 +92,6 @@ namespace Adler.UI
                 }
             }
 
-            if (_stratagemBay != null)
-            {
-                _stratagemBay.Detonated -= OnDetonated;
-            }
         }
 
         /// <summary>
@@ -109,8 +99,6 @@ namespace Adler.UI
         /// 전부 막혔을 때만 막힘 표시를 띄워야, 장갑 차량 옆의 보병을 잡은 것을
         /// 실패로 알리는 일이 없다.
         /// </summary>
-        private void OnDetonated(BombDefinition bomb, BlastReport report) => ShowBlast(report);
-
         private void OnMissileDetonated(MissileDefinition missile, BlastReport report) => ShowBlast(report);
 
         private void ShowBlast(BlastReport report)

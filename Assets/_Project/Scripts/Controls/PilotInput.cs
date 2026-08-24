@@ -33,10 +33,27 @@ namespace Adler.Controls
         private InputAction _pitch;
         private InputAction _roll;
         // 조작 이름표로 찾는다. 이름별 속성은 읽기 좋으라고 그 위에 얹어둔 것이다.
-        private readonly InputAction[] _actions = new InputAction[8];
-        private readonly InputAction[] _commands = new InputAction[4];
+        //
+        // 칸 수는 열거형의 가장 큰 번호를 따른다. 번호를 손으로 다시 세게 두면
+        // 조작을 더하거나 뺄 때 이 숫자를 함께 고쳐야 한다는 사실이 어디에도 없다.
+        // 빠진 번호는 칸만 빌 뿐 문제가 없다.
+        private readonly InputAction[] _actions = new InputAction[SlotCountOf<PilotAction>()];
+        private readonly InputAction[] _commands = new InputAction[SlotCountOf<CommandDirection>()];
 
         private IControlSuppressor[] _suppressors;
+
+        /// <summary>열거형의 가장 큰 번호까지 담을 수 있는 칸 수.</summary>
+        private static int SlotCountOf<T>() where T : System.Enum
+        {
+            int max = 0;
+
+            foreach (int value in System.Enum.GetValues(typeof(T)))
+            {
+                max = Mathf.Max(max, value);
+            }
+
+            return max + 1;
+        }
 
         /// <summary>기수를 올리고 내리는 정도. 키보드를 빼앗겼으면 0이다.</summary>
         public float Pitch => Stick(_pitch);
@@ -58,7 +75,6 @@ namespace Adler.Controls
 
         public bool RespawnPressed => WasPressed(PilotAction.Respawn);
 
-        public bool DropPressed => WasPressed(PilotAction.DropBomb);
 
         public bool ToggleCommandsPressed => WasPressed(PilotAction.ToggleCommands);
 
@@ -115,7 +131,6 @@ namespace Adler.Controls
             _actions[(int)PilotAction.SwitchTarget] = _map.FindAction("SwitchTarget", throwIfNotFound: true);
             _actions[(int)PilotAction.Grapple] = _map.FindAction("Grapple", throwIfNotFound: true);
             _actions[(int)PilotAction.Respawn] = _map.FindAction("Respawn", throwIfNotFound: true);
-            _actions[(int)PilotAction.DropBomb] = _map.FindAction("DropBomb", throwIfNotFound: true);
             _actions[(int)PilotAction.ToggleCommands] = _map.FindAction("ToggleCommands", throwIfNotFound: true);
 
             _commands[(int)CommandDirection.Up] = _map.FindAction("CommandUp", throwIfNotFound: true);
