@@ -32,18 +32,28 @@ namespace Adler.Abilities
         /// <summary>표적을 물어보는 통로. 없을 수 있다.</summary>
         public readonly ITargetSource Targets;
 
+        /// <summary>내구도를 채우는 통로. 없을 수 있다.</summary>
+        public readonly IDurability Durability;
+
+        /// <summary>무언가를 내놓는 자리. 없을 수 있다.</summary>
+        public readonly IHardpoint Hardpoint;
+
         public AbilityContext(
             GameObject owner,
             Clock clock,
             IMovementDriver movement = null,
             IWeaponHost weapons = null,
-            ITargetSource targets = null)
+            ITargetSource targets = null,
+            IDurability durability = null,
+            IHardpoint hardpoint = null)
         {
             Owner = owner;
             Clock = clock;
             Movement = movement;
             Weapons = weapons;
             Targets = targets;
+            Durability = durability;
+            Hardpoint = hardpoint;
         }
 
         /// <summary>이번 프레임에 이 행동의 시계가 흐른 양.</summary>

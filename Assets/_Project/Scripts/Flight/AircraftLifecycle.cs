@@ -223,7 +223,8 @@ namespace Adler.Flight
             _aircraft.Stratagems?.ResetRestrictions();
 
             // 죽기 전에 걸어둔 수리가 남아 있으면 가득 찬 기체를 계속 채우게 된다.
-            _aircraft.Repair?.Stop(completed: false);
+            // 죽기 전에 걸어둔 행동이 남아 있으면 되살아난 기체에 그대로 이어진다.
+            _aircraft.Abilities?.Stop();
 
             // 연출은 이 신호를 듣는 쪽이 알아서 한다. 여기서 하나씩 불러주면 연출을
             // 붙일 때마다 기체가 그것을 알아야 해서, 목록이 계속 늘어난다.

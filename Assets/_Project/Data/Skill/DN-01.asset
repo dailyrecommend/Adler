@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: DN-01
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.BombDefinition
   DisplayName: DN-01
+  Description: 
+  Tags: 129
+  WindupSeconds: 0
+  ActiveSeconds: 0.1
+  RecoverySeconds: 0
+  CancelableWhileActive: 0
+  Cooldown: 150
   Icon: {fileID: 21300000, guid: 5aa3e76dd2d117448a374337a9305eeb, type: 3}
   Command: 0000000003000000010000000100000001000000
-  Cooldown: 150
   UsesPerSortie: 0
   Prefab: {fileID: 7593093563049946421, guid: 69c5db3b87fe53042993060e02948b9a, type: 3}
   ArmingDelay: 1.5

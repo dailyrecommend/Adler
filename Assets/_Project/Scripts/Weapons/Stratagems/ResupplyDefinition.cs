@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -21,6 +22,9 @@ namespace Adler.Weapons
         public float RefillPercent = 100f;
 
         /// <summary>주어진 최대 장탄수에서 이번 보급으로 채울 탄 수.</summary>
+        /// <inheritdoc />
+        public override Ability Create() => new ResupplyAbility(this, RefillPercent);
+
         public int RoundsFor(int capacity)
         {
             return Mathf.CeilToInt(capacity * (RefillPercent / 100f));

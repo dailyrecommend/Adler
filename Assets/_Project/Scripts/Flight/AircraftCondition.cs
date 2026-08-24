@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using System;
 using Adler.Combat;
 using UnityEngine;
@@ -53,7 +54,7 @@ namespace Adler.Flight
                 AircraftCondition.Boosting => aircraft.Model?.IsBoosting == true,
                 AircraftCondition.Firing => aircraft.Weapons?.IsFiring == true,
                 AircraftCondition.Frozen => aircraft.Model?.IsFrozen == true,
-                AircraftCondition.Repairing => aircraft.Repair?.IsRepairing == true,
+                AircraftCondition.Repairing => aircraft.Abilities?.IsRunning(AbilityTag.Repair) == true,
                 AircraftCondition.Debuff => debuff != null && aircraft.Debuffs?.IsActive(debuff) == true,
                 _ => false,
             };

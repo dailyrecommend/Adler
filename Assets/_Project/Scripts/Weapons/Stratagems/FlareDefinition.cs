@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -65,6 +66,9 @@ namespace Adler.Weapons
                  "튀어나가는 힘은 그대로 두고 천천히 가라앉게 할 수 있다.")]
         [Range(0f, 1f)]
         public float GravityScale = 0.3f;
+
+        /// <inheritdoc />
+        public override Ability Create() => new FlareAbility(this);
 
         [Header("유혹")]
         [Tooltip("타는 시간(초). 이 시간이 지나면 미사일을 끌지 못한다.")]

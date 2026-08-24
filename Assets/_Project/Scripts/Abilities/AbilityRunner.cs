@@ -45,6 +45,16 @@ namespace Adler.Abilities
         public Ability Running => _running != null && _running.IsRunning ? _running : null;
 
         /// <summary>
+        /// 이 꼬리표를 단 행동이 지금 돌고 있는지.
+        /// <para>
+        /// 이름이 아니라 꼬리표로 묻는다. 화면 효과나 소리가 "수리 중인가"를 알고
+        /// 싶을 때 특정 스트라타젬의 이름을 알아야 한다면, 수리하는 스트라타젬을
+        /// 하나 더 만드는 순간 그 조건이 조용히 어긋난다.
+        /// </para>
+        /// </summary>
+        public bool IsRunning(AbilityTag tag) => Running?.Spec?.Has(tag) == true;
+
+        /// <summary>
         /// 행동이 세상에 닿는 통로. 기체가 자기 것을 끼워 넣는다.
         /// <para>
         /// 실행기가 스스로 찾지 않는다. 찾게 두면 이 파일이 기체의 부품 이름을 알아야

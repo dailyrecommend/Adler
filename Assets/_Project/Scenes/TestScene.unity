@@ -11441,8 +11441,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1870984622}
   - component: {fileID: 1870984625}
-  - component: {fileID: 1870984624}
   - component: {fileID: 1870984623}
+  - component: {fileID: 1870984626}
   m_Layer: 10
   m_Name: Stratagem
   m_TagString: Untagged
@@ -11492,20 +11492,6 @@ MonoBehaviour:
   _stepSeconds: 0.05
   _maxFlightTime: 15
   _castRadius: 0.1
---- !u!114 &1870984624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1870984621}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5c1c9c5dc859c042ade4acab6209a76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.FlareDispenser
-  _aircraft: {fileID: 1812182315}
-  _dispensePoint: {fileID: 1812182287}
 --- !u!114 &1870984625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11525,9 +11511,24 @@ MonoBehaviour:
   _loadout:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
   - {fileID: 11400000, guid: d27260d1aaece0f4ea4575d72fcaa254, type: 2}
+  - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
   _inputTimeout: 1.5
   _gamepadOpensOnInput: 1
   _openGuardSeconds: 0.1
+--- !u!114 &1870984626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870984621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21c418a0352f9b0e168483141726af57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AircraftHardpoint
+  _mount: {fileID: 1812182287}
+  _aircraft: {fileID: 1812182315}
 --- !u!4 &1875298262 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -949369033195206985, guid: 6864cf92dc458e14fbbff9538e404532, type: 3}
@@ -11648,7 +11649,6 @@ GameObject:
   - component: {fileID: 1919053225}
   - component: {fileID: 1919053224}
   - component: {fileID: 1919053228}
-  - component: {fileID: 1919053227}
   m_Layer: 10
   m_Name: Weapons
   m_TagString: Untagged
@@ -11740,19 +11740,6 @@ MonoBehaviour:
   _weapons:
   - {fileID: 1017914246}
   - {fileID: 189988666}
---- !u!114 &1919053227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1919053222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36a0cf2acb62a494cbdc4ba174d69297, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponResupply
-  _aircraft: {fileID: 1812182315}
 --- !u!114 &1919053228
 MonoBehaviour:
   m_ObjectHideFlags: 0

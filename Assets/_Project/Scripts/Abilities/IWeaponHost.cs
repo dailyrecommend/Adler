@@ -18,5 +18,8 @@ namespace Adler.Abilities
 
         /// <summary>방아쇠를 놓는다.</summary>
         void ReleaseTrigger();
+
+        /// <summary>실려 있는 무기들을 비율만큼 채운다. 재보급이 부른다.</summary>
+        void ResupplyAll(float percent);
     }
 }

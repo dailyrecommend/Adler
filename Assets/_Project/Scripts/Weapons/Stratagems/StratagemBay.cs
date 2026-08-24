@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using Adler.Combat;
 using Adler.Controls;
 using Adler.Core;
@@ -59,6 +60,7 @@ namespace Adler.Weapons
 
         // 어느 커맨드를 치고 있는지 알아내는 일은 이쪽이 맡는다. 여기는 입력을 읽어
         // 넘기고 결과를 알릴 뿐이다.
+        private AbilityRunner _abilities;
         private CommandRecognizer _recognizer;
 
         private float _lastInputTime;
@@ -207,6 +209,7 @@ namespace Adler.Weapons
             _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _input = _input != null ? _input : GetComponentInParent<PilotInput>();
+            _abilities = GetComponentInParent<AbilityRunner>();
 
             if (_input == null)
             {
@@ -431,6 +434,10 @@ namespace Adler.Weapons
             {
                 // 재보급처럼 승인과 동시에 끝나는 것은 그 자리에서 쓴 것으로 친다.
                 MarkUsed(stratagem);
+
+                // 실행은 행동 쪽이 맡는다. 여기서 무엇을 하는지까지 알면 스트라타젬을
+                // 늘릴 때마다 이 분기가 함께 늘어난다.
+                _abilities?.TryUse(stratagem);
             }
 
             Authorized?.Invoke(stratagem);

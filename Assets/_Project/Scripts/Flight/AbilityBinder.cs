@@ -83,7 +83,9 @@ namespace Adler.Flight
                 TimeScale.For(this),
                 _aircraft.Model as IMovementDriver,
                 _aircraft.Weapons,
-                _aircraft.Targeting);
+                _aircraft.Targeting,
+                _aircraft.Health,
+                GetComponentInChildren<IHardpoint>(includeInactive: true));
         }
 
         private void Update()

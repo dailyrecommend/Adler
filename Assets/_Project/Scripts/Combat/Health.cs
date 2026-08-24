@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using System;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace Adler.Combat
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class Health : MonoBehaviour, IDamageable
+    public sealed class Health : MonoBehaviour, IDamageable, IDurability
     {
         [Header("내구도")]
         [SerializeField] private float _maxHealth = 30f;
@@ -58,6 +59,12 @@ namespace Adler.Combat
         public float Current => _current;
         public float Max => _maxHealth;
         public float Normalized => _maxHealth > 0f ? _current / _maxHealth : 0f;
+
+        /// <summary>더 채울 것이 없는지. 수리는 이것을 보고 시작할지 정한다.</summary>
+        public bool IsFull => _current >= _maxHealth;
+
+        /// <inheritdoc />
+        float IDurability.Restore(float amount) => Heal(amount);
         public float Armor => _armor;
         public float RequiredDemolition => _requiredDemolition;
 

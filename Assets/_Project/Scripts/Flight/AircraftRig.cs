@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using Adler.Aircraft;
 using Adler.Combat;
 using Adler.Weapons;
@@ -42,7 +43,8 @@ namespace Adler.Flight
 
         public StratagemBay Stratagems { get; private set; }
 
-        public AircraftRepair Repair { get; private set; }
+        /// <summary>이 기체가 할 수 있는 행동들. 스트라타젬의 실행도 여기서 돈다.</summary>
+        public AbilityRunner Abilities { get; private set; }
 
         /// <summary>지금 걸려 있는 나쁜 상태들. 무엇이 걸리는지는 각 시스템이 알린다.</summary>
         public AircraftDebuffs Debuffs { get; private set; }
@@ -70,7 +72,7 @@ namespace Adler.Flight
             Targeting = GetComponentInChildren<LockOnTargeting>(includeInactive: true);
             Aim = GetComponentInChildren<SoftLock>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
-            Repair = GetComponentInChildren<AircraftRepair>(includeInactive: true);
+            Abilities = GetComponentInChildren<AbilityRunner>(includeInactive: true);
             Debuffs = GetComponentInChildren<AircraftDebuffs>(includeInactive: true);
         }
 

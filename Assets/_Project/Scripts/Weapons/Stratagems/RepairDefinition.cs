@@ -1,3 +1,4 @@
+using Adler.Abilities;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -41,5 +42,8 @@ namespace Adler.Weapons
 
         /// <summary>시간을 다 써도 이만큼밖에 채우지 못한다.</summary>
         public float MaxRestored => RepairRate * Duration;
+
+        /// <inheritdoc />
+        public override Ability Create() => new RepairAbility(this, MaxRestored);
     }
 }

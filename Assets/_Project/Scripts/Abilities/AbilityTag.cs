@@ -37,5 +37,11 @@ namespace Adler.Abilities
 
         /// <summary>표적이 잡혀 있어야 한다.</summary>
         NeedsTarget = 1 << 5,
+
+        /// <summary>내구도를 채운다.</summary>
+        Repair = 1 << 6,
+
+        /// <summary>커맨드를 쳐서 부른다.</summary>
+        Stratagem = 1 << 7,
     }
 }
