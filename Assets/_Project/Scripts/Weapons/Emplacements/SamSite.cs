@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -160,8 +161,11 @@ namespace Adler.Weapons
             return false;
         }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_health == null)
             {
                 _health = GetComponent<Health>();
@@ -198,7 +202,7 @@ namespace Adler.Weapons
 
             if (_reloadRemaining > 0f)
             {
-                _reloadRemaining -= Time.deltaTime;
+                _reloadRemaining -= _clock.Delta;
                 return;
             }
 
@@ -217,8 +221,8 @@ namespace Adler.Weapons
             bool engageable = _target != null && CanEngage();
 
             _lockProgress += engageable
-                ? Time.deltaTime / _lockSeconds
-                : -Time.deltaTime / _lockSeconds * _lockDecayRate;
+                ? _clock.Delta / _lockSeconds
+                : -_clock.Delta / _lockSeconds * _lockDecayRate;
 
             _lockProgress = Mathf.Clamp01(_lockProgress);
 
@@ -259,7 +263,7 @@ namespace Adler.Weapons
 
         private void UpdateSalvo()
         {
-            _salvoRemaining -= Time.deltaTime;
+            _salvoRemaining -= _clock.Delta;
 
             if (_salvoRemaining > 0f)
             {
@@ -328,7 +332,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _scanTimer -= Time.deltaTime;
+            _scanTimer -= _clock.Delta;
             if (_scanTimer > 0f)
             {
                 return;
@@ -379,7 +383,7 @@ namespace Adler.Weapons
             _turret.rotation = Quaternion.RotateTowards(
                 _turret.rotation,
                 Quaternion.LookRotation(flat, Vector3.up),
-                _traverseSpeed * Time.deltaTime);
+                _traverseSpeed * _clock.Delta);
         }
 
         private Transform ResolveLaunchPoint()

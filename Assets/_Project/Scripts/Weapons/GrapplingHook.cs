@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -232,8 +233,11 @@ namespace Adler.Weapons
         /// <summary>다시 걸 수 있을 때까지 남은 시간(초).</summary>
         public float CooldownRemaining => _cooldownRemaining;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _targeting = _aircraft != null ? _aircraft.Targeting : null;
 
@@ -281,7 +285,7 @@ namespace Adler.Weapons
         {
             if (_cooldownRemaining > 0f)
             {
-                _cooldownRemaining -= Time.deltaTime;
+                _cooldownRemaining -= _clock.Delta;
             }
 
             if (_grappleAction.WasPressedThisFrame())
@@ -440,7 +444,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _remaining -= Time.deltaTime;
+            _remaining -= _clock.Delta;
 
             if (_remaining <= 0f || distance > _breakRange)
             {
@@ -450,7 +454,7 @@ namespace Adler.Weapons
 
             if (_phase == Phase.Biting)
             {
-                _biteRemaining -= Time.deltaTime;
+                _biteRemaining -= _clock.Delta;
 
                 if (_biteRemaining <= 0f)
                 {
@@ -486,7 +490,7 @@ namespace Adler.Weapons
         private void Fly()
         {
             Vector3 toTarget = _hooked.position - _tip;
-            float step = _travelSpeed * Time.deltaTime;
+            float step = _travelSpeed * _clock.Delta;
 
             if (toTarget.sqrMagnitude <= step * step)
             {
@@ -555,7 +559,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _clearTimeout -= Time.deltaTime;
+            _clearTimeout -= _clock.Delta;
 
             bool clear = !_clearing.gameObject.activeInHierarchy
                          || Vector3.Distance(_clearing.position, _origin.position) > _clearRange;
@@ -647,7 +651,7 @@ namespace Adler.Weapons
             Vector3 end = _phase == Phase.Flying ? _tip : _hooked.position;
 
             float wanted = _phase == Phase.Pulling ? _taut : 1f;
-            _slack = Mathf.Lerp(_slack, wanted, 1f - Mathf.Exp(-SlackResponse * Time.deltaTime));
+            _slack = Mathf.Lerp(_slack, wanted, 1f - Mathf.Exp(-SlackResponse * _clock.Delta));
 
             Vector3 middle = Vector3.Lerp(start, end, 0.5f)
                              + (SagDirection() * (Vector3.Distance(start, end) * _sag * _slack));

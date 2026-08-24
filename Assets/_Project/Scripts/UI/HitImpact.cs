@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using Adler.Weapons;
 using UnityEngine;
@@ -46,9 +47,6 @@ namespace Adler.UI
         [Header("읽어올 대상")]
         [SerializeField] private AircraftRig _aircraft;
 
-        [Tooltip("비워두면 시간을 늦추지 않고 신호만 보낸다.")]
-        [SerializeField] private HitStop _hitStop;
-
         [Header("기총")]
         [Tooltip("기총이 맞을 때 연달아 신호를 보내지 않도록 두는 간격(초).\n" +
                  "시간은 어차피 늦추지 않으므로, 이건 카메라가 쉬지 않고 떠는 것을 막는 용도다.")]
@@ -70,6 +68,7 @@ namespace Adler.UI
         [SerializeField] private float _killStopScale = 0.05f;
 
         private WeaponBay _bay;
+        private Clock _clock;
         private StratagemBay _stratagemBay;
         private float _nextLightAt;
 
@@ -79,6 +78,7 @@ namespace Adler.UI
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
+            _clock = TimeScale.For(this);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
             _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
 
@@ -155,24 +155,24 @@ namespace Adler.UI
 
         /// <summary>
         /// 무거운 쪽은 간격을 두지 않는다. 드물게 일어나는 데다,
-        /// <see cref="HitStop"/>이 이미 늦춰지고 있는 동안 짧은 요청을 무시하므로
+        /// 시계가 이미 늦춰지고 있는 동안 짧은 요청을 무시하므로
         /// 연달아 터져도 늦춤이 잘게 끊기지 않는다.
         /// </summary>
         private void React(ImpactWeight weight)
         {
             if (weight == ImpactWeight.Light)
             {
-                if (Time.time < _nextLightAt)
+                if (_clock.Now < _nextLightAt)
                 {
                     return;
                 }
 
-                _nextLightAt = Time.time + _lightWindow;
+                _nextLightAt = _clock.Now + _lightWindow;
             }
-            else if (_hitStop != null)
+            else
             {
                 bool killed = weight == ImpactWeight.Kill;
-                _hitStop.Trigger(
+                Clock.World.Hold(
                     killed ? _killStopSeconds : _blastStopSeconds,
                     killed ? _killStopScale : _blastStopScale);
             }

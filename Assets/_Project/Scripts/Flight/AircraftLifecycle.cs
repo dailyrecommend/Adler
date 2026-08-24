@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -61,8 +62,11 @@ namespace Adler.Flight
         /// <summary>되돌린 직후.</summary>
         public event Action Respawned;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = GetComponent<AircraftRig>();
 
             _startPosition = transform.position;
@@ -193,7 +197,7 @@ namespace Adler.Flight
                 return;
             }
 
-            _autoRespawnRemaining -= Time.deltaTime;
+            _autoRespawnRemaining -= _clock.Delta;
 
             if (_autoRespawnRemaining <= 0f)
             {

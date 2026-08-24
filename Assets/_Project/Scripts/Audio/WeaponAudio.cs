@@ -1,4 +1,5 @@
 using Adler.Flight;
+using Adler.Core;
 using Adler.Weapons;
 using UnityEngine;
 
@@ -64,11 +65,13 @@ namespace Adler.Audio
         [SerializeField] private float _loopFadeOut = 25f;
 
         private WeaponBay _weapons;
+        private Clock _clock;
         private float _firingUntil;
         private float _nextOneShotAt;
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _weapons = _aircraft != null ? _aircraft.Weapons : null;
 
@@ -145,7 +148,7 @@ namespace Adler.Audio
             if (_gunLoop != null)
             {
                 // 쏘고 있다는 표시만 남긴다. 실제 소리는 계속 돌고 있는 루프가 낸다.
-                _firingUntil = Time.time + _loopHold;
+                _firingUntil = _clock.Now + _loopHold;
                 return;
             }
 
@@ -166,12 +169,12 @@ namespace Adler.Audio
                 return;
             }
 
-            if (!ignoreInterval && Time.time < _nextOneShotAt)
+            if (!ignoreInterval && _clock.Now < _nextOneShotAt)
             {
                 return;
             }
 
-            _nextOneShotAt = Time.time + _minInterval;
+            _nextOneShotAt = _clock.Now + _minInterval;
 
             _source.pitch = 1f + Random.Range(-_pitchJitter, _pitchJitter);
             _source.PlayOneShot(clip, _volume);
@@ -184,13 +187,13 @@ namespace Adler.Audio
                 return;
             }
 
-            bool firing = Time.time < _firingUntil;
+            bool firing = _clock.Now < _firingUntil;
 
             // 시작은 즉시, 끝은 서서히. 쏘는 순간과 소리가 어긋나면 안 되지만,
             // 손을 뗄 때 뚝 끊으면 파형이 잘려 딸깍 소리가 난다.
             _gunLoop.volume = firing
                 ? _volume
-                : Mathf.Lerp(_gunLoop.volume, 0f, 1f - Mathf.Exp(-_loopFadeOut * Time.deltaTime));
+                : Mathf.Lerp(_gunLoop.volume, 0f, 1f - Mathf.Exp(-_loopFadeOut * _clock.Delta));
 
             if (_gunLoop.volume > 0.001f)
             {

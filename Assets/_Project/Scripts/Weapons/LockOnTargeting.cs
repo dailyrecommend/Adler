@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -236,8 +237,11 @@ namespace Adler.Weapons
             }
         }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_boresight == null)
@@ -261,16 +265,16 @@ namespace Adler.Weapons
 
         private void Update()
         {
-            _scanTimer -= Time.deltaTime;
+            _scanTimer -= _clock.Delta;
             if (_scanTimer <= 0f)
             {
                 _scanTimer = _scanInterval;
                 Rescan();
             }
 
-            _manualHoldRemaining -= Time.deltaTime;
+            _manualHoldRemaining -= _clock.Delta;
 
-            UpdateTracked(Time.deltaTime);
+            UpdateTracked(_clock.Delta);
             UpdateSelection();
             BuildMarks();
         }
@@ -458,7 +462,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _holdRemaining -= Time.deltaTime;
+            _holdRemaining -= _clock.Delta;
 
             if (_holdRemaining <= 0f)
             {

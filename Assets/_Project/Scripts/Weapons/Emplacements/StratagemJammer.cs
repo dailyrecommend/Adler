@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -150,8 +151,11 @@ namespace Adler.Weapons
             return Mathf.Sqrt(x * x + z * z);
         }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_body == null)
             {
                 _body = GetComponent<Health>();
@@ -256,7 +260,7 @@ namespace Adler.Weapons
 
             if (_suspendRemaining > 0f)
             {
-                _suspendRemaining -= Time.deltaTime;
+                _suspendRemaining -= _clock.Delta;
 
                 if (_suspendRemaining <= 0f)
                 {
@@ -287,11 +291,11 @@ namespace Adler.Weapons
             }
 
             float target = IsOperational ? _spinSpeed : 0f;
-            _spin = Mathf.Lerp(_spin, target, 1f - Mathf.Exp(-_spinRamp * Time.deltaTime));
+            _spin = Mathf.Lerp(_spin, target, 1f - Mathf.Exp(-_spinRamp * _clock.Delta));
 
             if (Mathf.Abs(_spin) > 0.01f)
             {
-                _spinner.Rotate(Vector3.up, _spin * Time.deltaTime, Space.Self);
+                _spinner.Rotate(Vector3.up, _spin * _clock.Delta, Space.Self);
             }
         }
 

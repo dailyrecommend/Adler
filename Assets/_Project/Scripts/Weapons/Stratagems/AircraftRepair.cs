@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace Adler.Weapons
     public sealed class AircraftRepair : MonoBehaviour
     {
         private AircraftRig _aircraft;
+        private Clock _clock;
         private RepairDefinition _active;
         private float _remainingSeconds;
 
@@ -47,7 +49,11 @@ namespace Adler.Weapons
             }
         }
 
-        private void Awake() => _aircraft = GetComponent<AircraftRig>();
+        private void Awake()
+        {
+            _clock = TimeScale.For(this);
+            _aircraft = GetComponent<AircraftRig>();
+        }
 
         private void OnEnable()
         {
@@ -121,7 +127,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            float step = Mathf.Min(_remainingSeconds, Time.deltaTime);
+            float step = Mathf.Min(_remainingSeconds, _clock.Delta);
             _remainingSeconds -= step;
 
             Health health = _aircraft.Health;

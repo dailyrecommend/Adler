@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -43,6 +44,7 @@ namespace Adler.UI
 
         private Health _health;
         private float _pending;
+        private Clock _clock;
         private float _nextReactionAt;
 
         /// <summary>피격 반응이 일어날 때. 0~1로 정규화된 세기. 소리나 효과가 구독한다.</summary>
@@ -50,6 +52,7 @@ namespace Adler.UI
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _health = _aircraft != null ? _aircraft.Health : null;
 
@@ -73,14 +76,14 @@ namespace Adler.UI
 
         private void Update()
         {
-            if (_pending <= 0f || Time.time < _nextReactionAt)
+            if (_pending <= 0f || _clock.Now < _nextReactionAt)
             {
                 return;
             }
 
             float fraction = _health.Max > 0f ? Mathf.Clamp01(_pending / _health.Max) : 0f;
             _pending = 0f;
-            _nextReactionAt = Time.time + _window;
+            _nextReactionAt = _clock.Now + _window;
 
             if (_hudShake != null)
             {

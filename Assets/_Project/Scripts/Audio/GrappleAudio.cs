@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using Adler.Weapons;
 using UnityEngine;
@@ -79,8 +80,11 @@ namespace Adler.Audio
 
         private Sustain _playing;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_hook == null && _aircraft != null)
@@ -217,7 +221,7 @@ namespace Adler.Audio
             }
 
             _sustained.volume = _fadeOut > 0f
-                ? Mathf.MoveTowards(_sustained.volume, 0f, Time.deltaTime / _fadeOut)
+                ? Mathf.MoveTowards(_sustained.volume, 0f, _clock.Delta / _fadeOut)
                 : 0f;
 
             if (_sustained.volume <= 0f)

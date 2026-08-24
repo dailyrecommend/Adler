@@ -1,4 +1,5 @@
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -52,8 +53,11 @@ namespace Adler.CameraRig
 
         private AircraftDebuffs _debuffs;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _debuffs = _aircraft != null ? _aircraft.Debuffs : null;
 
@@ -83,7 +87,7 @@ namespace Adler.CameraRig
             float speed = active ? _rampUpSpeed : _rampDownSpeed;
 
             _volume.weight = Mathf.Lerp(
-                _volume.weight, target, 1f - Mathf.Exp(-speed * Time.deltaTime));
+                _volume.weight, target, 1f - Mathf.Exp(-speed * _clock.Delta));
         }
     }
 }

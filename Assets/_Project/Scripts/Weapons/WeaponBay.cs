@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -46,8 +47,11 @@ namespace Adler.Weapons
 
         public IReadOnlyList<AircraftWeapon> Weapons => _weapons;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_weapons.Count == 0 && _aircraft != null)
@@ -129,7 +133,7 @@ namespace Adler.Weapons
 
             if (_fireAction.IsPressed())
             {
-                weapon.HoldTrigger(Time.deltaTime);
+                weapon.HoldTrigger(_clock.Delta);
             }
             else
             {

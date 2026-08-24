@@ -1,3 +1,4 @@
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Flight
@@ -48,7 +49,15 @@ namespace Adler.Flight
         /// </summary>
         void Initialize(Rigidbody body);
 
-        /// <summary>FixedUpdate마다 호출. 구현체가 Rigidbody를 갱신한다.</summary>
-        void Tick(in FlightInput input, float deltaTime);
+        /// <summary>
+        /// FixedUpdate마다 호출. 구현체가 Rigidbody를 갱신한다.
+        /// <para>
+        /// 시간을 숫자가 아니라 시계로 받는다. 이 기체만 느리게 하려면 흐른 양을 줄이는
+        /// 것만으로는 모자라고 — 그러면 붙는 속도만 굼떠지고 순항 속도는 그대로다 —
+        /// 내놓는 속도 자체에도 같은 배율을 곱해야 한다. 둘은 언제나 짝으로 다녀야
+        /// 하므로 하나로 묶어 넘긴다.
+        /// </para>
+        /// </summary>
+        void Tick(in FlightInput input, Clock clock);
     }
 }

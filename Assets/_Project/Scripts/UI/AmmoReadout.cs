@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using Adler.Weapons;
 using TMPro;
@@ -72,8 +73,11 @@ namespace Adler.UI
         private float _punchRemaining;
         private float _punchAmount = 1f;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
 
@@ -220,7 +224,7 @@ namespace Adler.UI
                 return;
             }
 
-            _punchRemaining -= Time.deltaTime;
+            _punchRemaining -= _clock.Delta;
 
             if (_punchRemaining <= 0f)
             {

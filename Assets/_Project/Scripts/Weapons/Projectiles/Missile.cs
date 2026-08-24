@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -35,6 +36,7 @@ namespace Adler.Weapons
         private LayerMask _blastMask;
         private GameObject _owner;
         private Transform _target;
+        private Clock _clock;
         private Vector3 _velocity;
         private float _traveled;
         private float _straightRemaining;
@@ -72,6 +74,7 @@ namespace Adler.Weapons
             Vector3 velocity,
             LayerMask blastMask)
         {
+            _clock = TimeScale.For(this);
             _definition = definition;
             _owner = owner;
             _target = target;
@@ -92,7 +95,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            float dt = Time.fixedDeltaTime;
+            float dt = _clock.FixedDelta;
 
             Steer(dt);
             Accelerate(dt);

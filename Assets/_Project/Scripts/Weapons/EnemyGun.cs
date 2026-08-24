@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -140,8 +141,11 @@ namespace Adler.Weapons
             return false;
         }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_pilot == null)
             {
                 _pilot = GetComponentInParent<EnemyPilot>();
@@ -235,7 +239,7 @@ namespace Adler.Weapons
         /// </summary>
         private void UpdateFiring(bool onTarget)
         {
-            float deltaTime = Time.deltaTime;
+            float deltaTime = _clock.Delta;
 
             if (_firing)
             {
@@ -341,7 +345,7 @@ namespace Adler.Weapons
 
         private void FireWhileReady()
         {
-            _cooldown -= Time.deltaTime;
+            _cooldown -= _clock.Delta;
 
             const int MaxShotsPerFrame = 3;
             int shots = 0;

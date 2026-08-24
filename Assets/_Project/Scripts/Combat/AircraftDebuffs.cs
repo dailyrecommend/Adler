@@ -1,3 +1,4 @@
+using Adler.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Adler.Combat
     [DisallowMultipleComponent]
     public sealed class AircraftDebuffs : MonoBehaviour
     {
+        private Clock _clock;
         private IDebuffSource[] _sources;
 
         private readonly List<DebuffDefinition> _active = new();
@@ -38,6 +40,7 @@ namespace Adler.Combat
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             // 기체 위에 있는 것들을 한 번만 찾아둔다. 새 시스템이 디버프를 걸게 되면
             // 인터페이스만 구현하면 되고, 여기도 화면도 고칠 것이 없다.
             _sources = GetComponentsInChildren<IDebuffSource>(includeInactive: true);
@@ -57,7 +60,7 @@ namespace Adler.Combat
                 return;
             }
 
-            float until = Time.time + seconds;
+            float until = _clock.Now + seconds;
 
             if (!_timed.TryGetValue(debuff, out float existing) || until > existing)
             {
@@ -132,7 +135,7 @@ namespace Adler.Combat
 
             foreach (KeyValuePair<DebuffDefinition, float> pair in _timed)
             {
-                if (Time.time >= pair.Value)
+                if (_clock.Now >= pair.Value)
                 {
                     _expired.Add(pair.Key);
                 }

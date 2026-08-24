@@ -1,5 +1,6 @@
 using System;
 using Adler.Aircraft;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Flight
@@ -24,6 +25,7 @@ namespace Adler.Flight
         [SerializeField] private AircraftRig _aircraft;
 
         private float _remaining;
+        private Clock _clock;
         private float _rechargeAt;
         private bool _lockedOut;
         private bool _awaitingRelease;
@@ -58,6 +60,7 @@ namespace Adler.Flight
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_aircraft == null)
@@ -125,7 +128,7 @@ namespace Adler.Flight
         private void Spend(float amount)
         {
             _remaining = Mathf.Max(0f, _remaining - amount);
-            _rechargeAt = Time.time + _aircraft.Airframe.BoostRechargeDelay;
+            _rechargeAt = _clock.Now + _aircraft.Airframe.BoostRechargeDelay;
 
             Changed?.Invoke(this);
 
@@ -148,7 +151,7 @@ namespace Adler.Flight
         /// </summary>
         private void Recover(AircraftStatSheet stats, float deltaTime)
         {
-            if (_remaining >= Capacity || Time.time < _rechargeAt)
+            if (_remaining >= Capacity || _clock.Now < _rechargeAt)
             {
                 return;
             }

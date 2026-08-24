@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using Adler.Combat;
 using Adler.Weapons;
@@ -43,8 +44,11 @@ namespace Adler.UI
         private CanvasGroup _active;
         private float _remaining;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
             _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
@@ -156,7 +160,7 @@ namespace Adler.UI
                 return;
             }
 
-            _remaining -= Time.deltaTime;
+            _remaining -= _clock.Delta;
 
             if (_remaining <= 0f)
             {

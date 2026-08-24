@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using System.Collections.Generic;
 using Adler.Weapons;
@@ -49,8 +50,11 @@ namespace Adler.UI
         private float _confirmRemaining;
         private bool _commandModeActive;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _stratagemBay = _aircraft != null ? _aircraft.Stratagems : null;
 
@@ -183,7 +187,7 @@ namespace Adler.UI
         {
             if (_confirmRemaining > 0f)
             {
-                _confirmRemaining -= Time.deltaTime;
+                _confirmRemaining -= _clock.Delta;
 
                 if (_confirmRemaining <= 0f)
                 {

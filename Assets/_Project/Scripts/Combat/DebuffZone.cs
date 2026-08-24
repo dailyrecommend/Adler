@@ -1,3 +1,4 @@
+using Adler.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +35,7 @@ namespace Adler.Combat
 
         // 안에 있는 기체와 마지막으로 닿은 시각.
         private readonly Dictionary<AircraftDebuffs, float> _inside = new();
+        private Clock _clock;
 
         private void OnEnable() => Active.Add(this);
 
@@ -48,6 +50,7 @@ namespace Adler.Combat
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             var collider = GetComponent<Collider>();
 
             if (collider == null || !collider.isTrigger)
@@ -68,7 +71,7 @@ namespace Adler.Combat
 
             if (debuffs != null)
             {
-                _inside[debuffs] = Time.time;
+                _inside[debuffs] = _clock.Now;
             }
         }
 
@@ -78,7 +81,7 @@ namespace Adler.Combat
             foreach (DebuffZone zone in Active)
             {
                 if (!zone._inside.TryGetValue(owner, out float seen)
-                    || Time.time - seen > zone._graceSeconds)
+                    || zone._clock.Now - seen > zone._graceSeconds)
                 {
                     continue;
                 }

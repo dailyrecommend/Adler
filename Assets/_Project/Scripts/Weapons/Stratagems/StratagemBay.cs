@@ -1,4 +1,5 @@
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using System;
 using System.Collections.Generic;
@@ -68,6 +69,7 @@ namespace Adler.Weapons
         private bool _autoOpened;
 
         // 이 시각까지는 커맨드를 받지 않는다. 창을 연 그 손가락이 첫 칸이 되지 않게 한다.
+        private Clock _clock;
         private float _inputGuardUntil;
 
         // 스트라타젬별 재사용 시각과 쓴 횟수. 요청 절차를 여기서 다루므로 제한도 함께 맡는다.
@@ -162,7 +164,7 @@ namespace Adler.Weapons
                 return 0f;
             }
 
-            return Mathf.Max(0f, readyAt - Time.time);
+            return Mathf.Max(0f, readyAt - _clock.Now);
         }
 
         /// <summary>쿨타임 진행도. 1이면 방금 썼고 0이면 다 찼다. 게이지에 그대로 넣는다.</summary>
@@ -204,6 +206,7 @@ namespace Adler.Weapons
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             // 쿨타임과 횟수는 여기서 세고, 인식기는 그 결과만 물어본다.
@@ -268,7 +271,7 @@ namespace Adler.Weapons
                 // 커맨드의 첫 칸이 되는 것이 규칙이고, 겹치는 키도 없다.
                 if (CommandModeActive)
                 {
-                    _inputGuardUntil = Time.time + _openGuardSeconds;
+                    _inputGuardUntil = _clock.Now + _openGuardSeconds;
                 }
             }
             else if (!IsJammed && !CommandModeActive && ShouldAutoOpen())
@@ -279,7 +282,7 @@ namespace Adler.Weapons
 
             // 다만 커맨드는 한 칸도 들어가지 않는다. 화살표가 채워지지 않는 것 자체가
             // 지금 통하지 않는다는 답이 된다.
-            if (CommandModeActive && !IsJammed && Time.time >= _inputGuardUntil)
+            if (CommandModeActive && !IsJammed && _clock.Now >= _inputGuardUntil)
             {
                 // 같은 프레임에 이어서 읽는다. 창을 연 그 십자키 입력이 커맨드의 첫 칸이 된다.
                 ExpireStaleInput();
@@ -378,7 +381,7 @@ namespace Adler.Weapons
         /// <summary>입력이 끊긴 채로 시간이 지나면 처음부터 다시 받는다.</summary>
         private void ExpireStaleInput()
         {
-            if (_recognizer.Entered.Count == 0 || Time.time - _lastInputTime < _inputTimeout)
+            if (_recognizer.Entered.Count == 0 || _clock.Now - _lastInputTime < _inputTimeout)
             {
                 return;
             }
@@ -421,7 +424,7 @@ namespace Adler.Weapons
         /// </summary>
         private void Accept(CommandDirection direction)
         {
-            _lastInputTime = Time.time;
+            _lastInputTime = _clock.Now;
 
             switch (_recognizer.Accept(direction))
             {
@@ -503,7 +506,7 @@ namespace Adler.Weapons
         {
             if (stratagem.Cooldown > 0f)
             {
-                _readyAt[stratagem] = Time.time + stratagem.Cooldown;
+                _readyAt[stratagem] = _clock.Now + stratagem.Cooldown;
             }
 
             if (stratagem.UsesPerSortie > 0)

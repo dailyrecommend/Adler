@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -81,8 +82,11 @@ namespace Adler.UI
         private float _seedY;
         private float _seedRoll;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_target == null)
             {
                 _target = transform as RectTransform;
@@ -119,9 +123,9 @@ namespace Adler.UI
 
             float target = boosting ? _boostAmplitude : _idleAmplitude;
             float speed = boosting ? _rampUpSpeed : _rampDownSpeed;
-            _amplitude = Mathf.Lerp(_amplitude, target, 1f - Mathf.Exp(-speed * Time.deltaTime));
+            _amplitude = Mathf.Lerp(_amplitude, target, 1f - Mathf.Exp(-speed * _clock.Delta));
 
-            _impulse = Mathf.Lerp(_impulse, 0f, 1f - Mathf.Exp(-_impulseDecay * Time.deltaTime));
+            _impulse = Mathf.Lerp(_impulse, 0f, 1f - Mathf.Exp(-_impulseDecay * _clock.Delta));
 
             float amplitude = _amplitude + _impulse;
 

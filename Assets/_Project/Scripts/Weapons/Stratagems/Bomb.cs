@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -84,6 +85,7 @@ namespace Adler.Weapons
 
         private BombDefinition _definition;
         private GameObject _owner;
+        private Clock _clock;
         private float _armedAt;
         private bool _detonated;
         private Vector3 _previousPosition;
@@ -91,7 +93,7 @@ namespace Adler.Weapons
         private bool _hasRestingContact;
         private bool _stopped;
 
-        private bool IsArmed => Time.time >= _armedAt;
+        private bool IsArmed => _clock.Now >= _armedAt;
 
         /// <summary>터졌을 때. 투하한 쪽이 받아 화면 표시로 넘긴다.</summary>
         public event Action<BlastReport> Detonated;
@@ -101,7 +103,8 @@ namespace Adler.Weapons
         {
             _definition = definition;
             _owner = owner;
-            _armedAt = Time.time + definition.ArmingDelay;
+            _clock = TimeScale.For(this);
+            _armedAt = _clock.Now + definition.ArmingDelay;
             _previousPosition = transform.position;
 
             // 빠르게 떨어지는 물체라 물리 엔진의 기본 판정으로는 얇은 지면을 지나친다.

@@ -1,4 +1,5 @@
 using Adler.Aircraft;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Flight
@@ -160,6 +161,7 @@ namespace Adler.Flight
 
         [SerializeField] private LayerMask _groundMask;
 
+        private Clock _clock;
         private Rigidbody _body;
         private Rigidbody _targetBody;
         private ArcadeFlightModel _model;
@@ -179,6 +181,7 @@ namespace Adler.Flight
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _body = GetComponent<Rigidbody>();
 
             if (_airframe == null)
@@ -204,8 +207,8 @@ namespace Adler.Flight
         {
             ScanForTarget();
 
-            FlightInput input = Decide(Time.fixedDeltaTime);
-            _model.Tick(in input, Time.fixedDeltaTime);
+            FlightInput input = Decide(_clock.FixedDelta);
+            _model.Tick(in input, _clock);
         }
 
         private FlightInput Decide(float deltaTime)
@@ -559,7 +562,7 @@ namespace Adler.Flight
                 return;
             }
 
-            _scanTimer -= Time.fixedDeltaTime;
+            _scanTimer -= _clock.FixedDelta;
             if (_scanTimer > 0f)
             {
                 return;

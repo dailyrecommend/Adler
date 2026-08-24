@@ -1,5 +1,6 @@
 using System;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -35,6 +36,7 @@ namespace Adler.Weapons
         private GunDefinition _gun;
         private GameObject _owner;
         private LayerMask _hitMask;
+        private Clock _clock;
         private Vector3 _velocity;
         private float _traveled;
         private bool _spent;
@@ -45,6 +47,7 @@ namespace Adler.Weapons
         /// <summary>쏜 총이 성능과 초기 속도를 넘겨준다.</summary>
         public void Launch(GunDefinition gun, GameObject owner, Vector3 velocity, LayerMask hitMask)
         {
+            _clock = TimeScale.For(this);
             _gun = gun;
             _owner = owner;
             _velocity = velocity;
@@ -81,7 +84,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            float dt = Time.fixedDeltaTime;
+            float dt = _clock.FixedDelta;
             _velocity += Physics.gravity * (_gun.GravityScale * dt);
 
             Vector3 from = transform.position;

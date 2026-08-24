@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -59,8 +60,11 @@ namespace Adler.Audio
         private float _boostBlend;
         private bool _wasBoosting;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_aircraft == null || _cruise == null)
@@ -165,7 +169,7 @@ namespace Adler.Audio
 
             float speed = boosting ? _boostFadeIn : _boostFadeOut;
             _boostBlend = Mathf.Lerp(
-                _boostBlend, boosting ? 1f : 0f, 1f - Mathf.Exp(-speed * Time.deltaTime));
+                _boostBlend, boosting ? 1f : 0f, 1f - Mathf.Exp(-speed * _clock.Delta));
         }
     }
 }

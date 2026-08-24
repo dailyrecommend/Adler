@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Adler.Aircraft;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -37,6 +38,7 @@ namespace Adler.Flight
                  "고도든 다른 무엇이든, 이것을 목록에 올리는 쪽이면 모두 같은 결과를 낸다.")]
         [SerializeField] private DebuffDefinition _frozenDebuff;
 
+        private Clock _clock;
         private Rigidbody _body;
         private ArcadeFlightModel _model;
 
@@ -65,6 +67,7 @@ namespace Adler.Flight
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _body = GetComponent<Rigidbody>();
 
             _boostFuel = GetComponent<BoostFuel>();
@@ -153,7 +156,7 @@ namespace Adler.Flight
                              && _debuffs.IsActive(_frozenDebuff));
 
             FlightInput input = ReadInput();
-            _model.Tick(in input, Time.fixedDeltaTime);
+            _model.Tick(in input, _clock);
         }
 
         private FlightInput ReadInput()
@@ -165,7 +168,7 @@ namespace Adler.Flight
             // 타들어가면, 녹은 뒤에 쓸 것이 남아 있지 않아 두 번 벌을 받는다.
             bool wantsBoost = !_model.IsFrozen && _boostAction.IsPressed();
             bool boosting = _boostFuel != null
-                ? _boostFuel.RequestBoost(wantsBoost, Time.fixedDeltaTime)
+                ? _boostFuel.RequestBoost(wantsBoost, _clock.FixedDelta)
                 : wantsBoost;
 
             return new FlightInput

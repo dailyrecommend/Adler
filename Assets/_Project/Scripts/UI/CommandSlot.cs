@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Adler.Core;
 using Adler.Weapons;
 using TMPro;
 using UnityEngine;
@@ -131,8 +132,11 @@ namespace Adler.UI
         /// <summary>이 칸이 나타내는 스트라타젬.</summary>
         public StratagemDefinition Stratagem { get; private set; }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_icon != null)
             {
                 _iconBaseColor = _icon.color;
@@ -513,7 +517,7 @@ namespace Adler.UI
                 return;
             }
 
-            _group.alpha = Mathf.MoveTowards(_group.alpha, _targetAlpha, _fadeSpeed * Time.deltaTime);
+            _group.alpha = Mathf.MoveTowards(_group.alpha, _targetAlpha, _fadeSpeed * _clock.Delta);
 
             // 다 사라진 뒤에 자리를 비운다. 사라지는 도중에 비우면 남은 칸들이
             // 먼저 밀려 올라와서 이 칸이 그 위에 겹쳐 보인다.

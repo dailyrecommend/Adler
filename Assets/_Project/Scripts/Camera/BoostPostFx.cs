@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -43,8 +44,11 @@ namespace Adler.CameraRig
         [Min(0.1f)]
         [SerializeField] private float _rampDownSpeed = 3.5f;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_aircraft == null || _volume == null)
             {
                 Debug.LogError($"{nameof(BoostPostFx)}: Aircraft 또는 Volume이 비어 있습니다.", this);
@@ -76,7 +80,7 @@ namespace Adler.CameraRig
             float speed = boosting ? _rampUpSpeed : _rampDownSpeed;
 
             _volume.weight = Mathf.Lerp(
-                _volume.weight, target, 1f - Mathf.Exp(-speed * Time.deltaTime));
+                _volume.weight, target, 1f - Mathf.Exp(-speed * _clock.Delta));
         }
     }
 }

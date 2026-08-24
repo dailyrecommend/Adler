@@ -1,4 +1,5 @@
 using Adler.Combat;
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -53,8 +54,11 @@ namespace Adler.CameraRig
         private float _baseDensity;
         private FogMode _baseMode;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _debuffs = _aircraft != null ? _aircraft.Debuffs : null;
 
@@ -94,7 +98,7 @@ namespace Adler.CameraRig
             Color targetColor = active ? _fogColor : _baseColor;
             float speed = active ? _rampUpSpeed : _rampDownSpeed;
 
-            float t = 1f - Mathf.Exp(-speed * Time.deltaTime);
+            float t = 1f - Mathf.Exp(-speed * _clock.Delta);
 
             float density = Mathf.Lerp(RenderSettings.fogDensity, targetDensity, t);
             Color color = Color.Lerp(RenderSettings.fogColor, targetColor, t);

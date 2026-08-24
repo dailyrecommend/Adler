@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 
@@ -35,8 +36,11 @@ namespace Adler.Weapons
         /// <summary>지금 뿌리는 중인지.</summary>
         public bool IsDispensing => _leftInBurst > 0;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _stratagems = _aircraft != null ? _aircraft.Stratagems : null;
 
@@ -77,7 +81,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _nextInterval -= Time.deltaTime;
+            _nextInterval -= _clock.Delta;
 
             if (_nextInterval > 0f)
             {

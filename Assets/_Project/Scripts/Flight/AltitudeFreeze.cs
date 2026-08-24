@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -74,8 +75,11 @@ namespace Adler.Flight
             }
         }
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_definition == null)
             {
                 Debug.LogWarning($"{nameof(AltitudeFreeze)}: 디버프 정의가 비어 있어 목록에 뜨지 않습니다.", this);
@@ -141,7 +145,7 @@ namespace Adler.Flight
 
             _volume.weight = target >= _volume.weight
                 ? target
-                : Mathf.Lerp(_volume.weight, target, 1f - Mathf.Exp(-_fadeOutSpeed * Time.deltaTime));
+                : Mathf.Lerp(_volume.weight, target, 1f - Mathf.Exp(-_fadeOutSpeed * _clock.Delta));
         }
 
         void IDebuffSource.CollectDebuffs(List<DebuffDefinition> into)

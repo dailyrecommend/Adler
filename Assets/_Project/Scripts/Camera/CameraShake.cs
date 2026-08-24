@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using Adler.UI;
 using Unity.Cinemachine;
@@ -95,8 +96,11 @@ namespace Adler.CameraRig
         public void AddImpulse(float amplitude)
             => _impulse = Mathf.Max(_impulse, amplitude);
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _noise = GetComponent<CinemachineBasicMultiChannelPerlin>();
 
             if (_aircraft == null)
@@ -182,12 +186,12 @@ namespace Adler.CameraRig
 
             float targetAmplitude = boosting ? _boostAmplitude : _idleAmplitude;
             float speed = boosting ? _rampUpSpeed : _rampDownSpeed;
-            float t = 1f - Mathf.Exp(-speed * Time.deltaTime);
+            float t = 1f - Mathf.Exp(-speed * _clock.Delta);
 
             _amplitude = Mathf.Lerp(_amplitude, targetAmplitude, t);
             _frequency = Mathf.Lerp(_frequency, _boostFrequency, t);
 
-            _impulse = Mathf.Lerp(_impulse, 0f, 1f - Mathf.Exp(-_impulseDecay * Time.deltaTime));
+            _impulse = Mathf.Lerp(_impulse, 0f, 1f - Mathf.Exp(-_impulseDecay * _clock.Delta));
 
             // 이어지는 흔들림 위에 충격을 얹는다. 부스터 중에 맞으면 그만큼 더 흔들린다.
             _noise.AmplitudeGain = _amplitude + _impulse;

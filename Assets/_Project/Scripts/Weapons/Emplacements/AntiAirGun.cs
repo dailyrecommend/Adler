@@ -1,3 +1,4 @@
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -101,8 +102,11 @@ namespace Adler.Weapons
         /// <summary>지금 노리고 있는 대상. 없으면 null.</summary>
         public Transform Target => _target;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_gun == null)
             {
                 Debug.LogError($"{nameof(AntiAirGun)}: Gun Definition이 비어 있습니다.", this);
@@ -143,7 +147,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _scanTimer -= Time.deltaTime;
+            _scanTimer -= _clock.Delta;
             if (_scanTimer > 0f)
             {
                 return;
@@ -224,7 +228,7 @@ namespace Adler.Weapons
 
             Vector3 desired = toTarget.normalized;
             Vector3 current = AimDirectionOf(muzzle);
-            float dt = Time.deltaTime;
+            float dt = _clock.Delta;
 
             TraverseTowards(current, desired, dt);
             ElevateTowards(current, desired, dt);
@@ -331,7 +335,7 @@ namespace Adler.Weapons
 
         private void UpdateBurst(bool onTarget)
         {
-            _burstTimer -= Time.deltaTime;
+            _burstTimer -= _clock.Delta;
 
             if (_firing)
             {
@@ -369,7 +373,7 @@ namespace Adler.Weapons
 
         private void FireWhileReady()
         {
-            _cooldown -= Time.deltaTime;
+            _cooldown -= _clock.Delta;
 
             const int MaxShotsPerFrame = 3;
             int shots = 0;

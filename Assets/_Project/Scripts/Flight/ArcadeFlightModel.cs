@@ -1,5 +1,6 @@
 using System;
 using Adler.Aircraft;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Flight
@@ -36,6 +37,9 @@ namespace Adler.Flight
         // 실제로 나아가는 방향과 빠르기. 기수를 뒤따라가므로 둘이 어긋날 수 있다.
         private Vector3 _velocity;
         private bool _frozen;
+
+        // 세상에 견준 이번 스텝의 시간 배율. 내놓는 속도에 곱해 이 기체만 늦춘다.
+        private float _relative = 1f;
 
         // 이번 스텝에 걸린 외부 견인. 쓰고 나면 비운다.
         private Tether _tether = Tether.None;
@@ -104,11 +108,15 @@ namespace Adler.Flight
 
             // 떨어지던 속도를 이어받는다. 얼기 전 값으로 돌아가면 녹는 순간 속도가
             // 툭 바뀌어, 되살아난 것이 아니라 순간이동한 것처럼 보인다.
-            _speed = Mathf.Clamp(_body.linearVelocity.magnitude, _stats.MinSpeed, TopSpeed);
+            // 물리에서 읽어올 때는 곱해뒀던 배율을 덜어낸다. 그러지 않으면 늦춰진 채
+            // 녹은 기체가 자기 속도를 실제보다 느리게 기억한다.
+            Vector3 carried = _body.linearVelocity / Mathf.Max(0.01f, _relative);
+
+            _speed = Mathf.Clamp(carried.magnitude, _stats.MinSpeed, TopSpeed);
 
             // 떨어지던 방향도 이어받는다. 여기서 맞추지 않으면 얼기 직전의 진행 방향으로
             // 되돌아가면서, 추락하다 갑자기 옆으로 튄다.
-            _velocity = _body.linearVelocity;
+            _velocity = carried;
         }
 
         /// <summary>스틱을 밀 때 기수가 올라가게 한다. 기체 성능이 아니라 플레이어 취향이다.</summary>
@@ -148,8 +156,11 @@ namespace Adler.Flight
             _velocity = _body.transform.forward * _speed;
         }
 
-        public void Tick(in FlightInput input, float deltaTime)
+        public void Tick(in FlightInput input, Clock clock)
         {
+            float deltaTime = clock.FixedDelta;
+            _relative = clock.Relative;
+
             if (_body == null)
             {
                 return;
@@ -320,7 +331,9 @@ namespace Adler.Flight
             // 각속도로 주면 물리 엔진이 적분하고 Interpolate가 그 사이를 메운다.
             Vector3 world = _body.transform.TransformDirection(localAngular);
 
-            _body.angularVelocity = ApplyAimAssist(world);
+            // 물리는 세상 시간으로 적분되므로, 이 기체만 늦추려면 내놓는 각속도 자체를
+            // 줄여야 한다. 흐른 양만 줄이면 붙는 속도만 굼떠지고 선회율은 그대로다.
+            _body.angularVelocity = ApplyAimAssist(world) * _relative;
         }
 
         /// <summary>
@@ -388,7 +401,9 @@ namespace Adler.Flight
                 ? Vector3.Lerp(_velocity, desired, 1f - Mathf.Exp(-grip * deltaTime))
                 : desired;
 
-            _body.linearVelocity = _velocity;
+            // 내부 상태(_velocity)는 배율을 먹이지 않는다. 그러면 다음 스텝에 또 곱해져
+            // 배율이 거듭제곱으로 쌓인다. 물리에 넘기는 그 순간에만 곱한다.
+            _body.linearVelocity = _velocity * _relative;
         }
     }
 }

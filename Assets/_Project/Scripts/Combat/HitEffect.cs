@@ -1,3 +1,4 @@
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Combat
@@ -45,10 +46,12 @@ namespace Adler.Combat
                  "가만히 두면 불꽃이 기체 뒤에 줄줄이 남는다.")]
         [SerializeField] private bool _attach = true;
 
+        private Clock _clock;
         private float _nextAt;
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_health == null)
             {
                 _health = GetComponent<Health>();
@@ -67,12 +70,12 @@ namespace Adler.Combat
 
         private void OnDamaged(Health health, DamageInfo damage)
         {
-            if (Time.time < _nextAt)
+            if (_clock.Now < _nextAt)
             {
                 return;
             }
 
-            _nextAt = Time.time + _minInterval;
+            _nextAt = _clock.Now + _minInterval;
 
             // 법선이 비어 있을 수 있다. 위를 향하게 두면 적어도 껍데기 안으로는 안 박힌다.
             Quaternion rotation = _alignToSurface && damage.Normal.sqrMagnitude > 0.0001f

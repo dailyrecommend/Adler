@@ -1,4 +1,5 @@
 using Adler.Combat;
+using Adler.Core;
 using UnityEngine;
 
 namespace Adler.Audio
@@ -46,10 +47,12 @@ namespace Adler.Audio
         [Range(0f, 1f)]
         [SerializeField] private float _destroyedVolume = 1f;
 
+        private Clock _clock;
         private float _nextHitAt;
 
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_health == null)
             {
                 _health = GetComponent<Health>();
@@ -80,12 +83,12 @@ namespace Adler.Audio
 
         private void OnDamaged(Health health, DamageInfo damage)
         {
-            if (_hit == null || Time.time < _nextHitAt)
+            if (_hit == null || _clock.Now < _nextHitAt)
             {
                 return;
             }
 
-            _nextHitAt = Time.time + _minInterval;
+            _nextHitAt = _clock.Now + _minInterval;
 
             _source.pitch = 1f + Random.Range(-_pitchJitter, _pitchJitter);
             _source.PlayOneShot(_hit, _hitVolume);

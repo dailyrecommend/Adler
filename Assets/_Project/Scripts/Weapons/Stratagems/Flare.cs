@@ -1,3 +1,4 @@
+using Adler.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,6 +23,7 @@ namespace Adler.Weapons
 
         private FlareDefinition _definition;
         private Rigidbody _body;
+        private Clock _clock;
         private float _burnRemaining;
 
         /// <summary>지금 타고 있는 조명탄들. 미사일이 훑어본다.</summary>
@@ -68,6 +70,8 @@ namespace Adler.Weapons
             _body.AddForce(Physics.gravity * _definition.GravityScale, ForceMode.Acceleration);
         }
 
+        private void Awake() => _clock = TimeScale.For(this);
+
         private void OnEnable() => Active.Add(this);
 
         private void OnDisable() => Active.Remove(this);
@@ -109,7 +113,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            _burnRemaining -= Time.deltaTime;
+            _burnRemaining -= _clock.Delta;
 
             if (_burnRemaining <= 0f)
             {

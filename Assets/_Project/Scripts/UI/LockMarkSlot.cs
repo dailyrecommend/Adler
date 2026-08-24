@@ -1,3 +1,4 @@
+using Adler.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -89,8 +90,11 @@ namespace Adler.UI
         /// <summary>표식을 옮길 때 쓴다. 매번 형변환하지 않으려고 들고 있는다.</summary>
         public RectTransform Rect => _rect != null ? _rect : _rect = (RectTransform)transform;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             if (_standby != null)
             {
                 _standbyBaseScale = _standby.localScale;
@@ -149,7 +153,7 @@ namespace Adler.UI
                 return 1f;
             }
 
-            _lockProgress = Mathf.Min(1f, _lockProgress + (Time.deltaTime / _lockSeconds));
+            _lockProgress = Mathf.Min(1f, _lockProgress + (_clock.Delta / _lockSeconds));
 
             return _lockProgress;
         }

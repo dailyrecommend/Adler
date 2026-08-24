@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using Adler.Weapons;
 using UnityEngine;
@@ -44,8 +45,11 @@ namespace Adler.CameraRig
         [Min(0.1f)]
         [SerializeField] private float _rampDownSpeed = 2f;
 
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
             if (_aircraft == null || _volume == null)
@@ -78,7 +82,7 @@ namespace Adler.CameraRig
             float speed = repairing ? _rampUpSpeed : _rampDownSpeed;
 
             _volume.weight = Mathf.Lerp(
-                _volume.weight, target, 1f - Mathf.Exp(-speed * Time.deltaTime));
+                _volume.weight, target, 1f - Mathf.Exp(-speed * _clock.Delta));
         }
     }
 }

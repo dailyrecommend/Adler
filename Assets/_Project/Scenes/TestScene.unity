@@ -3087,7 +3087,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 01540d0807cd1364c857d115d709853b, type: 3}
       propertyPath: 'm_Materials.Array.data[2]'
       value: 
-      objectReference: {fileID: 2100000, guid: 98f165491190e1c4fb4e4cf7233cf2d2, type: 2}
+      objectReference: {fileID: 2100000, guid: 016b03e840a4bdd449dbd6f1e37eb673, type: 2}
     - target: {fileID: 919132149155446097, guid: 01540d0807cd1364c857d115d709853b, type: 3}
       propertyPath: m_Name
       value: Eagle
@@ -11059,7 +11059,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.UI.HitImpact
   _aircraft: {fileID: 1812182299}
-  _hitStop: {fileID: 2035002039}
   _lightWindow: 0.15
   _blastStopSeconds: 0.05
   _blastStopScale: 0.15
@@ -12128,6 +12127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c45c7e9e39e4d4395f6bf237f406fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Combat.HitStop
+  _baseFixedDeltaTime: 0
+  _remaining: 0
 --- !u!4 &2035002040
 Transform:
   m_ObjectHideFlags: 0

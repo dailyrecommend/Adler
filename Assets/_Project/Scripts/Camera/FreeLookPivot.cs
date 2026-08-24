@@ -1,3 +1,4 @@
+using Adler.Core;
 using Adler.Flight;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -87,8 +88,11 @@ namespace Adler.CameraRig
         /// 기체가 카메라를 알아야 해서, 연출을 하나 붙일 때마다 기체 쪽 목록이 늘어난다.
         /// </para>
         /// </summary>
+        private Clock _clock;
+
         private void Awake()
         {
+            _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
             _lifecycle = _aircraft != null ? _aircraft.Lifecycle : null;
         }
@@ -166,7 +170,7 @@ namespace Adler.CameraRig
             }
             else
             {
-                _idleTime += Time.deltaTime;
+                _idleTime += _clock.Delta;
 
                 if (_autoRecenter && _idleTime >= _autoRecenterDelay)
                 {
@@ -175,7 +179,7 @@ namespace Adler.CameraRig
 
                 if (_recentering)
                 {
-                    float t = 1f - Mathf.Exp(-_recenterSpeed * Time.deltaTime);
+                    float t = 1f - Mathf.Exp(-_recenterSpeed * _clock.Delta);
                     _yaw = Mathf.Lerp(_yaw, 0f, t);
                     _pitch = Mathf.Lerp(_pitch, 0f, t);
 
@@ -207,7 +211,7 @@ namespace Adler.CameraRig
             bool fromGamepad = _lookAction.activeControl?.device is Gamepad;
 
             Vector2 scaled = fromGamepad
-                ? raw * (_gamepadSensitivity * Time.deltaTime)
+                ? raw * (_gamepadSensitivity * _clock.Delta)
                 : raw * _mouseSensitivity;
 
             // 창을 되찾거나 재생이 시작되는 프레임에는 이동량이 비정상적으로 크게 들어온다.
