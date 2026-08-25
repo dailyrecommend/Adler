@@ -75,6 +75,12 @@ namespace Adler.CameraRig
         [Min(0f)]
         [SerializeField] private float _ramAmplitude = 2.2f;
 
+        [Tooltip("갈고리가 물었을 때의 흔들림 폭.\n" +
+                 "맞힌 것이 아니라 붙잡은 것이라 한 발보다도 작게 둘 만하다 —\n" +
+                 "줄이 걸렸다는 것만 손에 전해지면 된다. 0으로 두면 흔들리지 않는다.")]
+        [Min(0f)]
+        [SerializeField] private float _grappleAmplitude = 0.25f;
+
         private CinemachineBasicMultiChannelPerlin _noise;
         private float _amplitude;
         private float _frequency;
@@ -147,6 +153,7 @@ namespace Adler.CameraRig
             ImpactWeight.Kill => _killAmplitude,
             ImpactWeight.Ram => _ramAmplitude,
             ImpactWeight.Blast => _blastAmplitude,
+            ImpactWeight.Grapple => _grappleAmplitude,
             _ => _hitAmplitude,
         });
 

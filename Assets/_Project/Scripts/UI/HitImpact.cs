@@ -49,6 +49,16 @@ namespace Adler.UI
         [Range(0.01f, 1f)]
         [SerializeField] private float _ramStopScale = 0.08f;
 
+        [Header("갈고리")]
+        [Tooltip("갈고리가 물었을 때 늦추는 시간(초).\n" +
+                 "때린 것이 아니라 붙잡은 것이라 짧게 잡는 편이 낫다 — 줄은 기동을\n" +
+                 "이어가려고 던지는 것이어서, 길게 멎으면 이어붙이려던 흐름이 끊긴다.")]
+        [Min(0f)]
+        [SerializeField] private float _grappleStopSeconds = 0.06f;
+
+        [Range(0.01f, 1f)]
+        [SerializeField] private float _grappleStopScale = 0.12f;
+
         [Header("격추")]
         [Min(0f)]
         [SerializeField] private float _killStopSeconds = 0.11f;
@@ -59,6 +69,7 @@ namespace Adler.UI
         private WeaponBay _bay;
         private Clock _clock;
         private RamAttack _ram;
+        private GrapplingHook _grapple;
         private float _releaseAt;
         private ImpactWeight _releasingWeight;
         private bool _releasing;
@@ -73,6 +84,7 @@ namespace Adler.UI
             _clock = TimeScale.For(this);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
             _ram = _aircraft != null ? _aircraft.Ram : null;
+            _grapple = _aircraft != null ? _aircraft.Grapple : null;
 
             if (_bay == null)
             {
@@ -98,6 +110,11 @@ namespace Adler.UI
             {
                 _ram.Rammed += OnRammed;
             }
+
+            if (_grapple != null)
+            {
+                _grapple.PhaseChanged += OnGrapplePhase;
+            }
         }
 
         private void OnDisable()
@@ -116,6 +133,11 @@ namespace Adler.UI
             if (_ram != null)
             {
                 _ram.Rammed -= OnRammed;
+            }
+
+            if (_grapple != null)
+            {
+                _grapple.PhaseChanged -= OnGrapplePhase;
             }
         }
 
@@ -138,6 +160,18 @@ namespace Adler.UI
         /// 마무리한 것과 같은 연출이 나가서, 몸으로 밀어붙였다는 사실이 지워진다.
         /// </summary>
         private void OnRammed(Collision collision, DamageResult result) => React(ImpactWeight.Ram);
+
+        /// <summary>
+        /// 물린 순간에만 반응한다. 당기기는 물린 다음에 이어지는 단계일 뿐이라,
+        /// 거기서도 늦추면 한 번 던진 줄에 화면이 두 번 멎는다.
+        /// </summary>
+        private void OnGrapplePhase(GrapplePhase from, GrapplePhase to)
+        {
+            if (to == GrapplePhase.Biting)
+            {
+                React(ImpactWeight.Grapple);
+            }
+        }
 
         private void OnMissileDetonated(MissileDefinition missile, BlastReport report) => ReactToBlast(report);
 
@@ -218,6 +252,7 @@ namespace Adler.UI
         {
             ImpactWeight.Kill => _killStopSeconds,
             ImpactWeight.Ram => _ramStopSeconds,
+            ImpactWeight.Grapple => _grappleStopSeconds,
             _ => _blastStopSeconds,
         };
 
@@ -225,6 +260,7 @@ namespace Adler.UI
         {
             ImpactWeight.Kill => _killStopScale,
             ImpactWeight.Ram => _ramStopScale,
+            ImpactWeight.Grapple => _grappleStopScale,
             _ => _blastStopScale,
         };
     }
