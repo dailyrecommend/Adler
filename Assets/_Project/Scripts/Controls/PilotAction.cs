@@ -25,5 +25,8 @@ namespace Adler.Controls
         SwitchWeapon = 5,
         SwitchTarget = 6,
         Respawn = 7,
+
+        /// <summary>보조무기 방아쇠. 주무기와 나란히 당길 수 있다.</summary>
+        FireSecondary = 8,
     }
 }

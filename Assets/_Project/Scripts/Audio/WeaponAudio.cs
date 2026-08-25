@@ -136,10 +136,14 @@ namespace Adler.Audio
 
         /// <summary>
         /// 한 발 나갔다. 연사 무기면 루프를 살려두고, 단발 무기면 그 자리에서 울린다.
+        /// <para>
+        /// 무엇이 쐈는지는 신호가 들고 온다. 무기고에게 되물으면 두 자리가 동시에
+        /// 나가는 순간 답이 하나뿐이라, 기총을 갈기는 동안 나간 미사일이 기총 소리를 낸다.
+        /// </para>
         /// </summary>
-        private void OnFired(Vector3 origin, Vector3 direction)
+        private void OnFired(AircraftWeapon weapon, Vector3 origin, Vector3 direction)
         {
-            if (_weapons.Active is MissileLauncher)
+            if (weapon is MissileLauncher)
             {
                 PlayOneShot(_missile, ignoreInterval: true);
                 return;

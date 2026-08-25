@@ -49,7 +49,7 @@ namespace Adler.Abilities
                 return false;
             }
 
-            return !Spec.Has(AbilityTag.Weapon) || context.Weapons?.CanFire == true;
+            return true;
         }
 
         /// <summary>실행기가 이 행동을 시작할 때 부른다.</summary>

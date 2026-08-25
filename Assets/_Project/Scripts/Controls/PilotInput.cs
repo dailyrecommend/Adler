@@ -32,6 +32,11 @@ namespace Adler.Controls
 
         private InputAction _pitch;
         private InputAction _roll;
+        private InputAction _weaponScroll;
+
+        /// <summary>휠이 이만큼은 돌아야 한 칸으로 친다. 장치가 흘리는 미세한 값을 거른다.</summary>
+        private const float ScrollDeadzone = 0.01f;
+
         // 조작 이름표로 찾는다. 이름별 속성은 읽기 좋으라고 그 위에 얹어둔 것이다.
         //
         // 칸 수는 열거형의 가장 큰 번호를 따른다. 번호를 손으로 다시 세게 두면
@@ -75,6 +80,34 @@ namespace Adler.Controls
 
 
         public bool ToggleCommandsPressed => WasPressed(PilotAction.ToggleCommands);
+
+        /// <summary>
+        /// 이번 프레임에 무기를 몇 칸 넘기려는지. 위로 굴리면 +1, 아래로 -1, 가만있으면 0.
+        /// <para>
+        /// 상태를 두지 않는다. 휠 값은 굴린 프레임에만 실리고 곧 0으로 돌아오는 변화량이라,
+        /// 그 자체가 이미 "이번 프레임에 얼마나 굴렸나"다.
+        /// </para>
+        /// <para>
+        /// 키와 패드 버튼은 방향이 없으므로 언제나 다음 칸이다. 굴릴 것이 없는 장치에서
+        /// 앞으로만 도는 것은 칸이 셋뿐이라 견딜 만하다.
+        /// </para>
+        /// </summary>
+        public int WeaponCycle
+        {
+            get
+            {
+                if (WasPressed(PilotAction.SwitchWeapon))
+                {
+                    return 1;
+                }
+
+                float scroll = _weaponScroll?.ReadValue<float>() ?? 0f;
+
+                // 휠 한 칸은 장치마다 값이 다르다 — 윈도우는 120, 다른 데는 1이다.
+                // 크기를 믿지 않고 방향만 읽으면 어디서든 한 칸이 한 칸이다.
+                return Mathf.Abs(scroll) < ScrollDeadzone ? 0 : (scroll > 0f ? 1 : -1);
+            }
+        }
 
         /// <summary>이번 프레임에 이 방향이 눌렸는가.</summary>
         public bool CommandPressed(CommandDirection direction) => Pressed(_commands[(int)direction]);
@@ -123,8 +156,10 @@ namespace Adler.Controls
 
             _pitch = _map.FindAction("Pitch", throwIfNotFound: true);
             _roll = _map.FindAction("Roll", throwIfNotFound: true);
+            _weaponScroll = _map.FindAction("CycleWeapon", throwIfNotFound: true);
             _actions[(int)PilotAction.Boost] = _map.FindAction("Boost", throwIfNotFound: true);
             _actions[(int)PilotAction.Fire] = _map.FindAction("Fire", throwIfNotFound: true);
+            _actions[(int)PilotAction.FireSecondary] = _map.FindAction("FireSecondary", throwIfNotFound: true);
             _actions[(int)PilotAction.SwitchWeapon] = _map.FindAction("SwitchWeapon", throwIfNotFound: true);
             _actions[(int)PilotAction.SwitchTarget] = _map.FindAction("SwitchTarget", throwIfNotFound: true);
             _actions[(int)PilotAction.Grapple] = _map.FindAction("Grapple", throwIfNotFound: true);

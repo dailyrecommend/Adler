@@ -8,13 +8,13 @@ namespace Adler.Weapons
     /// <summary>
     /// 기체가 들고 쏘는 것들의 공통 기반.
     /// <para>
-    /// 방아쇠를 직접 읽지 않는다. 무엇을 쏠지는 <see cref="WeaponBay"/>가 정하고, 여기서는
-    /// "쏘라"는 요청이 왔을 때 쏠 수 있는지 판단하고 쏜다. 무기가 각자 입력을 읽으면
-    /// 교체했는데 이전 무기가 계속 나가는 일이 생긴다.
+    /// 방아쇠를 직접 읽지 않는다. 어느 자리의 방아쇠가 당겨졌는지는 <see cref="WeaponBay"/>가
+    /// 알고, 여기서는 "쏘라"는 요청이 왔을 때 쏠 수 있는지 판단하고 쏜다. 무기가 각자
+    /// 입력을 읽으면 두 자리가 같은 키를 물고 늘어지는 일이 생긴다.
     /// </para>
     /// <para>
-    /// 탄약도 무기마다 따로 갖는다. 기총 탄과 미사일을 한 통에 담으면 바꿔 쓰는 의미가
-    /// 사라진다.
+    /// 탄도 무기마다 따로 갖는다. 한 통에 담으면 기총을 갈긴 대가로 미사일이 없어져서,
+    /// 자리를 나눈 뜻이 사라진다.
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
@@ -34,38 +34,42 @@ namespace Adler.Weapons
         private float _firingFor;
         private float _cooldown;
         private int _nextMuzzle;
-        private int _remaining;
+        private Clock _clock;
 
         /// <summary>이 무기가 쓰는 성능 에셋.</summary>
         public abstract WeaponDefinition Definition { get; }
 
-        /// <summary>발사할 때마다. 총구 화염과 소리가 구독한다. (발사 위치, 방향)</summary>
-        public event Action<Vector3, Vector3> Fired;
+        /// <summary>
+        /// 이 무기가 쥐고 있는 탄. 남은 발수도 차오르는 정도도 여기서 묻는다.
+        /// <para>
+        /// 얇게 감싸 다시 내주지 않는다. 남은 발수를 두 곳에서 답하게 두면 언젠가
+        /// 한쪽만 고쳐지고, 그때 화면과 무기가 서로 다른 말을 하게 된다.
+        /// </para>
+        /// </summary>
+        public AmmoStock Ammo { get; private set; }
+
+        /// <summary>
+        /// 발사할 때마다. 총구 화염과 소리가 구독한다. (쏜 무기, 발사 위치, 방향)
+        /// <para>
+        /// 쏜 무기를 함께 보낸다. 듣는 쪽이 무기고에게 "지금 든 것이 무엇이냐"고
+        /// 되물으면 두 자리가 동시에 나가는 순간 답이 하나뿐이라 틀린다.
+        /// </para>
+        /// </summary>
+        public event Action<AircraftWeapon, Vector3, Vector3> Fired;
 
         /// <summary>무언가를 맞혔을 때. 화면 표시가 구독한다.</summary>
         public event Action<RaycastHit, IDamageable, DamageResult> Hit;
 
-        /// <summary>남은 탄이 바뀔 때마다.</summary>
-        public event Action<AircraftWeapon> AmmoChanged;
-
-        public int Remaining => _remaining;
-
-        public int Capacity => Definition != null ? Definition.AmmoCapacity : 0;
-
-        public float AmmoNormalized => Capacity > 0 ? (float)_remaining / Capacity : 0f;
-
-        public bool IsEmpty => _remaining <= 0;
-
         /// <summary>
-        /// 지금 쏠 수 있는지. 탄약 외에 조건이 있는 무기는 여기에 얹는다 —
+        /// 지금 쏠 수 있는지. 탄 외에 조건이 있는 무기는 여기에 얹는다 —
         /// 미사일은 조준이 걸려 있어야 한다.
         /// </summary>
-        public virtual bool CanFire => !IsEmpty;
+        public virtual bool CanFire => Ammo != null && Ammo.CanSpend;
 
         /// <summary>
         /// 지금 탄이 나가고 있는지. 총구 화염 같은 이어지는 연출이 이것을 본다.
         /// <para>
-        /// 방아쇠가 당겨져 있는지와 다르다. 탄창이 비었거나 조준이 안 걸린 동안에도
+        /// 방아쇠가 당겨져 있는지와 다르다. 탄이 없거나 조준이 안 걸린 동안에도
         /// 방아쇠는 당겨져 있는데, 그때 총구가 계속 타오르면 화면이 나가지도 않은
         /// 탄을 쏘고 있다고 말하게 된다.
         /// </para>
@@ -80,6 +84,7 @@ namespace Adler.Weapons
         protected virtual void Awake()
         {
             _root = AircraftRoot.Resolve(this, _root);
+            _clock = TimeScale.For(this);
 
             if (Definition == null)
             {
@@ -88,8 +93,17 @@ namespace Adler.Weapons
                 return;
             }
 
-            _remaining = Definition.AmmoCapacity;
+            Ammo = new AmmoStock(Definition);
         }
+
+        /// <summary>
+        /// 탄은 쏘지 않는 동안에도 차오른다. 그래서 방아쇠와 무관하게 매 프레임 돈다.
+        /// <para>
+        /// 늦춰진 시계로 센다. 시간이 멎은 동안에도 탄이 차면 멎었다고 할 수 없고,
+        /// 느려진 적기의 무기가 제 속도로 재장전되면 늦춘 뜻이 반쯤 사라진다.
+        /// </para>
+        /// </summary>
+        protected virtual void Update() => Ammo?.Advance(_clock.Delta);
 
         /// <summary>
         /// 방아쇠가 당겨져 있는 동안 매 프레임 불린다. 발사 간격은 여기서 지킨다.
@@ -104,7 +118,7 @@ namespace Adler.Weapons
                 return;
             }
 
-            if (!CanFire)
+            if (!CanFire || !Ammo.TrySpend())
             {
                 // 못 쏘는 동안 간격이 쌓이지 않게 한다. 조건이 풀리는 순간
                 // 밀린 몫이 한꺼번에 쏟아지면 무기가 폭주한 것처럼 보인다.
@@ -112,7 +126,6 @@ namespace Adler.Weapons
                 return;
             }
 
-            SpendRound();
             FireOnce();
             _cooldown += Definition.ShotInterval;
             _firingFor = FiringTail;
@@ -138,16 +151,10 @@ namespace Adler.Weapons
             _firingFor = 0f;
         }
 
-        /// <summary>교체돼서 손에서 떠날 때. 조준 같은 진행 중인 상태를 정리한다.</summary>
-        public virtual void OnStowed() => ReleaseTrigger();
-
-        /// <summary>교체돼서 손에 들어올 때.</summary>
-        public virtual void OnDrawn() { }
-
         /// <summary>한 발을 실제로 내보낸다.</summary>
         protected abstract void FireOnce();
 
-        protected void RaiseFired(Vector3 origin, Vector3 direction) => Fired?.Invoke(origin, direction);
+        protected void RaiseFired(Vector3 origin, Vector3 direction) => Fired?.Invoke(this, origin, direction);
 
         protected void RaiseHit(RaycastHit hit, IDamageable damaged, DamageResult result)
             => Hit?.Invoke(hit, damaged, result);
@@ -169,26 +176,5 @@ namespace Adler.Weapons
             _root != null && _root.Body != null ? _root.Body.linearVelocity : Vector3.zero;
 
         protected GameObject Owner => _root != null ? _root.gameObject : gameObject;
-
-        private void SpendRound()
-        {
-            _remaining = Mathf.Max(0, _remaining - 1);
-            AmmoChanged?.Invoke(this);
-        }
-
-        /// <summary>비율만큼 채운다. 재보급이 부른다.</summary>
-        public void Resupply(float percent)
-        {
-            int amount = Mathf.CeilToInt(Capacity * (percent / 100f));
-            _remaining = Mathf.Min(Capacity, _remaining + amount);
-            AmmoChanged?.Invoke(this);
-        }
-
-        /// <summary>가득 채운다. 출격을 다시 시작할 때 부른다.</summary>
-        public void Restock()
-        {
-            _remaining = Capacity;
-            AmmoChanged?.Invoke(this);
-        }
     }
 }

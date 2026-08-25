@@ -4,16 +4,21 @@ using UnityEngine;
 namespace Adler.UI
 {
     /// <summary>
-    /// 카메라가 도는 만큼 HUD를 조금 뒤처지게 민다.
+    /// 카메라가 <b>갑자기</b> 방향을 바꿀 때만 HUD를 살짝 밀었다 되돌린다.
     /// <para>
-    /// 화면에 딱 붙어 있는 HUD는 종이에 인쇄된 것처럼 보인다. 기수를 홱 꺾었는데 글자만
-    /// 미동도 없으면, 그 순간 화면이 아니라 <em>화면 위에 얹힌 그림</em>이 된다. 조금
-    /// 뒤처졌다 따라오면 조종석 앞 허공에 떠 있는 것으로 읽힌다.
+    /// 도는 동안 계속 밀려 있으면 안 된다. 선회는 대부분 등속으로 길게 이어지는데,
+    /// 그동안 HUD가 한쪽에 치우쳐 있으면 고장 난 것처럼 보인다. 화면에 남아야 하는 것은
+    /// "돌고 있다"가 아니라 "방금 홱 꺾었다"다.
     /// </para>
     /// <para>
-    /// 요소 하나하나가 아니라 <b>묶음에 붙인다</b>. 이유가 둘이다. 하나는 층마다 세기를
-    /// 다르게 줘야 깊이가 생기기 때문이고 — 가까운 것이 많이, 먼 것이 적게 — 다른 하나는
-    /// 스스로 자리를 정하는 것들(피해 숫자, 락온 표식)과 자리를 두고 다투지 않기 위해서다.
+    /// 그래서 도는 <em>빠르기</em>가 아니라 그 빠르기의 <em>변화</em>를 본다. 스틱을
+    /// 치는 순간에만 값이 서고, 꺾은 채로 유지하는 동안에는 0이다. 그 한 번을 충격으로
+    /// 실어주면 HUD가 툭 밀렸다가 제자리로 돌아온다.
+    /// </para>
+    /// <para>
+    /// 요소 하나하나가 아니라 <b>묶음에 붙인다</b>. 층마다 세기를 다르게 줘야 깊이가
+    /// 생기고 — 가까운 것이 많이, 먼 것이 적게 — 스스로 자리를 정하는 것들과 자리를
+    /// 두고 다투지 않는다.
     /// </para>
     /// <para>
     /// 늦춰진 시계를 쓴다. 히트스톱이 걸린 동안 화면은 멎어 있는데 HUD만 계속 흘러가면
@@ -25,26 +30,41 @@ namespace Adler.UI
     [RequireComponent(typeof(RectTransform))]
     public sealed class HudParallax : MonoBehaviour
     {
+        /// <summary>
+        /// 한 프레임에 흘렀다고 쳐줄 최대 시간(초).
+        /// <para>
+        /// 용수철은 한 번에 너무 많이 흐르면 발산한다. 화면이 한 번 걸렸을 때 HUD가
+        /// 튕겨 나가는 것보다는, 그 프레임만 조금 느리게 도는 편이 낫다.
+        /// </para>
+        /// </summary>
+        private const float MaxStep = 0.05f;
+
         [Header("읽어올 대상")]
         [Tooltip("움직임을 따라갈 카메라. 비워두면 Camera.main을 쓴다.")]
         [SerializeField] private Camera _camera;
 
-        [Header("세기")]
-        [Tooltip("카메라가 초당 1도 돌 때 밀리는 거리(px).\n\n" +
-                 "층마다 다르게 주면 깊이가 생긴다 — 가까이 있어야 할 것은 크게,\n" +
-                 "멀리 있어야 할 것은 작게. 0.15~0.4쯤에서 고르면 된다.")]
-        [SerializeField] private float _sway = 0.25f;
+        [Header("반응")]
+        [Tooltip("회전 속도가 갑자기 초당 1도만큼 바뀔 때 실리는 밀림(px/s).\n\n" +
+                 "등속으로 도는 동안에는 아무 일도 없다. 스틱을 치는 순간에만 실린다.\n" +
+                 "층마다 다르게 주면 깊이가 생긴다 — 가까이 있어야 할 것은 크게.")]
+        [SerializeField] private float _kick = 2f;
 
         [Tooltip("아무리 세게 꺾어도 이만큼까지만 밀린다(px).\n\n" +
-                 "없으면 급기동 한 번에 HUD가 화면 밖으로 날아간다. 읽을 수 있어야 하는\n" +
-                 "물건이므로 제자리에서 크게 벗어나면 안 된다.")]
+                 "읽을 수 있어야 하는 물건이므로 제자리에서 크게 벗어나면 안 된다.")]
         [Min(0f)]
-        [SerializeField] private float _maxOffset = 40f;
+        [SerializeField] private float _maxOffset = 30f;
 
-        [Tooltip("밀린 것이 따라붙고 돌아오는 속도. 클수록 즉각적이다.\n\n" +
-                 "작게 두면 흐물거리고, 크게 두면 뒤처지는 느낌 자체가 사라진다.")]
-        [Min(0.1f)]
-        [SerializeField] private float _response = 8f;
+        [Header("가라앉는 방식")]
+        [Tooltip("제자리로 끌어당기는 힘. 클수록 빨리 돌아온다.\n\n" +
+                 "작게 두면 늘어져서 한 번 밀린 것이 오래 남고, 크게 두면 밀렸다는\n" +
+                 "사실 자체가 안 보인다. 60~140쯤에서 고르면 된다.")]
+        [Min(1f)]
+        [SerializeField] private float _stiffness = 90f;
+
+        [Tooltip("출렁임. 1이면 지나치지 않고 곧장 멈추고, 낮출수록 넘어갔다 돌아온다.\n\n" +
+                 "낮게 두면 한 번 꺾을 때마다 화면이 흔들다리처럼 떨린다. 0.7~1을 권한다.")]
+        [Range(0.05f, 1.5f)]
+        [SerializeField] private float _damping = 0.8f;
 
         [Header("방향")]
         [Tooltip("체크하면 카메라가 도는 쪽으로 따라간다.\n" +
@@ -59,7 +79,11 @@ namespace Adler.UI
         private Vector2 _home;
 
         private Vector3 _lastForward;
+        private Vector2 _lastRate;
+        private bool _primed;
+
         private Vector2 _offset;
+        private Vector2 _velocity;
 
         private void Awake()
         {
@@ -95,6 +119,8 @@ namespace Adler.UI
                 return;
             }
 
+            delta = Mathf.Min(delta, MaxStep);
+
             Transform view = _camera.transform;
 
             // 지난 프레임의 정면을 지금 카메라 기준으로 다시 본다. 카메라가 오른쪽으로
@@ -107,15 +133,45 @@ namespace Adler.UI
             // 조금씩 밀려서, 잘 도는 컴퓨터에서 효과가 옅어진다.
             Vector2 rate = new Vector2(local.x, local.y) * (Mathf.Rad2Deg / delta);
 
-            Vector2 target = rate * (_leadInstead ? -_sway : _sway);
+            // 빠르기가 아니라 그 변화를 본다. 등속으로 도는 동안에는 0이므로 HUD는
+            // 제자리에 있고, 스틱을 치는 순간에만 값이 선다.
+            Vector2 jerk = _primed ? rate - _lastRate : Vector2.zero;
 
-            if (target.sqrMagnitude > _maxOffset * _maxOffset)
+            _lastRate = rate;
+            _primed = true;
+
+            // 흐른 시간으로 나누지 않는다. 한 번의 기동에서 실리는 총량이 프레임 수와
+            // 무관하게 같아야 하는데, 변화량을 그대로 더하면 저절로 그렇게 된다.
+            _velocity += jerk * (_leadInstead ? -_kick : _kick);
+
+            Settle(delta);
+
+            _rect.anchoredPosition = _home + _offset;
+        }
+
+        /// <summary>
+        /// 용수철 한 걸음. 언제나 제자리로 끌어당기고, 속도에 비례한 저항으로 가라앉힌다.
+        /// <para>
+        /// 저항 계수를 강성의 제곱근에서 뽑으므로, 강성을 올려도 출렁임의 성격은
+        /// 그대로다 — 돌아오는 빠르기와 출렁임을 따로 만질 수 있다.
+        /// </para>
+        /// </summary>
+        private void Settle(float delta)
+        {
+            float drag = 2f * _damping * Mathf.Sqrt(_stiffness);
+
+            _velocity += (-_offset * _stiffness - _velocity * drag) * delta;
+            _offset += _velocity * delta;
+
+            if (_offset.sqrMagnitude <= _maxOffset * _maxOffset)
             {
-                target = target.normalized * _maxOffset;
+                return;
             }
 
-            _offset = Vector2.Lerp(_offset, target, 1f - Mathf.Exp(-_response * delta));
-            _rect.anchoredPosition = _home + _offset;
+            // 한계에 닿으면 밀어내던 속도까지 끊는다. 자리만 붙잡아두면 속도가 계속
+            // 쌓여서, 한계를 벗어나는 순간 튕겨 나간다.
+            _offset = _offset.normalized * _maxOffset;
+            _velocity = Vector2.zero;
         }
 
 #if UNITY_EDITOR
