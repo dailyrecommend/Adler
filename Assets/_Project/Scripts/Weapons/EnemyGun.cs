@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using Adler.Core;
 using Adler.Abilities;
 using UnityEngine;
@@ -26,7 +26,6 @@ namespace Adler.Weapons
     [DisallowMultipleComponent]
     public sealed class EnemyGun : MonoBehaviour
     {
-        private static readonly List<EnemyGun> Active = new();
 
         [Header("무장")]
         [SerializeField] private GunDefinition _gun;
@@ -92,19 +91,21 @@ namespace Adler.Weapons
         private Transform _target;
         private Rigidbody _targetBody;
         private float _onTargetFor;
-        private float _burstTimer;
-        private bool _firing;
-        private float _cooldown;
         private int _nextMuzzle;
         private Vector3 _aimOffset;
+
+        // 점사 리듬과 발사 간격은 대공포와 같은 부품을 쓴다. 시작 조건(뜸)만 이쪽 사정이다.
+        private readonly ShotCadence _cadence = new();
+        private BurstCycle _burst;
+        private Action _fireOne;
 
         private readonly RaycastHit[] _sightBuffer = new RaycastHit[8];
 
         /// <summary>겨눔이 맞아 뜸을 들이는 중. 아직 쏘지는 않았다.</summary>
-        public bool IsAiming => _target != null && !_firing && _onTargetFor > 0f;
+        public bool IsAiming => _target != null && !IsFiring && _onTargetFor > 0f;
 
         /// <summary>지금 쏘고 있는지.</summary>
-        public bool IsFiring => _firing;
+        public bool IsFiring => _burst.IsFiring;
 
         /// <summary>
         /// 이 기체를 겨누고 있는 적기가 있는지. 화면 경고가 물어본다.
@@ -125,11 +126,11 @@ namespace Adler.Weapons
                 return false;
             }
 
-            foreach (EnemyGun gun in Active)
+            foreach (EnemyGun gun in Registry<EnemyGun>.All)
             {
                 if (gun._target != null
                     && gun._target.IsChildOf(target)
-                    && (gun.IsAiming || gun._firing))
+                    && (gun.IsAiming || gun.IsFiring))
                 {
                     return true;
                 }
@@ -161,13 +162,16 @@ namespace Adler.Weapons
             }
 
             _body = _boresight.GetComponentInParent<Rigidbody>();
+
+            _burst = new BurstCycle(_burstSeconds, _burstCooldown);
+            _fireOne = FireSingle;
         }
 
-        private void OnEnable() => Active.Add(this);
+        private void OnEnable() => Registry<EnemyGun>.Add(this);
 
         private void OnDisable()
         {
-            Active.Remove(this);
+            Registry<EnemyGun>.Remove(this);
             Reset();
         }
 
@@ -238,37 +242,36 @@ namespace Adler.Weapons
         {
             float deltaTime = _clock.Delta;
 
-            if (_firing)
+            if (_burst.IsFiring)
             {
-                _burstTimer -= deltaTime;
-
-                if (_burstTimer <= 0f)
+                if (!_burst.Tick(deltaTime))
                 {
-                    _firing = false;
+                    // 다 쐈으면 뜸도 처음으로. 방금 얻어맞은 참이라 겨눔이 이어지고
+                    // 있다는 이유로 곧바로 다음 점사가 오면 쉬는 시간이 뜻을 잃는다.
                     _onTargetFor = 0f;
-                    _burstTimer = _burstCooldown;
                     return;
                 }
 
                 // 쏘는 도중 겨눔이 빗나가도 탄은 계속 나간다. 사격을 시작한 뒤에는
                 // 총이 기수를 따라가는 것이 맞고, 그 빗나간 탄줄이 피했다는 신호가 된다.
-                if (onTarget || _cooldown > 0f)
+                if (onTarget || _cadence.CoolingDown)
                 {
-                    FireWhileReady();
+                    _cadence.Run(deltaTime, _gun.ShotInterval, _fireOne);
                 }
 
                 return;
             }
 
-            _burstTimer -= deltaTime;
+            _burst.Tick(deltaTime);
             _onTargetFor = Mathf.Clamp(_onTargetFor + AimStep(onTarget, deltaTime), 0f, _warnSeconds);
 
-            if (_onTargetFor < _warnSeconds || _burstTimer > 0f)
+            if (_onTargetFor < _warnSeconds || !_burst.RestDone)
             {
                 return;
             }
 
-            Begin();
+            _burst.Begin();
+            _aimOffset = Ballistics.BurstScatter(transform.position, _target.position, _leadError);
         }
 
         /// <summary>이번 프레임에 뜸이 차거나 풀릴 몫.</summary>
@@ -287,23 +290,10 @@ namespace Adler.Weapons
             return -deltaTime * (_warnSeconds / _warnForgetSeconds);
         }
 
-        private void Begin()
-        {
-            _firing = true;
-            _burstTimer = _burstSeconds;
-
-            // 사격을 시작할 때 한 번만 어긋냄을 정한다. 매 발 새로 뽑으면 탄이 사방으로
-            // 흩어져 그냥 부정확해 보이고, 이렇게 두면 한 줄기가 빗나가는 것으로 읽힌다.
-            //
-            // 사거리가 아니라 지금 거리에 비례한다. 사거리로 재면 코앞에서 쏴도 멀리서
-            // 쏘는 것과 똑같이 빗나가서, 바싹 붙는 것이 공짜가 된다.
-            float distance = Vector3.Distance(transform.position, _target.position);
-            _aimOffset = Random.onUnitSphere * (distance * _leadError * Random.value);
-        }
-
         private void Reset()
         {
-            _firing = false;
+            _burst.Interrupt();
+            _cadence.Reset();
             _onTargetFor = 0f;
             _target = null;
             _targetBody = null;
@@ -320,53 +310,28 @@ namespace Adler.Weapons
         /// </summary>
         private Vector3 LeadPoint(Vector3 muzzle)
         {
-            Vector3 position = _target.position;
-            Vector3 velocity = _targetBody != null ? _targetBody.linearVelocity : Vector3.zero;
-
-            // 기체 속도가 탄에 얹혀 나가므로, 이쪽에서 보면 표적은 상대 속도로 움직인다.
-            if (_body != null)
-            {
-                velocity -= _body.linearVelocity;
-            }
-
-            Vector3 predicted = position;
-
-            for (int i = 0; i < 2; i++)
-            {
-                float flightTime = Vector3.Distance(muzzle, predicted) / _gun.MuzzleVelocity;
-                predicted = position + (velocity * flightTime);
-            }
-
-            return predicted;
+            // 기체 속도가 탄에 얹혀 나가므로 자기 속도를 함께 넘긴다. 그러면 표적이
+            // 상대 속도로 계산된다.
+            return Ballistics.LeadPoint(
+                muzzle,
+                _target.position,
+                _targetBody != null ? _targetBody.linearVelocity : Vector3.zero,
+                _body != null ? _body.linearVelocity : Vector3.zero,
+                _gun.MuzzleVelocity);
         }
 
-        private void FireWhileReady()
+        /// <summary>한 발을 내보낸다. 리듬은 <see cref="ShotCadence"/>가 지킨다.</summary>
+        private void FireSingle()
         {
-            _cooldown -= _clock.Delta;
+            Transform muzzle = ResolveMuzzle();
+            Vector3 toAim = LeadPoint(muzzle.position) + _aimOffset - muzzle.position;
 
-            const int MaxShotsPerFrame = 3;
-            int shots = 0;
+            Vector3 direction = ProjectileLauncher.ApplySpread(
+                toAim.sqrMagnitude > 0.0001f ? toAim.normalized : muzzle.forward,
+                _gun.SpreadDegrees);
 
-            while (_cooldown <= 0f && shots < MaxShotsPerFrame)
-            {
-                Transform muzzle = ResolveMuzzle();
-                Vector3 toAim = LeadPoint(muzzle.position) + _aimOffset - muzzle.position;
-
-                Vector3 direction = ProjectileLauncher.ApplySpread(
-                    toAim.sqrMagnitude > 0.0001f ? toAim.normalized : muzzle.forward,
-                    _gun.SpreadDegrees);
-
-                ProjectileLauncher.Fire(
-                    _gun, muzzle.position, direction, CarrierVelocity, gameObject, _hitMask);
-
-                _cooldown += _gun.ShotInterval;
-                shots++;
-            }
-
-            if (_cooldown < 0f)
-            {
-                _cooldown = 0f;
-            }
+            ProjectileLauncher.Fire(
+                _gun, muzzle.position, direction, CarrierVelocity, gameObject, _hitMask);
         }
 
         /// <summary>
@@ -422,7 +387,7 @@ namespace Adler.Weapons
 
             if (_target != null)
             {
-                Gizmos.color = _firing ? Color.red : Color.yellow;
+                Gizmos.color = IsFiring ? Color.red : Color.yellow;
                 Gizmos.DrawLine(transform.position, _target.position);
             }
         }

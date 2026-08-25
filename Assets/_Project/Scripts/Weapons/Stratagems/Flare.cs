@@ -15,7 +15,6 @@ namespace Adler.Weapons
     [DisallowMultipleComponent]
     public sealed class Flare : MonoBehaviour
     {
-        private static readonly List<Flare> Active = new();
 
         [Tooltip("여기에 닿으면 사라진다. 지형을 넣고 기체는 빼둘 것 —\n" +
                  "사출되는 자리가 기체 위라서, 넣어두면 나오자마자 없어진다.")]
@@ -27,7 +26,7 @@ namespace Adler.Weapons
         private float _burnRemaining;
 
         /// <summary>지금 타고 있는 조명탄들. 미사일이 훑어본다.</summary>
-        public static IReadOnlyList<Flare> Burning => Active;
+        public static IReadOnlyList<Flare> Burning => Registry<Flare>.All;
 
         public float SeduceRange => _definition != null ? _definition.SeduceRange : 0f;
 
@@ -72,9 +71,9 @@ namespace Adler.Weapons
 
         private void Awake() => _clock = TimeScale.For(this);
 
-        private void OnEnable() => Active.Add(this);
+        private void OnEnable() => Registry<Flare>.Add(this);
 
-        private void OnDisable() => Active.Remove(this);
+        private void OnDisable() => Registry<Flare>.Remove(this);
 
         /// <summary>
         /// 땅에 닿으면 사라진다.

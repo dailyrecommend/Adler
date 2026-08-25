@@ -90,11 +90,13 @@ namespace Adler.Weapons
         private Transform _target;
         private Rigidbody _targetBody;
         private float _scanTimer;
-        private float _burstTimer;
-        private bool _firing;
-        private float _cooldown;
         private int _nextMuzzle;
         private Vector3 _aimOffset;
+
+        // 점사 리듬과 발사 간격은 적기 기총과 같은 부품을 쓴다. 시작 조건(겨눠짐)만 이쪽 사정이다.
+        private readonly ShotCadence _cadence = new();
+        private BurstCycle _burst;
+        private System.Action _fireOne;
 
         private readonly Collider[] _scanBuffer = new Collider[8];
         private readonly RaycastHit[] _sightBuffer = new RaycastHit[8];
@@ -118,6 +120,9 @@ namespace Adler.Weapons
             {
                 _yawPivot = transform;
             }
+
+            _burst = new BurstCycle(_burstSeconds, _burstCooldown);
+            _fireOne = FireSingle;
         }
 
         private void Update()
@@ -126,7 +131,8 @@ namespace Adler.Weapons
 
             if (_target == null)
             {
-                _firing = false;
+                _burst.Interrupt();
+                _cadence.Reset();
                 return;
             }
 
@@ -192,19 +198,13 @@ namespace Adler.Weapons
         /// </summary>
         private Vector3 PredictAimPoint()
         {
-            Vector3 muzzle = ResolveMuzzle().position;
-            Vector3 targetPosition = _target.position;
-            Vector3 targetVelocity = _targetBody != null ? _targetBody.linearVelocity : Vector3.zero;
-
-            Vector3 predicted = targetPosition;
-
-            for (int i = 0; i < 2; i++)
-            {
-                float flightTime = Vector3.Distance(muzzle, predicted) / _gun.MuzzleVelocity;
-                predicted = targetPosition + (targetVelocity * flightTime);
-            }
-
-            return predicted + _aimOffset;
+            // 제자리에 선 포탑이라 자기 속도는 0이다.
+            return Ballistics.LeadPoint(
+                ResolveMuzzle().position,
+                _target.position,
+                _targetBody != null ? _targetBody.linearVelocity : Vector3.zero,
+                Vector3.zero,
+                _gun.MuzzleVelocity) + _aimOffset;
         }
 
         /// <summary>
@@ -335,66 +335,38 @@ namespace Adler.Weapons
 
         private void UpdateBurst(bool onTarget)
         {
-            _burstTimer -= _clock.Delta;
+            float deltaTime = _clock.Delta;
 
-            if (_firing)
+            if (_burst.IsFiring)
             {
-                if (_burstTimer <= 0f)
+                if (_burst.Tick(deltaTime) && onTarget)
                 {
-                    _firing = false;
-                    _burstTimer = _burstCooldown;
-                    return;
-                }
-
-                if (onTarget)
-                {
-                    FireWhileReady();
+                    _cadence.Run(deltaTime, _gun.ShotInterval, _fireOne);
                 }
 
                 return;
             }
 
-            if (_burstTimer > 0f || !onTarget)
+            _burst.Tick(deltaTime);
+
+            if (!_burst.RestDone || !onTarget)
             {
                 return;
             }
 
-            _firing = true;
-            _burstTimer = _burstSeconds;
-
-            // 사격을 시작할 때 한 번만 어긋냄을 정한다. 매 발 새로 뽑으면 탄이 사방으로
-            // 흩어져 그냥 부정확해 보이고, 이렇게 두면 한 줄기가 빗나가는 것으로 읽힌다.
-            //
-            // 사거리가 아니라 지금 거리에 비례한다. 사거리로 재면 코앞을 스쳐 지나가도
-            // 멀리 도는 것과 똑같이 빗나가서, 저공 근접 통과가 공짜가 된다.
-            float distance = Vector3.Distance(transform.position, _target.position);
-            _aimOffset = Random.onUnitSphere * (distance * _leadError * Random.value);
+            _burst.Begin();
+            _aimOffset = Ballistics.BurstScatter(transform.position, _target.position, _leadError);
         }
 
-        private void FireWhileReady()
+        /// <summary>한 발을 내보낸다. 리듬은 <see cref="ShotCadence"/>가 지킨다.</summary>
+        private void FireSingle()
         {
-            _cooldown -= _clock.Delta;
+            Transform muzzle = ResolveMuzzle();
+            Vector3 direction = ProjectileLauncher.ApplySpread(
+                AimDirectionOf(muzzle), _gun.SpreadDegrees);
 
-            const int MaxShotsPerFrame = 3;
-            int shots = 0;
-
-            while (_cooldown <= 0f && shots < MaxShotsPerFrame)
-            {
-                Transform muzzle = ResolveMuzzle();
-                Vector3 direction = ProjectileLauncher.ApplySpread(
-                    AimDirectionOf(muzzle), _gun.SpreadDegrees);
-
-                ProjectileLauncher.Fire(
-                    _gun, muzzle.position, direction, Vector3.zero, gameObject, _hitMask);
-
-                _cooldown += _gun.ShotInterval;
-                shots++;
-            }
-
-            if (_cooldown < 0f)
-            {
-                _cooldown = 0f;
-            }
+            ProjectileLauncher.Fire(
+                _gun, muzzle.position, direction, Vector3.zero, gameObject, _hitMask);
         }
 
         /// <summary>

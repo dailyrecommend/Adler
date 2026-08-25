@@ -23,7 +23,6 @@ namespace Adler.Combat
     [DisallowMultipleComponent]
     public sealed class DebuffZone : MonoBehaviour
     {
-        private static readonly List<DebuffZone> Active = new();
 
         [Tooltip("이 안에 있는 동안 걸릴 것들. 여러 개를 함께 걸 수 있다.")]
         [SerializeField] private DebuffDefinition[] _debuffs;
@@ -37,11 +36,11 @@ namespace Adler.Combat
         private readonly Dictionary<AircraftDebuffs, float> _inside = new();
         private Clock _clock;
 
-        private void OnEnable() => Active.Add(this);
+        private void OnEnable() => Registry<DebuffZone>.Add(this);
 
         private void OnDisable()
         {
-            Active.Remove(this);
+            Registry<DebuffZone>.Remove(this);
 
             // 구역이 사라지면 걸어둔 것도 함께 사라진다. 남겨두면 없어진 구역의
             // 상태가 화면에 붙어 있는다.
@@ -78,7 +77,7 @@ namespace Adler.Combat
         /// <summary>이 기체에 걸려 있는 구역 효과를 모은다.</summary>
         public static void CollectFor(AircraftDebuffs owner, List<DebuffDefinition> into)
         {
-            foreach (DebuffZone zone in Active)
+            foreach (DebuffZone zone in Registry<DebuffZone>.All)
             {
                 if (!zone._inside.TryGetValue(owner, out float seen)
                     || zone._clock.Now - seen > zone._graceSeconds)

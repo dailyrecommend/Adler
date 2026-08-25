@@ -24,21 +24,18 @@ namespace Adler.Core
         [SerializeField] private float _scale = 1f;
 
         /// <summary>
-        /// 지금 살아 있는 시계들.
+        /// 지금 살아 있는 시계들. 시간을 건드리는 것이 무엇을 늦출지 찾을 때 쓴다.
         /// <para>
-        /// 시간을 건드리는 것이 무엇을 늦출지 찾을 때 쓴다. 늦출 대상의 목록을 손으로
-        /// 들고 있으면 적을 하나 새로 만들 때 그것을 넣는 것을 잊게 되고, 그때 증상이
-        /// "멈춘 세상에서 저놈만 날아다닌다"라 눈에 띄기는 하지만 원인이 멀리 있다.
+        /// 늦출 대상의 목록을 손으로 들고 있으면 적을 하나 새로 만들 때 그것을 넣는
+        /// 것을 잊게 되고, 그때 증상이 "멈춘 세상에서 저놈만 날아다닌다"라 눈에
+        /// 띄기는 하지만 원인이 멀리 있다.
         /// </para>
         /// <para>
         /// 여기 오르는 것은 <b>시계를 가진 것들뿐</b>이다. 늦추고 싶은 것에는 이
         /// 컴포넌트가 붙어 있어야 한다는 뜻이고, 그게 이 방식이 치르는 값이다.
         /// </para>
         /// </summary>
-        private static readonly List<TimeScale> Active = new();
-
-        /// <inheritdoc cref="Active" />
-        public static IReadOnlyList<TimeScale> All => Active;
+        public static IReadOnlyList<TimeScale> All => Registry<TimeScale>.All;
 
         private Clock _clock;
 
@@ -84,9 +81,9 @@ namespace Adler.Core
         public static Clock Inherited(GameObject owner, Component self)
             => owner != null ? For(owner.transform) : For(self);
 
-        private void OnEnable() => Active.Add(this);
+        private void OnEnable() => Registry<TimeScale>.Add(this);
 
-        private void OnDisable() => Active.Remove(this);
+        private void OnDisable() => Registry<TimeScale>.Remove(this);
 
         private void Awake() => Clock.LocalScale = _scale;
 

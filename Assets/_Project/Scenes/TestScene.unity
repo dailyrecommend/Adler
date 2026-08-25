@@ -1017,7 +1017,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 110962683}
   _boresight: {fileID: 110962687}
   _range: 180
   _aimTolerance: 12
@@ -1932,7 +1931,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74fafca667ab19d42bc6f8d4415ef597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.MissileLauncher
-  _aircraft: {fileID: 0}
+  _root: {fileID: 0}
   _muzzles:
   - {fileID: 1388372180}
   - {fileID: 699131689}
@@ -2238,7 +2237,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 259753831}
   _boresight: {fileID: 259753835}
   _range: 180
   _aimTolerance: 12
@@ -4085,7 +4083,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 439997324}
   _boresight: {fileID: 439997328}
   _range: 180
   _aimTolerance: 12
@@ -5875,7 +5872,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 747353673}
   _boresight: {fileID: 747353672}
   _range: 180
   _aimTolerance: 12
@@ -7640,7 +7636,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7e0af3c430c5ef4c99c0d6377e63584, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.AircraftGun
-  _aircraft: {fileID: 0}
+  _root: {fileID: 0}
   _muzzles:
   - {fileID: 824846410}
   - {fileID: 2083879041}
@@ -8566,7 +8562,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 1255502847}
   _boresight: {fileID: 1255502851}
   _range: 180
   _aimTolerance: 12
@@ -9091,7 +9086,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 1362435563}
   _boresight: {fileID: 1362435567}
   _range: 180
   _aimTolerance: 12
@@ -12178,7 +12172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.StratagemBay
   _input: {fileID: 1812182311}
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _jammedDebuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
   _loadout:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
@@ -12295,7 +12289,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 1024
-  _pilot: {fileID: 1875145603}
   _boresight: {fileID: 1875145607}
   _range: 180
   _aimTolerance: 12
@@ -12601,7 +12594,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dc7bc685b47d9a4ea52f9b48df0792f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.SoftLock
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _targeting: {fileID: 1919053225}
   _cone: 7
   _range: 150
@@ -12619,7 +12612,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 412bb8d724c168c47b41d98b969a0db1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.LockOnTargeting
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _boresight: {fileID: 1812182287}
   _view: {fileID: 330585545}
   _targetMask:
@@ -12652,7 +12645,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponBay
   _input: {fileID: 1812182311}
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _weapons:
   - {fileID: 1017914246}
   - {fileID: 189988666}
@@ -12668,7 +12661,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d960924ae3b9cbe4f8283255c699f901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrapplingHook
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _origin: {fileID: 1812182287}
   _closeRate: 20
   _pathBend: 0.9
@@ -12694,7 +12687,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrappleLine
   _hook: {fileID: 1919053228}
-  _aircraft: {fileID: 1812182315}
+  _root: {fileID: 0}
   _line: {fileID: 297140799}
   _segments: 16
   _sag: 0.12

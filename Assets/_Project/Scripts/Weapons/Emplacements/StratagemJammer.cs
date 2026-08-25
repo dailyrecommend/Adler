@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Adler.Combat;
 using Adler.Core;
 using UnityEngine;
@@ -21,7 +20,6 @@ namespace Adler.Weapons
     [DisallowMultipleComponent]
     public sealed class StratagemJammer : MonoBehaviour
     {
-        private static readonly List<StratagemJammer> Active = new();
 
         [Header("범위")]
         [Tooltip("이 안에서는 스트라타젬을 부를 수 없다 (m). 가로 거리만 본다.")]
@@ -102,7 +100,7 @@ namespace Adler.Weapons
             StratagemJammer nearest = null;
             float closest = float.MaxValue;
 
-            foreach (StratagemJammer jammer in Active)
+            foreach (StratagemJammer jammer in Registry<StratagemJammer>.All)
             {
                 if (!jammer.IsOperational || !jammer.Contains(point))
                 {
@@ -164,7 +162,7 @@ namespace Adler.Weapons
 
         private void OnEnable()
         {
-            Active.Add(this);
+            Registry<StratagemJammer>.Add(this);
 
             if (_antenna != null)
             {
@@ -179,7 +177,7 @@ namespace Adler.Weapons
 
         private void OnDisable()
         {
-            Active.Remove(this);
+            Registry<StratagemJammer>.Remove(this);
 
             if (_antenna != null)
             {

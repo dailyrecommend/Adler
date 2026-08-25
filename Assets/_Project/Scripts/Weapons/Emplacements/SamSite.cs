@@ -26,7 +26,6 @@ namespace Adler.Weapons
     [DisallowMultipleComponent]
     public sealed class SamSite : MonoBehaviour
     {
-        private static readonly List<SamSite> Active = new();
 
         [Header("무장")]
         [SerializeField] private MissileDefinition _missile;
@@ -120,7 +119,7 @@ namespace Adler.Weapons
         /// </summary>
         public static bool AnyCovering(Transform target)
         {
-            foreach (SamSite site in Active)
+            foreach (SamSite site in Registry<SamSite>.All)
             {
                 if (!site.IsOperational)
                 {
@@ -147,7 +146,7 @@ namespace Adler.Weapons
         /// </summary>
         public static bool AnyIncoming(Transform target)
         {
-            foreach (SamSite site in Active)
+            foreach (SamSite site in Registry<SamSite>.All)
             {
                 foreach (Missile missile in site._inFlight)
                 {
@@ -178,9 +177,9 @@ namespace Adler.Weapons
             }
         }
 
-        private void OnEnable() => Active.Add(this);
+        private void OnEnable() => Registry<SamSite>.Add(this);
 
-        private void OnDisable() => Active.Remove(this);
+        private void OnDisable() => Registry<SamSite>.Remove(this);
 
         private void Update()
         {
