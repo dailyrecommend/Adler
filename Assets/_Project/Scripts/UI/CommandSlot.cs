@@ -31,8 +31,10 @@ namespace Adler.UI
         [Tooltip("평소에는 이름을, 쿨타임 중에는 남은 시간을 보여주는 글자.")]
         [SerializeField] private TMP_Text _label;
 
-        [Tooltip("{0}에 분, {1}에 초가 들어간다. 초는 두 자리로 채워야 4:9처럼 보이지 않는다.")]
-        [SerializeField] private string _cooldownFormat = "Cooldown {0}:{1:00}";
+        [Tooltip("{0}에 남은 초가 통째로 들어간다.\n\n" +
+                 "분과 초로 나누지 않는다. 쿨타임이 대개 1분을 넘지 않아 분 자리가 늘 0이고,\n" +
+                 "그러면 읽어야 할 숫자 앞에 뜻 없는 0과 구분자가 붙는다.")]
+        [SerializeField] private string _cooldownFormat = "Cooldown {0}";
 
         [Tooltip("출격 횟수를 다 썼을 때 보여줄 글자.")]
         [SerializeField] private string _exhaustedText = "Expended";
@@ -221,7 +223,7 @@ namespace Adler.UI
                 return;
             }
 
-            _label.SetText(string.Format(_cooldownFormat, seconds / 60, seconds % 60));
+            _label.SetText(string.Format(_cooldownFormat, seconds));
             _label.color = _cooldownTextColor;
         }
 

@@ -279,8 +279,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: afdfcac0e5daa3c4fbef9aac03dfdd61, type: 2}
+  m_sharedMaterial: {fileID: 7357055769685865116, guid: afdfcac0e5daa3c4fbef9aac03dfdd61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -304,10 +304,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70
+  m_fontSize: 34.25
   m_fontSizeBase: 70
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -557,15 +557,12 @@ MonoBehaviour:
   _icon: {fileID: 265522926481545036}
   _arrowRoot: {fileID: 3644861176056373585}
   _group: {fileID: 5119428663003133740}
-  _armedHighlight: {fileID: 4507567482268405220}
   _label: {fileID: 6910130070778231478}
-  _cooldownFormat: 'Cooldown {0} : {1:00}'
-  _armedText: READY
+  _cooldownFormat: Cooldown {0}
   _exhaustedText: Expended
   _cooldownFill: {fileID: 3428917041476318755}
   _fillAsItRecovers: 0
   _cooldownTextColor: {r: 1, g: 1, b: 1, a: 1}
-  _armedTextColor: {r: 1, g: 1, b: 1, a: 1}
   _readyTextColor: {r: 1, g: 1, b: 1, a: 1}
   _pendingColor: {r: 1, g: 1, b: 1, a: 0.35}
   _enteredColor: {r: 1, g: 1, b: 1, a: 1}
