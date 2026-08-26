@@ -16,10 +16,10 @@ MonoBehaviour:
   Description: 
   Tags: 193
   WindupSeconds: 0
-  ActiveSeconds: 10
+  ActiveSeconds: 5
   RecoverySeconds: 0
-  Cooldown: 45
+  Cooldown: 30
+  UsesPerSortie: 0
   Icon: {fileID: 21300000, guid: 9c5217f36a770ea449100218751c0f9b, type: 3}
   Command: 0000000000000000020000000000000003000000
-  UsesPerSortie: 0
   RepairRate: 50

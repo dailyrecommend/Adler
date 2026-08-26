@@ -7596,7 +7596,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.MusicPlayer
   _tracks:
+  - {fileID: 8300000, guid: 4acf24a57adb0a0488d9bbbd6ad203e5, type: 3}
+  - {fileID: 8300000, guid: 65da718e68273d542b6d1daadfc02a48, type: 3}
+  - {fileID: 8300000, guid: 79429f09d2fd6a548b450a22190db64e, type: 3}
   - {fileID: 8300000, guid: 10bd64365fc47a247a978299573d5749, type: 3}
+  - {fileID: 8300000, guid: 2dee998708ed4d645899444ae1294789, type: 3}
+  - {fileID: 8300000, guid: d5016dc96f77cd64e8f027ba74711e75, type: 3}
   _volume: 0.5
   _fadeInSeconds: 2
   _crossfadeSeconds: 3
@@ -8438,7 +8443,6 @@ MonoBehaviour:
   _jammedDebuff: {fileID: 11400000, guid: 5146c2fcf5ed0924dac367c70f56784f, type: 2}
   _loadout:
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
-  - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
   - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   - {fileID: 11400000, guid: 848b47f07bf8f2349a0a8b44024e8ead, type: 2}
   _inputTimeout: 1.5

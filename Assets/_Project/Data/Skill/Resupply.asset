@@ -16,11 +16,10 @@ MonoBehaviour:
   Description: 
   Tags: 129
   WindupSeconds: 0
-  ActiveSeconds: 10
+  ActiveSeconds: 1
   RecoverySeconds: 0
-  CancelableWhileActive: 0
-  Cooldown: 180
+  Cooldown: 15
+  UsesPerSortie: 0
   Icon: {fileID: 21300000, guid: c5bc9a07f7bb0194d969331d787e69c1, type: 3}
   Command: 01000000010000000000000003000000
-  UsesPerSortie: 3
-  RefillPercent: 50
+  RefillPercent: 75

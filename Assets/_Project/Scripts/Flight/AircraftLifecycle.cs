@@ -120,6 +120,7 @@ namespace Adler.Flight
         private void OnDied(Health health, DamageInfo damage)
         {
             SetControlEnabled(false);
+            ClearStates();
             Destroyed?.Invoke();
 
             if (_autoRespawn)
@@ -167,6 +168,25 @@ namespace Adler.Flight
             {
                 behaviour.enabled = enabled;
             }
+        }
+
+        /// <summary>
+        /// 걸려 있던 상태를 죽는 즉시 전부 놓는다. 줄·커맨드 창·디버프·돌던 행동.
+        /// <para>
+        /// 리스폰까지 기다리지 않는다. 컴포넌트를 끄는 것은 앞으로의 입력을 막을 뿐
+        /// 이미 걸린 것은 못 푼다 — 잔해에 줄이 매달려 있고, 커맨드 창이 열린 채
+        /// 남고, 되살아난 기체가 죽기 전의 창과 디버프를 물려받는다.
+        /// </para>
+        /// </summary>
+        private void ClearStates()
+        {
+            _aircraft.Grapple?.Release();
+            _aircraft.Stratagems?.SetCommandMode(false);
+            _aircraft.Debuffs?.Clear();
+
+            // 돌던 행동은 여기서도 멈춘다. 리스폰의 Stop은 죽은 채 기다리는 동안
+            // 프레임락 같은 것이 계속 돌지 않게 하는 이 호출의 뒷단속이다.
+            _aircraft.Abilities?.Stop();
         }
 
         // ------------------------------------------------------------------

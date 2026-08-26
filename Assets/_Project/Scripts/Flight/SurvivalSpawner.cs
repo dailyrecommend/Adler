@@ -177,8 +177,23 @@ namespace Adler.Flight
             _nextSpawnAt = _clock.Now + CurrentInterval();
         }
 
-        /// <summary>난이도 시계. 판이 시작하고 얼마나 왔는지 (0~1).</summary>
-        private float Ramp => Mathf.Clamp01((_clock.Now - _runStartedAt) / _rampSeconds);
+        /// <summary>
+        /// 난이도 시계. 판이 시작하고 얼마나 왔는지 (0~1).
+        /// <para>
+        /// 앞쪽으로 기울어져 있다. 절반의 시간에 성장의 3/4이 온다 — 직선으로 두면
+        /// 초반 몇 분이 거의 그대로라, 강해지기 전에 판이 지루해질 틈이 생긴다.
+        /// 세게 시작하고 완만하게 마무리하는 쪽이 버티는 게임의 박자다.
+        /// </para>
+        /// </summary>
+        private float Ramp
+        {
+            get
+            {
+                float linear = Mathf.Clamp01((_clock.Now - _runStartedAt) / _rampSeconds);
+
+                return 1f - ((1f - linear) * (1f - linear));
+            }
+        }
 
         /// <summary>지금의 등장 간격. 판이 오래될수록 최소 간격으로 좁아진다.</summary>
         private float CurrentInterval() => Mathf.Lerp(_startInterval, _minInterval, Ramp);

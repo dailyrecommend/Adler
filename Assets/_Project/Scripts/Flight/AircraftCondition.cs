@@ -64,6 +64,14 @@ namespace Adler.Flight
                 return false;
             }
 
+            // 죽은 기체는 아무 상태도 아니다. 조종이 꺼지면 비행 모델이 멈춰서
+            // 마지막 값이 굳는데, 그대로 두면 부스터를 켠 채 죽은 잔해가 불꽃을
+            // 단 채로 떨어진다. 죽음의 연출은 죽음 쪽 시스템이 따로 낸다.
+            if (aircraft.Health != null && !aircraft.Health.IsAlive)
+            {
+                return false;
+            }
+
             return condition switch
             {
                 AircraftCondition.Boosting => aircraft.Model?.IsBoosting == true,
