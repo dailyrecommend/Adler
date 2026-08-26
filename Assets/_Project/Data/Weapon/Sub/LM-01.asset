@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 801629b932c1ccd4abe98848e81bb01f, type: 3}
   m_Name: LM-01
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.MissileDefinition
-  DisplayName: LM-01
-  Description: 
+  DisplayName: Destiny
+  Description: True-Forced Love.
   Icon: {fileID: 21300000, guid: 40825af7a3b54354db119965e969c1c3, type: 3}
   Picture: {fileID: 21300000, guid: 05fa4ed46711d7442a450dba98f3fae3, type: 3}
   Equipment: {fileID: 1728313410899837566, guid: 41edb45c13968574ea212d1bdfab305e, type: 3}

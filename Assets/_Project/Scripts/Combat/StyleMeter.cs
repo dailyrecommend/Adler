@@ -42,6 +42,15 @@ namespace Adler.Combat
         /// <summary>지금 점수.</summary>
         public float Score => _score;
 
+        /// <summary>
+        /// 이번 판에 벌어들인 점수의 합. 새거나 맞아서 잃은 것은 빼지 않는다.
+        /// <para>
+        /// 천장에 막힌 몫도 센다. 게이지가 가득한 채로 잘 싸운 것도 벌어들인 것이고,
+        /// 여기서 안 세면 최고 랭크를 유지한 시간이 기록에서 가장 초라한 시간이 된다.
+        /// </para>
+        /// </summary>
+        public float TotalEarned { get; private set; }
+
         /// <summary>지금 랭크 칸 번호. 0은 무랭크다.</summary>
         public int RankIndex => _rank;
 
@@ -101,6 +110,7 @@ namespace Adler.Combat
         public void ResetScore()
         {
             _score = 0f;
+            TotalEarned = 0f;
             _freshness.Clear();
             _graceUntil = 0f;
             RefreshRank();
@@ -116,8 +126,10 @@ namespace Adler.Combat
             }
 
             float freshness = _freshness.TryGetValue(weight, out float value) ? value : 1f;
+            float earned = points * freshness;
 
-            _score = Mathf.Min(_score + (points * freshness), _definition.Ceiling);
+            _score = Mathf.Min(_score + earned, _definition.Ceiling);
+            TotalEarned += earned;
 
             // 쓴 종류만 마른다. 전부 같이 깎으면 섞어 쓴 사람과 한 우물만 판
             // 사람이 같은 값을 받아서, 섞으라는 뜻이 사라진다.

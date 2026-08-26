@@ -42,6 +42,7 @@ namespace Adler.Audio
         private AudioSource _back;
 
         private int _index;
+        private bool _overriding;
         private float _fade;
 
         private void Awake()
@@ -91,15 +92,66 @@ namespace Adler.Audio
                     : 1f;
             }
 
-            Advance(delta);
+            FadeOutBack(delta);
+
+            // 끼어든 곡이 도는 동안 목록은 쉰다. 루프 중인 곡을 목록이
+            // 끝나간다고 판단해 다음 곡으로 밀어내면 안 된다.
+            if (!_overriding)
+            {
+                Advance();
+            }
 
             _front.volume = _volume * _fade;
         }
 
         /// <summary>
-        /// 곡이 끝나갈 무렵 다음 곡을 미리 틀고, 끝난 곡의 자리와 바꾼다.
+        /// 밖에서 끼어드는 곡. 지금 곡을 밀어내고 이 곡을 루프로 돈다.
+        /// 결과 화면처럼 장면이 바뀌는 자리가 부른다.
         /// </summary>
-        private void Advance(float delta)
+        public void Override(AudioClip clip)
+        {
+            if (clip == null)
+            {
+                return;
+            }
+
+            _overriding = true;
+            Cut(clip, loop: true);
+        }
+
+        /// <summary>끼어든 곡을 물리고 목록으로 돌아간다. 끼어든 것이 없으면 아무 일도 없다.</summary>
+        public void EndOverride()
+        {
+            if (!_overriding || _tracks.Length == 0)
+            {
+                _overriding = false;
+                return;
+            }
+
+            _overriding = false;
+            Cut(_tracks[_index], loop: _tracks.Length == 1);
+        }
+
+        /// <summary>물러나는 곡은 겹치는 동안 잦아든다.</summary>
+        private void FadeOutBack(float delta)
+        {
+            if (!_back.isPlaying)
+            {
+                return;
+            }
+
+            float overlap = Mathf.Max(0.01f, _crossfadeSeconds);
+
+            _back.volume = Mathf.Max(0f, _back.volume - (delta / overlap) * _volume);
+
+            if (_back.volume <= 0f)
+            {
+                _back.Stop();
+            }
+        }
+
+        /// <summary>곡이 끝나갈 무렵 다음 곡으로 넘어간다.</summary>
+        private void Advance()
         {
             if (_tracks.Length < 2 || _front.clip == null)
             {
@@ -109,33 +161,27 @@ namespace Adler.Audio
             float remaining = _front.clip.length - _front.time;
             float overlap = Mathf.Min(_crossfadeSeconds, _front.clip.length * 0.5f);
 
-            // 물러나는 곡은 겹치는 동안 잦아든다.
-            if (_back.isPlaying)
-            {
-                _back.volume = Mathf.Max(0f, _back.volume - (delta / Mathf.Max(0.01f, overlap)) * _volume);
-
-                if (!_back.isPlaying || _back.volume <= 0f)
-                {
-                    _back.Stop();
-                }
-            }
-
             if (remaining > overlap && _front.isPlaying)
             {
                 return;
             }
 
-            // 다음 곡. 지금 곡은 뒷자리로 물러나 잦아들고, 새 곡이 앞자리를 받는다.
             _index = (_index + 1) % _tracks.Length;
+            Cut(_tracks[_index], loop: false);
+        }
 
+        /// <summary>
+        /// 앞자리 곡을 바꾼다. 지금 곡은 뒷자리로 물러나 잦아들고, 새 곡이
+        /// 앞자리를 받아 차오른다 — 어느 쪽만 하면 섞임이 아니라 끼어듦으로 들린다.
+        /// </summary>
+        private void Cut(AudioClip clip, bool loop)
+        {
             (_front, _back) = (_back, _front);
 
-            _front.clip = _tracks[_index];
-            _front.loop = false;
+            _front.clip = clip;
+            _front.loop = loop;
             _front.Play();
 
-            // 들어오는 쪽도 차오른다. 물러나는 곡만 잦아들면 새 곡이 제 소리로
-            // 툭 들어와서, 섞이는 것이 아니라 끼어드는 것으로 들린다.
             if (_fadeInSeconds > 0f)
             {
                 _fade = 0f;

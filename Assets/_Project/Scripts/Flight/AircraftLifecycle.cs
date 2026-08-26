@@ -180,6 +180,12 @@ namespace Adler.Flight
         /// </summary>
         private void ClearStates()
         {
+            // 추력을 모델 안에서 끊는다. 조종이 꺼지면 모델이 멈춰 마지막 값이
+            // 굳는데, 부스터 소리와 화면 떨림은 조건 게이트를 거치지 않고 모델을
+            // 직접 읽어서 — 게이트로는 안 막히고 값 자체가 꺼져야 한다.
+            // 얼어붙은 채 죽는 길은 이미 설계에 있다. 리스폰의 Initialize가 푼다.
+            _aircraft.Model?.SetFrozen(true);
+
             _aircraft.Grapple?.Release();
             _aircraft.Stratagems?.SetCommandMode(false);
             _aircraft.Debuffs?.Clear();
