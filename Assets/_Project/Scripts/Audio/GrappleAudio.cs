@@ -80,6 +80,9 @@ namespace Adler.Audio
 
         private Sustain _playing;
 
+        // 실제로 붙어 있는 갈고리. 인스펙터 칸과 달리 장비 교체를 따라간다.
+        private GrapplingHook _bound;
+
         private Clock _clock;
 
         private void Awake()
@@ -87,15 +90,11 @@ namespace Adler.Audio
             _clock = TimeScale.For(this);
             _aircraft = AircraftRig.Resolve(this, _aircraft);
 
-            if (_hook == null && _aircraft != null)
+            // 갈고리는 여기서 찾지 않는다. 장비라서 이 Awake보다 늦게 태어나고,
+            // 안 실었을 수도 있다 — 어느 쪽이든 잘못이 아니다.
+            if (_source == null)
             {
-                _hook = _aircraft.GetComponentInChildren<GrapplingHook>(includeInactive: true);
-            }
-
-            if (_hook == null || _source == null)
-            {
-                Debug.LogError(
-                    $"{nameof(GrappleAudio)}: {nameof(GrapplingHook)} 또는 Audio Source가 비어 있습니다.", this);
+                Debug.LogError($"{nameof(GrappleAudio)}: Audio Source가 비어 있습니다.", this);
                 enabled = false;
                 return;
             }
@@ -113,13 +112,69 @@ namespace Adler.Audio
 
         private void OnEnable()
         {
-            _hook.PhaseChanged += OnPhaseChanged;
+            WeaponBay bay = _aircraft != null ? _aircraft.Weapons : null;
+            if (bay != null)
+            {
+                bay.Rearmed += OnRearmed;
+            }
+
+            Bind();
         }
 
         private void OnDisable()
         {
-            _hook.PhaseChanged -= OnPhaseChanged;
+            WeaponBay bay = _aircraft != null ? _aircraft.Weapons : null;
+            if (bay != null)
+            {
+                bay.Rearmed -= OnRearmed;
+            }
 
+            Unbind();
+            Silence();
+        }
+
+        /// <summary>
+        /// 장비를 갈아입었다. 갈고리가 실렸는지부터 다시 본다 —
+        /// 내렸을 수도, 방금 실렸을 수도 있다.
+        /// </summary>
+        private void OnRearmed()
+        {
+            Unbind();
+            Bind();
+            Silence();
+        }
+
+        /// <summary>
+        /// 갈고리를 찾아 붙는다. 안 실려 있으면 조용히 빈손으로 있는다 —
+        /// 장비를 내린 것은 잘못이 아니므로 오류를 뱉지 않는다.
+        /// </summary>
+        private void Bind()
+        {
+            _bound = _hook != null ? _hook : (_aircraft != null ? _aircraft.Grapple : null);
+
+            if (_bound != null)
+            {
+                _bound.PhaseChanged += OnPhaseChanged;
+            }
+        }
+
+        /// <summary>
+        /// 참조 비교로 끊는다. 지워진 갈고리는 null인 척을 해서, 보통 비교로는
+        /// 끊을 기회 자체가 안 온다.
+        /// </summary>
+        private void Unbind()
+        {
+            if (!ReferenceEquals(_bound, null))
+            {
+                _bound.PhaseChanged -= OnPhaseChanged;
+            }
+
+            _bound = null;
+        }
+
+        /// <summary>이어지던 소리를 그 자리에서 멈춘다.</summary>
+        private void Silence()
+        {
             if (_sustained != null)
             {
                 _sustained.Stop();
@@ -186,8 +241,9 @@ namespace Adler.Audio
                 return;
             }
 
-            Sustain wanted = _hook.Phase == GrapplePhase.Pulling ? Sustain.Reel
-                : _hook.Phase == GrapplePhase.Flying ? Sustain.Flight
+            Sustain wanted = _bound == null ? Sustain.None
+                : _bound.Phase == GrapplePhase.Pulling ? Sustain.Reel
+                : _bound.Phase == GrapplePhase.Flying ? Sustain.Flight
                 : Sustain.None;
 
             if (wanted != _playing)

@@ -33,6 +33,13 @@ namespace Adler.Weapons
                  "같은 갈래의 무기라도 서로 다른 그림을 쓴다.")]
         public Sprite Picture;
 
+        [Header("장비")]
+        [Tooltip("이 무기의 몸. 무기 컴포넌트와 총구, 딸린 것들을 담은 프리팹.\n\n" +
+                 "실었을 때 기체에 찍혀 나오고, 벗으면 통째로 사라진다. 그래서 안 실은\n" +
+                 "무기는 기체에 코드 한 줄도 남기지 않는다.\n\n" +
+                 "비워두면 이 무기는 실을 수 없다.")]
+        public GameObject Equipment;
+
         [Header("자리")]
         [Tooltip("이 무기가 걸리는 자리.\n" +
                  "주무기는 늘 쥐고 있는 쪽, 보조무기는 때를 골라 쓰는 쪽이다.\n" +

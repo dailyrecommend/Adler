@@ -8,6 +8,11 @@ namespace Adler.Weapons
     /// <summary>
     /// 기체가 들고 쏘는 것들의 공통 기반.
     /// <para>
+    /// 몸일 뿐이다. 어떤 무기인지는 장착할 때 <see cref="Equip"/>으로 꽂히는 성능
+    /// 에셋이 정한다 — 프리팹에 에셋을 적어두면 같은 몸을 쓰는 무기마다 프리팹을
+    /// 복제해야 하고, 장비 목록과 프리팹이 서로 다른 말을 할 수 있게 된다.
+    /// </para>
+    /// <para>
     /// 방아쇠를 직접 읽지 않는다. 어느 자리의 방아쇠가 당겨졌는지는 <see cref="WeaponBay"/>가
     /// 알고, 여기서는 "쏘라"는 요청이 왔을 때 쏠 수 있는지 판단하고 쏜다. 무기가 각자
     /// 입력을 읽으면 두 자리가 같은 키를 물고 늘어지는 일이 생긴다.
@@ -36,8 +41,10 @@ namespace Adler.Weapons
         private int _nextMuzzle;
         private Clock _clock;
 
-        /// <summary>이 무기가 쓰는 성능 에셋.</summary>
-        public abstract WeaponDefinition Definition { get; }
+        /// <summary>
+        /// 이 무기가 쓰는 성능 에셋. 장착할 때 꽂히고, 꽂히기 전에는 null이다.
+        /// </summary>
+        public WeaponDefinition Definition { get; private set; }
 
         /// <summary>
         /// 이 무기가 쥐고 있는 탄. 남은 발수도 차오르는 정도도 여기서 묻는다.
@@ -85,16 +92,38 @@ namespace Adler.Weapons
         {
             _root = AircraftRoot.Resolve(this, _root);
             _clock = TimeScale.For(this);
+        }
 
-            if (Definition == null)
+        /// <summary>
+        /// 성능 에셋을 꽂는다. 장착하는 쪽이 찍어낸 직후 부른다. 받을 수 없는
+        /// 종류면 아무것도 바뀌지 않고 거짓을 준다.
+        /// <para>
+        /// 종류 검사를 여기서 한다. 발사기 몸에 기총 에셋을 꽂으면 유도 수치를 읽는
+        /// 순간 터지는데, 그 순간은 첫 발사라 장비를 잘못 적은 곳에서 한참 멀다.
+        /// </para>
+        /// </summary>
+        public bool Equip(WeaponDefinition definition)
+        {
+            if (definition == null || !Accepts(definition))
             {
-                Debug.LogError($"{GetType().Name}: 성능 에셋이 비어 있습니다.", this);
-                enabled = false;
-                return;
+                Debug.LogError(
+                    $"{GetType().Name}: '{(definition != null ? definition.name : "없음")}'은 " +
+                    "이 몸이 받을 수 있는 성능 에셋이 아닙니다.", this);
+                return false;
             }
 
-            Ammo = new AmmoStock(Definition);
+            Definition = definition;
+            Ammo = new AmmoStock(definition);
+            OnEquipped();
+
+            return true;
         }
+
+        /// <summary>이 몸이 받을 수 있는 성능 에셋인지. 발사기는 미사일 에셋만 받는다.</summary>
+        protected abstract bool Accepts(WeaponDefinition definition);
+
+        /// <summary>에셋이 꽂힌 직후. 에셋을 읽어야 하는 준비는 Awake가 아니라 여기서 한다.</summary>
+        protected virtual void OnEquipped() { }
 
         /// <summary>
         /// 탄은 쏘지 않는 동안에도 차오른다. 그래서 방아쇠와 무관하게 매 프레임 돈다.

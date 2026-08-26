@@ -13,13 +13,14 @@ namespace Adler.Weapons
     /// </summary>
     public sealed class MissileLauncher : AircraftWeapon
     {
-        [Header("무기")]
-        [SerializeField] private MissileDefinition _missile;
-
+        [Header("참조")]
         [Tooltip("조준을 맡는 곳. 비워두면 기체에서 찾는다.")]
         [SerializeField] private LockOnTargeting _targeting;
 
-        public override WeaponDefinition Definition => _missile;
+        /// <summary>꽂힌 에셋을 발사기의 말로 읽는다. 종류는 장착 때 이미 검사됐다.</summary>
+        private MissileDefinition Missile => (MissileDefinition)Definition;
+
+        protected override bool Accepts(WeaponDefinition definition) => definition is MissileDefinition;
 
         /// <summary>
         /// 표적이 잡혀 있고, 사거리 안이어야 쏠 수 있다.
@@ -33,7 +34,7 @@ namespace Adler.Weapons
             base.CanFire
             && _targeting != null
             && _targeting.HasLock
-            && Vector3.Distance(transform.position, _targeting.TargetPoint) <= _missile.LockRange;
+            && Vector3.Distance(transform.position, _targeting.TargetPoint) <= Missile.LockRange;
 
         /// <summary>미사일이 터졌을 때. 폭발은 발사체가 사라진 뒤에 보고된다.</summary>
         public event Action<MissileDefinition, BlastReport> Detonated;
@@ -59,31 +60,35 @@ namespace Adler.Weapons
             Transform muzzle = ResolveMuzzle();
             Transform target = _targeting.Target;
 
-            if (_missile.Prefab == null)
+            if (Missile.Prefab == null)
             {
-                Debug.LogError($"{nameof(MissileLauncher)}: '{_missile.DisplayName}'에 프리팹이 없습니다.", this);
+                Debug.LogError($"{nameof(MissileLauncher)}: '{Missile.DisplayName}'에 프리팹이 없습니다.", this);
                 return;
             }
 
             GameObject instance = Instantiate(
-                _missile.Prefab, muzzle.position, Quaternion.LookRotation(muzzle.forward));
+                Missile.Prefab, muzzle.position, Quaternion.LookRotation(muzzle.forward));
 
             if (instance.TryGetComponent(out Missile missile))
             {
+                // 어떤 미사일이었는지를 지금 붙잡아 둔다. 신호가 올 때 Definition을
+                // 읽으면, 날아가는 사이 다른 에셋으로 갈아입었을 때 남의 이름이 나간다.
+                MissileDefinition fired = Missile;
+
                 // 미사일은 터지면 사라지므로 화면 표시가 직접 붙을 수 없다.
-                missile.Detonated += report => Detonated?.Invoke(_missile, report);
+                missile.Detonated += report => Detonated?.Invoke(fired, report);
 
                 missile.Launch(
-                    _missile,
+                    fired,
                     Owner,
                     target,
-                    (muzzle.forward * _missile.LaunchSpeed) + CarrierVelocity,
+                    (muzzle.forward * fired.LaunchSpeed) + CarrierVelocity,
                     _hitMask);
             }
             else
             {
                 Debug.LogError(
-                    $"{nameof(MissileLauncher)}: '{_missile.DisplayName}'의 프리팹에 " +
+                    $"{nameof(MissileLauncher)}: '{Missile.DisplayName}'의 프리팹에 " +
                     $"{nameof(Missile)}이 없습니다.", this);
                 Destroy(instance);
             }

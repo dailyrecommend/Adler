@@ -51,6 +51,32 @@ namespace Adler.UI
         /// </summary>
         private void Start()
         {
+            _bay.Rearmed += Rebind;
+            _bay.SecondaryChanged += OnSecondaryChanged;
+
+            Rebind();
+        }
+
+        private void OnDestroy()
+        {
+            if (_bay != null)
+            {
+                _bay.Rearmed -= Rebind;
+                _bay.SecondaryChanged -= OnSecondaryChanged;
+            }
+        }
+
+        /// <summary>
+        /// 어느 무기로 바뀌었는지는 쓰지 않는다. 칸 번호가 필요한데 그것은 무기고가
+        /// 들고 있으므로, 바뀌었다는 사실만 신호로 받고 번호는 다시 물어본다.
+        /// </summary>
+        private void OnSecondaryChanged(AircraftWeapon weapon) => Highlight();
+
+        /// <summary>
+        /// 실려 있는 것들을 칸에 다시 세운다. 처음 켤 때와 장비를 갈아입었을 때.
+        /// </summary>
+        private void Rebind()
+        {
             IReadOnlyList<AircraftWeapon> loaded = _bay.Secondaries;
 
             if (_slots.Count < loaded.Count)
@@ -65,23 +91,8 @@ namespace Adler.UI
                 _slots[i].Bind(i < loaded.Count ? loaded[i] : null);
             }
 
-            _bay.SecondaryChanged += OnSecondaryChanged;
             Highlight();
         }
-
-        private void OnDestroy()
-        {
-            if (_bay != null)
-            {
-                _bay.SecondaryChanged -= OnSecondaryChanged;
-            }
-        }
-
-        /// <summary>
-        /// 어느 무기로 바뀌었는지는 쓰지 않는다. 칸 번호가 필요한데 그것은 무기고가
-        /// 들고 있으므로, 바뀌었다는 사실만 신호로 받고 번호는 다시 물어본다.
-        /// </summary>
-        private void OnSecondaryChanged(AircraftWeapon weapon) => Highlight();
 
         private void Highlight()
         {

@@ -16,9 +16,10 @@ MonoBehaviour:
   Description: A winch with a spear.
   Icon: {fileID: 21300000, guid: ef67dbc9c3d503245bf6d5edb61ad5cc, type: 3}
   Picture: {fileID: 21300000, guid: 293838e7b7de63342a4199506de4fe7c, type: 3}
+  Equipment: {fileID: 2693696006843987921, guid: ccc8ef6dc1b80bd449f7dfaf5d38762e, type: 3}
   Slot: 1
   RoundsPerMinute: 1
-  Prefab: {fileID: 0}
+  Prefab: {fileID: 7126543633751197651, guid: 052fdcf83f9bcce46bcda790195a92a8, type: 3}
   Range: 300
   AmmoCapacity: 1
   RechargeSeconds: 6

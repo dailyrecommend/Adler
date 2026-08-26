@@ -15,6 +15,8 @@ MonoBehaviour:
   DisplayName: Stalker
   Description: Soft-Lock Built-In.
   Icon: {fileID: 21300000, guid: fc80c932694585846a771a5fe58e46b8, type: 3}
+  Picture: {fileID: 0}
+  Equipment: {fileID: 6046996318531784477, guid: 4e66cb2e5f5e8bc4ea81803a3c9d034b, type: 3}
   Slot: 0
   RoundsPerMinute: 1500
   Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}

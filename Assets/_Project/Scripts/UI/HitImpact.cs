@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Adler.Combat;
 using Adler.Core;
 using Adler.Flight;
@@ -70,6 +71,9 @@ namespace Adler.UI
         private Clock _clock;
         private RamAttack _ram;
         private GrapplingHook _grapple;
+
+        // 지금 구독해 둔 무기들. 갈아입을 때 이 목록으로 놓는다.
+        private readonly List<AircraftWeapon> _listening = new();
         private float _releaseAt;
         private ImpactWeight _releasingWeight;
         private bool _releasing;
@@ -84,7 +88,6 @@ namespace Adler.UI
             _clock = TimeScale.For(this);
             _bay = _aircraft != null ? _aircraft.Weapons : null;
             _ram = _aircraft != null ? _aircraft.Ram : null;
-            _grapple = _aircraft != null ? _aircraft.Grapple : null;
 
             if (_bay == null)
             {
@@ -93,11 +96,56 @@ namespace Adler.UI
             }
         }
 
+        /// <summary>
+        /// 실려 있는 무기와 갈고리에 붙는다. 장비를 갈아입으면 놓고 다시 붙는다.
+        /// <para>
+        /// 놓는 쪽은 붙었던 목록으로 한다. 무기고의 지금 목록으로 놓으면 이미 지워진
+        /// 옛 무기는 영영 못 놓는다. 지워진 것은 null인 척을 하므로 참조 비교로 거른다.
+        /// </para>
+        /// </summary>
         private void OnEnable()
+        {
+            _bay.Rearmed += OnRearmed;
+
+            // 들이받기는 장비가 아니라 기체의 부품이다. 갈아입어도 그대로이므로
+            // 붙는 자리도 장비 쪽 목록이 아니라 여기다.
+            if (_ram != null)
+            {
+                _ram.Rammed += OnRammed;
+            }
+
+            Attach();
+        }
+
+        private void OnDisable()
+        {
+            _bay.Rearmed -= OnRearmed;
+
+            if (_ram != null)
+            {
+                _ram.Rammed -= OnRammed;
+            }
+
+            Detach();
+        }
+
+        private void OnRearmed()
+        {
+            Detach();
+            Attach();
+        }
+
+        private void Attach()
         {
             foreach (AircraftWeapon weapon in _bay.Weapons)
             {
+                if (weapon == null)
+                {
+                    continue;
+                }
+
                 weapon.Hit += OnHit;
+                _listening.Add(weapon);
 
                 if (weapon is MissileLauncher launcher)
                 {
@@ -105,11 +153,8 @@ namespace Adler.UI
                 }
             }
 
-
-            if (_ram != null)
-            {
-                _ram.Rammed += OnRammed;
-            }
+            // 갈고리는 장비라 있을 수도 없을 수도 있다. 지금 실려 있는 것을 그때그때 찾는다.
+            _grapple = _aircraft.Grapple;
 
             if (_grapple != null)
             {
@@ -117,10 +162,15 @@ namespace Adler.UI
             }
         }
 
-        private void OnDisable()
+        private void Detach()
         {
-            foreach (AircraftWeapon weapon in _bay.Weapons)
+            foreach (AircraftWeapon weapon in _listening)
             {
+                if (ReferenceEquals(weapon, null))
+                {
+                    continue;
+                }
+
                 weapon.Hit -= OnHit;
 
                 if (weapon is MissileLauncher launcher)
@@ -129,15 +179,12 @@ namespace Adler.UI
                 }
             }
 
+            _listening.Clear();
 
-            if (_ram != null)
-            {
-                _ram.Rammed -= OnRammed;
-            }
-
-            if (_grapple != null)
+            if (!ReferenceEquals(_grapple, null))
             {
                 _grapple.PhaseChanged -= OnGrapplePhase;
+                _grapple = null;
             }
         }
 

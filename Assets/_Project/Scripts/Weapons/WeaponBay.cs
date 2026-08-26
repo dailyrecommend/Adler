@@ -8,19 +8,16 @@ using UnityEngine;
 namespace Adler.Weapons
 {
     /// <summary>
-    /// 기체가 든 무기들을 자리별로 세우고, 자리마다 방아쇠를 당긴다.
+    /// 장비 목록을 읽어 무기의 몸을 찍어내고, 자리마다 방아쇠를 당긴다.
     /// <para>
-    /// 주무기는 하나, 보조무기는 셋까지다. 주무기는 늘 그 자리에 있고 보조무기만
-    /// 골라 쓴다 — 언제나 할 수 있는 일이 하나 있어야 고르는 일이 판단이 된다.
+    /// 무기는 씬에 놓이지 않는다. 무엇을 실을지는 성능 에셋의 목록이고, 몸은 그 에셋이
+    /// 가리키는 프리팹에서 장착할 때 나온다 — 그래서 안 실은 무기는 기체에 코드 한 줄도
+    /// 없고, 장비창은 목록을 바꿔 <see cref="Arm"/>을 부르는 것으로 끝난다.
     /// </para>
     /// <para>
-    /// 고르는 것은 보조무기 <b>안에서</b>다. 주무기와 보조무기 사이를 오가는 것이
-    /// 아니라 둘 다 늘 손에 있고, 각자의 방아쇠로 동시에 나갈 수 있다.
-    /// </para>
-    /// <para>
-    /// 어느 자리에 걸릴지는 묻지 않는다. 무기가 자기 성능 에셋에 적어두고 오므로,
-    /// 여기서는 달려 있는 것을 모아 자리에 세우기만 한다. 실은 쪽이 정하게 두면
-    /// 에셋과 인스펙터가 서로 다른 말을 할 수 있고, 그때 어느 쪽이 맞는지 알 길이 없다.
+    /// 주무기는 하나, 보조무기는 셋까지다. 어느 자리에 걸릴지는 에셋이 알고 있으므로
+    /// 여기서는 찍어낸 것을 자리에 세우기만 한다. 둘 다 늘 손에 있고 각자의 방아쇠로
+    /// 동시에 나갈 수 있다 — 고르는 것은 보조무기 안에서다.
     /// </para>
     /// <para>
     /// 방아쇠를 여기서 읽는다. 사격은 쿨타임도, 지속시간도, 출격당 횟수도 없어서
@@ -29,8 +26,8 @@ namespace Adler.Weapons
     /// </para>
     /// </summary>
     /// <remarks>
-    /// 뿌리(-100) 다음, 나머지(0)보다 앞서 돈다. 걸린 무기 목록을 여기서 세우는데,
-    /// 그 목록에 붙는 쪽들이 자기 OnEnable이나 Start에서 읽기 때문이다.
+    /// 뿌리(-100) 다음, 나머지(0)보다 앞서 돈다. 무기의 몸을 여기 Awake에서 찍어내므로,
+    /// 자기 Awake나 OnEnable에서 무기를 찾는 쪽들이 헛손질하지 않는다.
     /// </remarks>
     [DefaultExecutionOrder(-50)]
     [DisallowMultipleComponent]
@@ -46,6 +43,16 @@ namespace Adler.Weapons
         [Tooltip("입력을 읽어오는 곳. 비워두면 이 기체에서 찾는다.")]
         [SerializeField] private PilotInput _input;
 
+        [Header("장비")]
+        [Tooltip("출격할 때 싣는 무기들. 성능 에셋을 넣는다 — 몸은 에셋이 가리키는\n" +
+                 "프리팹에서 나온다. 자리는 에셋에 적혀 있으므로 순서는 상관없지만,\n" +
+                 "보조무기끼리는 여기 적힌 순서가 곧 칸 순서다.\n\n" +
+                 "장비창이 생기면 그쪽이 Arm으로 갈아입힌다. 이 목록은 기본 장비다.")]
+        [SerializeField] private List<WeaponDefinition> _loadout = new();
+
+        [Tooltip("무기의 몸이 붙는 자리. 비워두면 이 오브젝트 바로 아래에 붙는다.")]
+        [SerializeField] private Transform _mountRoot;
+
         [Header("보조무기")]
         [Tooltip("이만큼 쓰지 않으면 고른 것을 놓는다(초). 0이면 놓지 않는다.\n\n" +
                  "쥔 채로 잊고 다니면 다음에 우클릭할 때 무엇이 나갈지 모르는 상태가 된다.\n" +
@@ -58,6 +65,13 @@ namespace Adler.Weapons
         private AircraftWeapon _primary;
         private readonly List<AircraftWeapon> _secondaries = new(SecondaryCapacity);
 
+        // 찍어낸 몸들. 갈아입을 때 이것들을 지운다.
+        private readonly List<GameObject> _bodies = new();
+
+        // 걸려 있는 것을 통째로 모아둔다. 소리와 화면이 무기 하나하나에 붙을 때 쓰고,
+        // 부를 때마다 만들면 매 프레임 쓰레기가 쌓인다.
+        private readonly List<AircraftWeapon> _mounted = new();
+
         // 고른 칸. -1은 아무것도 안 든 상태다.
         private int _selected;
 
@@ -66,12 +80,14 @@ namespace Adler.Weapons
 
         private float _holsterAt;
 
-        // 걸려 있는 것을 통째로 모아둔다. 소리와 화면이 무기 하나하나에 붙을 때 쓰고,
-        // 부를 때마다 만들면 매 프레임 쓰레기가 쌓인다.
-        private readonly List<AircraftWeapon> _mounted = new();
-
         private LockOnTargeting _targeting;
         private Clock _clock;
+
+        /// <summary>
+        /// 장비를 갈아입었을 때. 무기에 붙어 있던 쪽들은 이 신호에 끊고 다시 붙는다.
+        /// 이전에 붙잡아 둔 무기는 이미 지워진 뒤다.
+        /// </summary>
+        public event Action Rearmed;
 
         /// <summary>고른 보조무기가 바뀔 때. 화면이 따라붙는다.</summary>
         public event Action<AircraftWeapon> SecondaryChanged;
@@ -128,24 +144,6 @@ namespace Adler.Weapons
                 return;
             }
 
-            _root.GetComponentsInChildren(includeInactive: true, _mounted);
-            _mounted.RemoveAll(weapon => weapon == null || weapon.Definition == null);
-
-            foreach (AircraftWeapon weapon in _mounted)
-            {
-                Assign(weapon);
-            }
-
-            if (_primary == null && _secondaries.Count == 0)
-            {
-                Debug.LogError($"{nameof(WeaponBay)}: 기체에 무기가 하나도 없습니다.", this);
-            }
-
-            // 출격은 첫 칸을 든 채로 시작한다. 쓰지 않으면 곧 손을 놓겠지만, 처음부터
-            // 빈손이면 우클릭이 왜 안 먹는지 알 길이 없다.
-            _selected = _secondaries.Count > 0 ? 0 : -1;
-            _holsterAt = _clock.Now + _holsterSeconds;
-
             _targeting = _root.Find<LockOnTargeting>();
             _input = _input != null ? _input : _root.Find<PilotInput>();
 
@@ -153,7 +151,144 @@ namespace Adler.Weapons
             {
                 Debug.LogError($"{nameof(WeaponBay)}: {nameof(PilotInput)}을 찾지 못했습니다.", this);
                 enabled = false;
+                return;
             }
+
+            Arm(_loadout);
+        }
+
+        /// <summary>
+        /// 장비를 갈아입는다. 실려 있던 몸은 지우고 목록대로 새로 찍어낸다.
+        /// <para>
+        /// 장착과 철거가 일어나는 유일한 자리다. 장비창이든 출격 준비든 여기 하나만
+        /// 부르면 되고, 무기에 붙어 있던 쪽들은 <see cref="Rearmed"/>를 듣고 따라온다.
+        /// </para>
+        /// </summary>
+        public void Arm(IReadOnlyList<WeaponDefinition> loadout)
+        {
+            Disarm();
+
+            if (loadout != null)
+            {
+                foreach (WeaponDefinition definition in loadout)
+                {
+                    Mount(definition);
+                }
+            }
+
+            if (_primary == null && _secondaries.Count == 0)
+            {
+                Debug.LogError($"{nameof(WeaponBay)}: 장비 목록이 비어 있어 실은 무기가 없습니다.", this);
+            }
+
+            // 출격은 첫 칸을 든 채로 시작한다. 쓰지 않으면 곧 손을 놓겠지만, 처음부터
+            // 빈손이면 우클릭이 왜 안 먹는지 알 길이 없다.
+            _selected = _secondaries.Count > 0 ? 0 : -1;
+            _lastSelected = 0;
+            _holsterAt = _clock.Now + _holsterSeconds;
+
+            Rearmed?.Invoke();
+            SecondaryChanged?.Invoke(Secondary);
+        }
+
+        /// <summary>실려 있던 몸을 전부 지운다.</summary>
+        private void Disarm()
+        {
+            foreach (GameObject body in _bodies)
+            {
+                if (body != null)
+                {
+                    Destroy(body);
+                }
+            }
+
+            _bodies.Clear();
+            _mounted.Clear();
+            _secondaries.Clear();
+            _primary = null;
+            _selected = -1;
+        }
+
+        /// <summary>
+        /// 무기 하나를 싣는다. 몸을 찍어내고, 에셋을 꽂고, 자리에 세운다.
+        /// 어느 걸음에서든 어긋나면 찍어낸 것을 지우고 없던 일로 한다 —
+        /// 반쯤 실린 무기가 남으면 그 뒤의 모든 증상이 여기서 멀어진다.
+        /// </summary>
+        private void Mount(WeaponDefinition definition)
+        {
+            if (definition == null)
+            {
+                return;
+            }
+
+            if (definition.Equipment == null)
+            {
+                Debug.LogError(
+                    $"{nameof(WeaponBay)}: '{definition.DisplayName}'에 몸(Equipment 프리팹)이 " +
+                    "없어 실을 수 없습니다.", this);
+                return;
+            }
+
+            GameObject body = Instantiate(
+                definition.Equipment, _mountRoot != null ? _mountRoot : transform);
+            body.name = definition.DisplayName;
+
+            AircraftWeapon weapon = body.GetComponentInChildren<AircraftWeapon>(includeInactive: true);
+
+            if (weapon == null)
+            {
+                Debug.LogError(
+                    $"{nameof(WeaponBay)}: '{definition.DisplayName}'의 몸에 " +
+                    $"{nameof(AircraftWeapon)}이 없습니다.", this);
+                Destroy(body);
+                return;
+            }
+
+            if (!weapon.Equip(definition) || !Assign(weapon))
+            {
+                Destroy(body);
+                return;
+            }
+
+            _bodies.Add(body);
+            _mounted.Add(weapon);
+        }
+
+        /// <summary>
+        /// 무기를 자기 자리에 세운다. 자리가 모자라면 먼저 온 쪽이 남는다.
+        /// <para>
+        /// 조용히 흘리지 않는다. 넘친 무기는 영영 나가지 않는데, 그것을 알아채는 길이
+        /// "왜 이게 안 나가지"뿐이면 원인에서 한참 떨어진 곳을 뒤지게 된다.
+        /// </para>
+        /// </summary>
+        private bool Assign(AircraftWeapon weapon)
+        {
+            string name = weapon.Definition.DisplayName;
+
+            if (weapon.Definition.Slot == WeaponSlot.Primary)
+            {
+                if (_primary != null)
+                {
+                    Debug.LogError(
+                        $"{nameof(WeaponBay)}: 주무기 자리를 {_primary.Definition.DisplayName}와 " +
+                        $"{name}가 함께 노리고 있습니다. 뒤엣것은 실리지 않습니다.", this);
+                    return false;
+                }
+
+                _primary = weapon;
+                return true;
+            }
+
+            if (_secondaries.Count >= SecondaryCapacity)
+            {
+                Debug.LogError(
+                    $"{nameof(WeaponBay)}: 보조무기는 {SecondaryCapacity}개까지입니다. " +
+                    $"{name}는 실리지 않습니다.", this);
+                return false;
+            }
+
+            _secondaries.Add(weapon);
+            return true;
         }
 
         private void OnDisable()
@@ -162,7 +297,10 @@ namespace Adler.Weapons
             // 눌려 있던 상태가 남아 첫 발이 저절로 나가지 않게 한다.
             foreach (AircraftWeapon weapon in _mounted)
             {
-                weapon.ReleaseTrigger();
+                if (weapon != null)
+                {
+                    weapon.ReleaseTrigger();
+                }
             }
         }
 
@@ -325,42 +463,6 @@ namespace Adler.Weapons
             {
                 weapon.ReleaseTrigger();
             }
-        }
-
-        /// <summary>
-        /// 무기를 자기 자리에 세운다. 자리가 모자라면 먼저 온 쪽이 남는다.
-        /// <para>
-        /// 조용히 흘리지 않는다. 넘친 무기는 영영 나가지 않는데, 그것을 알아채는 길이
-        /// "왜 이게 안 나가지"뿐이면 원인에서 한참 떨어진 곳을 뒤지게 된다.
-        /// </para>
-        /// </summary>
-        private void Assign(AircraftWeapon weapon)
-        {
-            string name = weapon.Definition.DisplayName;
-
-            if (weapon.Definition.Slot == WeaponSlot.Primary)
-            {
-                if (_primary != null)
-                {
-                    Debug.LogError(
-                        $"{nameof(WeaponBay)}: 주무기 자리를 {_primary.Definition.DisplayName}와 " +
-                        $"{name}가 함께 노리고 있습니다. 뒤엣것은 걸리지 않습니다.", weapon);
-                    return;
-                }
-
-                _primary = weapon;
-                return;
-            }
-
-            if (_secondaries.Count >= SecondaryCapacity)
-            {
-                Debug.LogError(
-                    $"{nameof(WeaponBay)}: 보조무기는 {SecondaryCapacity}개까지입니다. " +
-                    $"{name}는 걸리지 않습니다.", weapon);
-                return;
-            }
-
-            _secondaries.Add(weapon);
         }
     }
 }

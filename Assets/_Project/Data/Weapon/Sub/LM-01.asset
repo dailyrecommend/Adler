@@ -16,10 +16,11 @@ MonoBehaviour:
   Description: 
   Icon: {fileID: 21300000, guid: 40825af7a3b54354db119965e969c1c3, type: 3}
   Picture: {fileID: 21300000, guid: 05fa4ed46711d7442a450dba98f3fae3, type: 3}
+  Equipment: {fileID: 1728313410899837566, guid: 41edb45c13968574ea212d1bdfab305e, type: 3}
   Slot: 1
   RoundsPerMinute: 1
   Prefab: {fileID: 3364867573603955381, guid: dcbc93032bcaa1547bcd20057f33fc0f, type: 3}
-  Range: 300
+  Range: 600
   AmmoCapacity: 2
   RechargeSeconds: 6
   RechargeDelay: 0.8
@@ -29,12 +30,12 @@ MonoBehaviour:
   Demolition: 20
   LockRange: 200
   NavigationConstant: 4
-  LaunchSpeed: 40
-  MaxSpeed: 160
-  Acceleration: 120
-  TurnRate: 90
+  LaunchSpeed: 1
+  MaxSpeed: 120
+  Acceleration: 10
+  TurnRate: 220
   StraightFlightSeconds: 0.25
   InnerRadius: 2
   BlastRadius: 6
   MissRange: 0
-  ProximityRadius: 1.5
+  ProximityRadius: 2.5

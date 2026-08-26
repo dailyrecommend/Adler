@@ -51,8 +51,18 @@ namespace Adler.Flight
         /// <summary>이 기체가 할 수 있는 행동들. 스트라타젬의 실행도 여기서 돈다.</summary>
         public AbilityRunner Abilities { get; private set; }
 
-        /// <summary>갈고리. 걸려 있는지는 <c>Grapple.IsAttached</c>로 읽는다.</summary>
-        public GrapplingHook Grapple { get; private set; }
+        /// <summary>
+        /// 갈고리. 걸려 있는지는 <c>Grapple.IsAttached</c>로 읽는다.
+        /// <para>
+        /// 장비라서 게으르게 찾는다. 무기의 몸은 이 리그의 Awake보다 늦게 태어나고,
+        /// 장비창에서 내리면 사라지기도 한다 — 물을 때마다 다시 보되, 찾은 것은
+        /// 지워질 때까지 쥐고 있는다. 안 실었으면 null이고, 그건 잘못이 아니다.
+        /// </para>
+        /// </summary>
+        public GrapplingHook Grapple =>
+            _grapple != null ? _grapple : _grapple = GetComponentInChildren<GrapplingHook>(includeInactive: true);
+
+        private GrapplingHook _grapple;
 
         /// <summary>몸으로 들이받는 것. 없으면 부딪히는 것은 그냥 죽는 일이다.</summary>
         public RamAttack Ram { get; private set; }
@@ -93,7 +103,6 @@ namespace Adler.Flight
             Aim = GetComponentInChildren<SoftLock>(includeInactive: true);
             Stratagems = GetComponentInChildren<StratagemBay>(includeInactive: true);
             Abilities = GetComponentInChildren<AbilityRunner>(includeInactive: true);
-            Grapple = GetComponentInChildren<GrapplingHook>(includeInactive: true);
             Ram = GetComponentInChildren<RamAttack>(includeInactive: true);
             Debuffs = GetComponentInChildren<AircraftDebuffs>(includeInactive: true);
         }

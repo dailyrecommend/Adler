@@ -67,6 +67,9 @@ namespace Adler.UI
         /// </summary>
         private void Start()
         {
+            // 장비를 갈아입으면 이 자리의 무기도 바뀐다. 다시 꽂는다.
+            _bay.Rearmed += OnRearmed;
+
             if (_slot == WeaponSlot.Secondary)
             {
                 _bay.SecondaryChanged += Bind;
@@ -77,11 +80,18 @@ namespace Adler.UI
 
         private void OnDestroy()
         {
-            if (_bay != null && _slot == WeaponSlot.Secondary)
+            if (_bay != null)
             {
-                _bay.SecondaryChanged -= Bind;
+                _bay.Rearmed -= OnRearmed;
+
+                if (_slot == WeaponSlot.Secondary)
+                {
+                    _bay.SecondaryChanged -= Bind;
+                }
             }
         }
+
+        private void OnRearmed() => Bind(_bay[_slot]);
 
         /// <summary>
         /// 이 자리에 걸린 무기를 꽂는다. 빈 자리면 표시째로 물러난다.

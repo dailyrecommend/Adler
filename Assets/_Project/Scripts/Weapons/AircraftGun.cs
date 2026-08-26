@@ -11,10 +11,10 @@ namespace Adler.Weapons
     /// </summary>
     public sealed class AircraftGun : AircraftWeapon
     {
-        [Header("무기")]
-        [SerializeField] private GunDefinition _gun;
+        /// <summary>꽂힌 에셋을 기총의 말로 읽는다. 종류는 장착 때 이미 검사됐다.</summary>
+        private GunDefinition Gun => (GunDefinition)Definition;
 
-        public override WeaponDefinition Definition => _gun;
+        protected override bool Accepts(WeaponDefinition definition) => definition is GunDefinition;
 
         protected override void FireOnce()
         {
@@ -25,15 +25,15 @@ namespace Adler.Weapons
             // 탄이 한 점으로 모이고, 기총이 저격총처럼 굴게 된다.
             SoftLock softLock = _root != null ? _root.Find<SoftLock>() : null;
             Vector3 aim = softLock != null
-                ? softLock.Adjust(origin, muzzle.forward, _gun)
+                ? softLock.Adjust(origin, muzzle.forward, Gun)
                 : muzzle.forward;
 
-            Vector3 direction = ProjectileLauncher.ApplySpread(aim, _gun.SpreadDegrees);
+            Vector3 direction = ProjectileLauncher.ApplySpread(aim, Gun.SpreadDegrees);
 
             // 기체 속도를 얹는다. 이게 없으면 빠르게 날면서 쏠 때 탄이 뒤로 처지는
             // 것처럼 보이고, 기체가 자기 탄을 따라잡는 상황까지 나온다.
             Projectile projectile = ProjectileLauncher.Fire(
-                _gun, origin, direction, CarrierVelocity, Owner, _hitMask);
+                Gun, origin, direction, CarrierVelocity, Owner, _hitMask);
 
             if (projectile != null)
             {

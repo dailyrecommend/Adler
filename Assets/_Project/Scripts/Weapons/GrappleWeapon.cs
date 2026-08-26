@@ -21,9 +21,6 @@ namespace Adler.Weapons
     /// </summary>
     public sealed class GrappleWeapon : AircraftWeapon
     {
-        [Header("무기")]
-        [SerializeField] private GrappleDefinition _grapple;
-
         [Header("갈고리")]
         [Tooltip("몰고 갈 갈고리. 비워두면 이 기체에서 찾는다.")]
         [SerializeField] private GrapplingHook _hook;
@@ -35,7 +32,8 @@ namespace Adler.Weapons
         // 토글이 아니라 갈아타기가 된다.
         private bool _spent;
 
-        public override WeaponDefinition Definition => _grapple;
+        /// <summary>꽂힌 에셋을 갈고리의 말로 읽을 일은 아직 없다. 종류만 지킨다.</summary>
+        protected override bool Accepts(WeaponDefinition definition) => definition is GrappleDefinition;
 
         /// <summary>탄이 있어도 줄이 나가 있으면 못 던진다. 줄은 하나뿐이다.</summary>
         public override bool CanFire => base.CanFire && !_spent && _hook != null && _hook.CanThrow;

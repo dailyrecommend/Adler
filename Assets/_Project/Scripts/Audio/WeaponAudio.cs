@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Adler.Flight;
 using Adler.Core;
 using Adler.Weapons;
@@ -69,6 +70,9 @@ namespace Adler.Audio
         private float _firingUntil;
         private float _nextOneShotAt;
 
+        // 지금 구독해 둔 무기들. 갈아입을 때 이 목록으로 놓는다.
+        private readonly List<AircraftWeapon> _listening = new();
+
         private void Awake()
         {
             _clock = TimeScale.For(this);
@@ -99,39 +103,69 @@ namespace Adler.Audio
         /// <summary>
         /// 실려 있는 무기 전부를 구독한다.
         /// <para>
-        /// OnEnable이 아니라 Start에서 한다. 무기 목록은 <see cref="WeaponBay"/>가 자기
-        /// Awake에서 모으는데, 그것이 이 컴포넌트의 OnEnable보다 늦게 돌 수 있다.
-        /// 그때는 빈 목록을 순회하게 되어 구독이 하나도 걸리지 않고, 소리는 영영 나지
-        /// 않는데 오류도 나지 않아 원인을 짐작하기 어렵다.
+        /// Start에서 처음 붙는다. 무기의 몸은 <see cref="WeaponBay"/>가 자기 Awake에서
+        /// 찍어내는데, 그것이 이 컴포넌트의 OnEnable보다 늦게 돌 수 있다.
+        /// </para>
+        /// <para>
+        /// 장비를 갈아입으면 따라간다. 무기가 지워지고 새로 찍히므로, 붙잡았던 것을
+        /// 놓고 지금 실린 것에 다시 붙는다 — 놓는 쪽은 붙었던 목록으로 한다. 무기고의
+        /// 지금 목록으로 놓으면 이미 지워진 옛 무기는 영영 못 놓는다.
         /// </para>
         /// </summary>
-        private void Start() => Subscribe(true);
-
-        private void OnDestroy() => Subscribe(false);
-
-        private void Subscribe(bool on)
+        private void Start()
         {
             if (_weapons == null)
             {
                 return;
             }
 
+            _weapons.Rearmed += OnRearmed;
+            Attach();
+        }
+
+        private void OnDestroy()
+        {
+            if (_weapons != null)
+            {
+                _weapons.Rearmed -= OnRearmed;
+            }
+
+            Detach();
+        }
+
+        private void OnRearmed()
+        {
+            Detach();
+            Attach();
+        }
+
+        private void Attach()
+        {
             foreach (AircraftWeapon weapon in _weapons.Weapons)
             {
-                if (weapon == null)
-                {
-                    continue;
-                }
-
-                if (on)
+                if (weapon != null)
                 {
                     weapon.Fired += OnFired;
+                    _listening.Add(weapon);
                 }
-                else
+            }
+        }
+
+        /// <summary>
+        /// 참조 비교로 놓는다. 지워진 무기는 null인 척을 해서, 보통 비교로 거르면
+        /// 놓을 기회 자체가 안 온다.
+        /// </summary>
+        private void Detach()
+        {
+            foreach (AircraftWeapon weapon in _listening)
+            {
+                if (!ReferenceEquals(weapon, null))
                 {
                     weapon.Fired -= OnFired;
                 }
             }
+
+            _listening.Clear();
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Adler.Core;
 using Adler.Flight;
 using Adler.Combat;
@@ -45,6 +46,9 @@ namespace Adler.UI
 
         private Clock _clock;
 
+        // 지금 구독해 둔 무기들. 갈아입을 때 이 목록으로 놓는다.
+        private readonly List<AircraftWeapon> _listening = new();
+
         private void Awake()
         {
             _clock = TimeScale.For(this);
@@ -63,27 +67,63 @@ namespace Adler.UI
         }
 
         /// <summary>
-        /// 손에 들지 않은 무기의 명중도 받는다. 미사일은 쏘고 나서 무기를 바꿔도
+        /// 손에 들지 않은 무기의 명중도 받는다. 미사일은 쏘고 나서 자리를 바꿔도
         /// 계속 날아가고, 맞았을 때 표식이 안 뜨면 어디로 갔는지 알 수 없다.
+        /// <para>
+        /// 장비를 갈아입으면 놓고 다시 붙는다. 놓는 쪽은 붙었던 목록으로 한다 —
+        /// 무기고의 지금 목록으로 놓으면 이미 지워진 옛 무기는 영영 못 놓는다.
+        /// </para>
         /// </summary>
         private void OnEnable()
         {
+            _bay.Rearmed += OnRearmed;
+            Attach();
+        }
+
+        private void OnDisable()
+        {
+            _bay.Rearmed -= OnRearmed;
+            Detach();
+        }
+
+        private void OnRearmed()
+        {
+            Detach();
+            Attach();
+        }
+
+        private void Attach()
+        {
             foreach (AircraftWeapon weapon in _bay.Weapons)
             {
+                if (weapon == null)
+                {
+                    continue;
+                }
+
                 weapon.Hit += OnHit;
+                _listening.Add(weapon);
 
                 if (weapon is MissileLauncher launcher)
                 {
                     launcher.Detonated += OnMissileDetonated;
                 }
             }
-
         }
 
-        private void OnDisable()
+        /// <summary>
+        /// 참조 비교로 놓는다. 지워진 무기는 null인 척을 해서, 보통 비교로 거르면
+        /// 놓을 기회 자체가 안 온다.
+        /// </summary>
+        private void Detach()
         {
-            foreach (AircraftWeapon weapon in _bay.Weapons)
+            foreach (AircraftWeapon weapon in _listening)
             {
+                if (ReferenceEquals(weapon, null))
+                {
+                    continue;
+                }
+
                 weapon.Hit -= OnHit;
 
                 if (weapon is MissileLauncher launcher)
@@ -92,8 +132,8 @@ namespace Adler.UI
                 }
             }
 
+            _listening.Clear();
         }
-
         /// <summary>
         /// 폭발은 한 번에 여러 표적을 때린다. 하나라도 피해가 들어갔으면 명중으로 본다.
         /// 전부 막혔을 때만 막힘 표시를 띄워야, 장갑 차량 옆의 보병을 잡은 것을
