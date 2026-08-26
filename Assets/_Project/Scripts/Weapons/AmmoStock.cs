@@ -153,6 +153,37 @@ namespace Adler.Weapons
         }
 
         /// <summary>
+        /// 발의 일부를 돌려준다. 잘한 것에 값으로 돌려주는 쪽이 부른다.
+        /// <para>
+        /// <see cref="Restore"/>와 달리 올려주지 않는다. 절반을 주기로 한 쪽이 있는데
+        /// 여기서 한 발로 부풀리면, 절반이라는 값이 거짓이 된다.
+        /// </para>
+        /// <para>
+        /// 회복 지연은 건너뛴다. 돌려주는 뜻이 이어서 쓰라는 것인데, 방금 썼다는 이유로
+        /// 받은 몫이 지연에 묶여 서 있으면 받은 줄도 모른다.
+        /// </para>
+        /// </summary>
+        public void Hasten(float rounds)
+        {
+            if (rounds <= 0f || _remaining >= Capacity)
+            {
+                return;
+            }
+
+            _idleFor = Mathf.Max(_idleFor, _definition.RechargeDelay);
+            _progress += rounds;
+
+            int gained = Mathf.FloorToInt(_progress);
+            if (gained <= 0)
+            {
+                return;
+            }
+
+            _progress -= gained;
+            Gain(gained);
+        }
+
+        /// <summary>
         /// 용량의 일부를 돌려준다. 재보급이 부른다.
         /// <para>
         /// 올림으로 준다. 내림이면 용량이 작은 무기에 적은 비율을 넣었을 때 아무것도

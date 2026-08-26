@@ -279,6 +279,90 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &33544513
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 33544514}
+  - component: {fileID: 33544515}
+  m_Layer: 10
+  m_Name: Sub3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &33544514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33544513}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 41372652}
+  m_Father: {fileID: 1919053223}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &33544515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33544513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3e517778243f49408847a55c7a4793c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrappleWeapon
+  _root: {fileID: 0}
+  _muzzles:
+  - {fileID: 41372652}
+  _hitMask:
+    serializedVersion: 2
+    m_Bits: 2048
+  _grapple: {fileID: 11400000, guid: 04d73e0200d55584eb990672025b29b3, type: 2}
+  _hook: {fileID: 1919053228}
+--- !u!1 &41372651
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 41372652}
+  m_Layer: 10
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &41372652
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 41372651}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.031, z: 0.493}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 33544514}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &49589781
 GameObject:
   m_ObjectHideFlags: 0
@@ -14200,9 +14284,9 @@ MonoBehaviour:
   _clearRange: 20
   _clearTimeout: 4
   _shieldGrace: 0.5
-  _boostReturn: 0.5
-  _returnedAbility: {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
-  _grappleReturn: 0.5
+  _boostReturn: 0.3
+  _returnedWeapon: {fileID: 11400000, guid: 04d73e0200d55584eb990672025b29b3, type: 2}
+  _weaponReturn: 0.3
   _afterSeconds: 2
 --- !u!114 &1812182318
 MonoBehaviour:
@@ -14348,10 +14432,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Adler.Runtime::Adler.Flight.AbilityBinder
   _aircraft: {fileID: 1812182315}
   _input: {fileID: 1812182311}
-  _bindings:
-  - Action: 2
-    Ability: {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
-    Style: 2
+  _bindings: []
 --- !u!114 &1840017528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14368,9 +14449,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 69c08c3b4dae5764d9e15879a38c4297, type: 2}
   - {fileID: 11400000, guid: e6a87d97374145c46ac652d44dff2dc2, type: 2}
   - {fileID: 11400000, guid: 24cc91af326f26240abd3cd419280954, type: 2}
-  - {fileID: 11400000, guid: 2eb784d5437aa4a46a5c6c16143ee1a4, type: 2}
   - {fileID: 11400000, guid: 848b47f07bf8f2349a0a8b44024e8ead, type: 2}
-  - {fileID: 11400000, guid: 72150892e8ff0f54ab481b16cbeaaa76, type: 2}
 --- !u!1 &1840385403
 GameObject:
   m_ObjectHideFlags: 0
@@ -15253,6 +15332,7 @@ Transform:
   - {fileID: 1017914245}
   - {fileID: 189988665}
   - {fileID: 1053205069}
+  - {fileID: 33544514}
   m_Father: {fileID: 1812182287}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1919053224
@@ -15319,6 +15399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.WeaponBay
   _root: {fileID: 1812182318}
   _input: {fileID: 1812182311}
+  _holsterSeconds: 5
 --- !u!114 &1919053228
 MonoBehaviour:
   m_ObjectHideFlags: 0

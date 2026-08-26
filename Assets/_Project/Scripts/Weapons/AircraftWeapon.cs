@@ -113,6 +113,8 @@ namespace Adler.Weapons
             _firingFor = Mathf.Max(0f, _firingFor - deltaTime);
             _cooldown -= deltaTime;
 
+            OnTriggerHeld(deltaTime);
+
             if (_cooldown > 0f)
             {
                 return;
@@ -149,7 +151,21 @@ namespace Adler.Weapons
             // 놓는 순간 바로 끈다. 여기서 꼬리를 남기면 톡 눌렀을 때 총구가
             // 손을 뗀 뒤에도 타올라, 끊어 쏘는 것이 화면에 끊어져 보이지 않는다.
             _firingFor = 0f;
+            OnTriggerReleased();
         }
+
+        /// <summary>
+        /// 방아쇠가 당겨져 있는 동안 매 프레임, 쏘기 전에 불린다. 간격과 탄에 막혀
+        /// 한 발도 못 내보내는 프레임에도 당기고 있다는 것은 참이므로 불린다.
+        /// <para>
+        /// 쏘는 것 말고도 방아쇠에 반응해야 하는 무기가 얹는다 — 갈고리는 걸려 있는
+        /// 동안의 두 번째 누름을 끊으라는 뜻으로 읽는다.
+        /// </para>
+        /// </summary>
+        protected virtual void OnTriggerHeld(float deltaTime) { }
+
+        /// <summary>방아쇠가 놓여 있는 동안. 놓인 채로도 매 프레임 불릴 수 있다.</summary>
+        protected virtual void OnTriggerReleased() { }
 
         /// <summary>한 발을 실제로 내보낸다.</summary>
         protected abstract void FireOnce();

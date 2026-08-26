@@ -162,7 +162,6 @@ namespace Adler.Controls
             _actions[(int)PilotAction.FireSecondary] = _map.FindAction("FireSecondary", throwIfNotFound: true);
             _actions[(int)PilotAction.SwitchWeapon] = _map.FindAction("SwitchWeapon", throwIfNotFound: true);
             _actions[(int)PilotAction.SwitchTarget] = _map.FindAction("SwitchTarget", throwIfNotFound: true);
-            _actions[(int)PilotAction.Grapple] = _map.FindAction("Grapple", throwIfNotFound: true);
             _actions[(int)PilotAction.Respawn] = _map.FindAction("Respawn", throwIfNotFound: true);
             _actions[(int)PilotAction.ToggleCommands] = _map.FindAction("ToggleCommands", throwIfNotFound: true);
 

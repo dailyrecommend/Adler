@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e64760dd47a6b149822eed894f4f04c, type: 3}
-  m_Name: MG-01
+  m_Name: Stalker
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GunDefinition
   DisplayName: Stalker
   Description: Soft-Lock Built-In.

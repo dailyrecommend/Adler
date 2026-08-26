@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Adler.Abilities;
 using Adler.Combat;
 using Adler.Core;
+using Adler.Weapons;
 using UnityEngine;
 
 namespace Adler.Flight
@@ -114,14 +114,15 @@ namespace Adler.Flight
         [Range(0f, 1f)]
         [SerializeField] private float _boostReturn = 0.5f;
 
-        [Tooltip("성공하면 이 행동의 쿨타임을 깎아준다. 보통 갈고리를 넣는다.\n\n" +
+        [Tooltip("성공하면 이 무기의 탄을 돌려준다. 보통 갈고리를 넣는다.\n\n" +
                  "갈고리로 붙어서 박고, 박은 값으로 다시 걸고, 또 박는다.\n" +
                  "이 고리가 돌아가려면 연료와 함께 이쪽도 돌아와야 한다.")]
-        [SerializeField] private AbilitySpec _returnedAbility;
+        [SerializeField] private WeaponDefinition _returnedWeapon;
 
-        [Tooltip("깎아주는 몫. 전체 쿨타임에 대한 비율이다.")]
-        [Range(0f, 1f)]
-        [SerializeField] private float _grappleReturn = 0.5f;
+        [Tooltip("돌려주는 발수. 0.5면 다음 발이 반쯤 차오른 채로 시작한다.\n" +
+                 "한 발로 올려주지 않는다 — 절반은 절반이어야 두 번 물고 세 번째가 없다.")]
+        [Min(0f)]
+        [SerializeField] private float _weaponReturn = 0.5f;
 
         [Header("여운")]
         [Tooltip("들이받은 뒤 이만큼은 '들이받는 중'으로 친다(초).\n\n" +
@@ -328,15 +329,15 @@ namespace Adler.Flight
         /// 이어갈 수 있어도 그 이상은 바닥나므로, <b>어디서 멈출지</b>가 판단으로 남는다.
         /// </para>
         /// <para>
-        /// 무엇을 되돌릴지는 각자에게 맡긴다. 연료가 어떻게 차오르는지, 쿨다운이 언제부터
-        /// 흐르는지는 그쪽의 사정이고, 여기서 값을 직접 써넣으면 그 사정이 바뀔 때마다
+        /// 무엇을 되돌릴지는 각자에게 맡긴다. 연료가 어떻게 차오르는지, 탄이 언제부터
+        /// 돌아오는지는 그쪽의 사정이고, 여기서 값을 직접 써넣으면 그 사정이 바뀔 때마다
         /// 이곳도 함께 틀어진다.
         /// </para>
         /// </summary>
         private void Reward()
         {
             _aircraft.Boost?.Restore(_boostReturn);
-            _aircraft.Abilities?.ReduceCooldown(_returnedAbility, _grappleReturn);
+            _aircraft.Weapons?.Mounted(_returnedWeapon)?.Ammo?.Hasten(_weaponReturn);
         }
 
         /// <summary>

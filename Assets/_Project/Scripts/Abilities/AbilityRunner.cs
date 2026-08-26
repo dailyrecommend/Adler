@@ -129,24 +129,6 @@ namespace Adler.Abilities
             => RemainingCooldown(spec) > 0f || IsExhausted(spec);
 
         /// <summary>
-        /// 이 행동의 쿨타임을 정해진 몫만큼 깎아준다. 잘한 것에 값으로 돌려주는 쪽이 부른다.
-        /// <para>
-        /// 쿨타임이 시작하는 순간부터 흐르므로, 행동이 아직 도는 중이어도 그냥 깎으면
-        /// 된다 — 끝나기를 기다렸다 적어두는 장부 같은 것은 필요 없다.
-        /// </para>
-        /// </summary>
-        /// <param name="fraction">전체 쿨타임에 대한 비율. 0.5면 절반을 돌려준다.</param>
-        public void ReduceCooldown(AbilitySpec spec, float fraction)
-        {
-            if (spec == null || _clock == null || !_readyAt.TryGetValue(spec, out float readyAt))
-            {
-                return;
-            }
-
-            _readyAt[spec] = Mathf.Max(_clock.Now, readyAt - (spec.Cooldown * Mathf.Clamp01(fraction)));
-        }
-
-        /// <summary>
         /// 출격을 다시 시작할 때 제한을 되돌린다. 쿨타임도 횟수도 새 출격에는 새것이다.
         /// </summary>
         public void ResetSortie()

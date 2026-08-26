@@ -175,6 +175,16 @@ namespace Adler.Weapons
         /// <summary>표적에 물려 있다. 버티는 중이든 끌리는 중이든.</summary>
         public bool IsAttached => Phase is GrapplePhase.Biting or GrapplePhase.Pulling;
 
+        /// <summary>
+        /// 지금 던질 수 있는지. 값을 치르는 쪽이 치르기 전에 묻는다.
+        /// <para>
+        /// <see cref="Fire"/>가 거절하는 조건과 같아야 한다. 여기서 된다고 해놓고
+        /// 저쪽이 거절하면, 물은 쪽은 이미 탄을 쓴 뒤다.
+        /// </para>
+        /// </summary>
+        public bool CanThrow =>
+            _hooked == null && _targeting != null && _targeting.HasLock && _targeting.Target != null;
+
         /// <summary>남은 유지 시간(초). 물리기 전에는 0이다.</summary>
         public float Remaining => _remaining;
 
