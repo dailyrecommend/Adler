@@ -14,14 +14,20 @@ namespace Adler.UI
     /// </summary>
     public enum WarningKind
     {
+        /// <summary>
+        /// 경계 밖이다. 유예가 다 되면 격추되므로, 어떤 경고보다 급하다 —
+        /// 미사일은 피하면 그만이지만 이것은 자리 자체가 틀렸다는 뜻이다.
+        /// </summary>
+        OutOfBounds = 0,
+
         /// <summary>미사일이 날아오고 있다. 선회를 걸고 유지해야 한다.</summary>
-        MissileIncoming = 0,
+        MissileIncoming = 1,
 
         /// <summary>적기가 뒤를 잡고 기수를 얹었다. 지금 꺾어야 한다.</summary>
-        GunsOnMe = 1,
+        GunsOnMe = 2,
 
         /// <summary>발사대가 조준을 쌓고 있다. 아직 숨을 시간이 있다.</summary>
-        SamLock = 2,
+        SamLock = 3,
     }
 
     /// <summary>
@@ -48,6 +54,12 @@ namespace Adler.UI
         [Tooltip("줄이 늘어설 자리. 비워두면 이 오브젝트 아래에 붙인다.")]
         [SerializeField] private RectTransform _slotRoot;
 
+        [Header("경계")]
+        [Tooltip("경계 밖에 있을 때.")]
+        [SerializeField] private string _boundsText = "OUT OF BOUNDS";
+
+        [SerializeField] private Color _boundsColor = new Color(1f, 0.15f, 0.1f, 1f);
+
         [Header("미사일")]
         [SerializeField] private string _incomingText = "LOCK ON";
 
@@ -63,6 +75,8 @@ namespace Adler.UI
 
         [SerializeField] private Color _lockColor = new Color(1f, 0.75f, 0.2f, 1f);
 
+        private OutOfBounds _bounds;
+
         private readonly Dictionary<WarningKind, WarningSlot> _slots = new();
         private readonly List<WarningKind> _active = new();
         private readonly List<WarningKind> _removed = new();
@@ -70,6 +84,12 @@ namespace Adler.UI
         private void Awake()
         {
             _aircraft = AircraftRig.Resolve(this, _aircraft);
+
+            // 리그를 찾은 다음에 뒤진다. 경계 감시는 기체에 붙은 부품이라
+            // 리그가 없으면 찾을 곳도 없다.
+            _bounds = _aircraft != null
+                ? _aircraft.GetComponentInChildren<OutOfBounds>(includeInactive: true)
+                : null;
 
             if (_aircraft == null || _slotPrefab == null)
             {
@@ -103,6 +123,11 @@ namespace Adler.UI
             _active.Clear();
 
             Transform self = _aircraft.transform;
+
+            if (_bounds != null && _bounds.IsOutside)
+            {
+                _active.Add(WarningKind.OutOfBounds);
+            }
 
             if (SamSite.AnyIncoming(self))
             {
@@ -179,6 +204,7 @@ namespace Adler.UI
         {
             return kind switch
             {
+                WarningKind.OutOfBounds => _boundsText,
                 WarningKind.MissileIncoming => _incomingText,
                 WarningKind.GunsOnMe => _gunsText,
                 WarningKind.SamLock => _lockText,
@@ -190,6 +216,7 @@ namespace Adler.UI
         {
             return kind switch
             {
+                WarningKind.OutOfBounds => _boundsColor,
                 WarningKind.MissileIncoming => _incomingColor,
                 WarningKind.GunsOnMe => _gunsColor,
                 WarningKind.SamLock => _lockColor,

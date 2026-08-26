@@ -17,6 +17,15 @@ Shader "Adler/Toon"
         [MainTexture] _BaseMap ("바탕 텍스처", 2D) = "white" {}
         [MainColor]   _BaseColor ("바탕 색", Color) = (1, 1, 1, 1)
 
+        // 켜면 오브젝트를 키운 만큼 텍스처가 더 반복된다. 격자 무늬를 바닥에 깔고
+        // 바닥을 150배로 늘려도 격자 한 칸의 실제 크기는 그대로다 — 끄면 무늬가
+        // 바닥과 함께 늘어나 칸 하나가 지도만 해진다.
+        [Toggle(_SCALE_TILING)] _ScaleTiling ("크기 따라 타일 반복", Float) = 0
+
+        // 위 토글이 켜졌을 때 미터당 몇 번 반복할지. 1이면 1m에 한 칸,
+        // 0.1이면 10m에 한 칸이다. 칸 크기 = 1m ÷ 이 값.
+        _TileDensity ("미터당 반복 수", Float) = 1
+
         [Header(Shading)]
         [Space(4)]
         // 경계선의 개수다. 3이면 밝기는 0·1/3·2/3·1의 네 가지가 된다.
@@ -46,6 +55,7 @@ Shader "Adler/Toon"
             float4 _BaseMap_ST;
             half4  _BaseColor;
             float4 _ShadowColor;
+            float  _TileDensity;
             float  _Steps;
             float  _Softness;
             float  _ShadowRange;
@@ -63,6 +73,8 @@ Shader "Adler/Toon"
             HLSLPROGRAM
             #pragma vertex Vertex
             #pragma fragment Fragment
+
+            #pragma shader_feature_local_vertex _SCALE_TILING
 
             // 그림자 종류는 서로 배타적이라 한 세트다. 따로 선언하면 메인 그림자 없이
             // 캐스케이드만 켜진 뜻 없는 변형이 생기고, 변형 수는 그만큼 배로 뛴다.
@@ -144,7 +156,23 @@ Shader "Adler/Toon"
                 output.positionCS = positions.positionCS;
                 output.positionWS = positions.positionWS;
                 output.normalWS = normals.normalWS;
-                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+
+                float2 uv = input.uv;
+
+                // 오브젝트의 크기를 변환 행렬에서 읽어 UV에 곱한다. 150배로 키우면
+                // 무늬도 150배 더 반복되므로, 화면에 보이는 칸 크기는 변하지 않는다.
+                // 크기는 축마다 따로 읽는다 — 한쪽으로만 길게 늘여도 칸은 네모다.
+                //
+                // 평면과 지형은 UV가 X·Z를 따라가므로 그 두 축을 쓴다. 쿼드처럼
+                // X·Y를 쓰는 메시에는 세로 크기가 안 걸리는데, 그런 것은 대개
+                // 화면 요소라 이 토글을 켤 일이 없다.
+                #ifdef _SCALE_TILING
+                    uv *= _TileDensity * float2(
+                        length(unity_ObjectToWorld._m00_m10_m20),
+                        length(unity_ObjectToWorld._m02_m12_m22));
+                #endif
+
+                output.uv = TRANSFORM_TEX(uv, _BaseMap);
                 output.fogFactor = ComputeFogFactor(positions.positionCS.z);
 
                 return output;

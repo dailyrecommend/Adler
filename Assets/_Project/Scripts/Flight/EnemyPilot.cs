@@ -223,7 +223,7 @@ namespace Adler.Flight
             // Nothing to chase: hold level so it keeps flying instead of drifting.
             if (_target == null)
             {
-                return SteerTowards(LevelOff(transform.forward), float.MaxValue);
+                return SteerTowards(KeepInside(LevelOff(transform.forward)), float.MaxValue);
             }
 
             MeasureClearance();
@@ -240,7 +240,7 @@ namespace Adler.Flight
                 _ => AimPoint() - transform.position,
             };
 
-            return SteerTowards(AvoidGround(Smooth(desired, deltaTime)), distance);
+            return SteerTowards(KeepInside(AvoidGround(Smooth(desired, deltaTime))), distance);
         }
 
         /// <summary>
@@ -461,6 +461,51 @@ namespace Adler.Flight
             return urgency <= 0f
                 ? desired
                 : Vector3.Slerp(desired.normalized, Vector3.up, urgency);
+        }
+
+        /// <summary>
+        /// 경계에 다가가면 안쪽으로 꺾는다.
+        /// <para>
+        /// 지면 회피처럼 마지막에 걸리는 필터다. 무엇을 쫓고 있었든 경계 앞에서는
+        /// 그것이 먼저다 — 표적이 경계 밖에 있어도 따라 나가지 않고, 벽을 따라
+        /// 돌면서 표적이 돌아오기를 기다리는 모양이 된다.
+        /// </para>
+        /// <para>
+        /// 문턱이 아니라 구간으로 꺾는다. 벽에서 딱 꺾으면 벽에 걸친 채로 나가려는
+        /// 판단과 돌아오려는 필터가 매 스텝 다퉈서, 벽 위에서 떠는 기체가 된다.
+        /// </para>
+        /// </summary>
+        private Vector3 KeepInside(Vector3 desired)
+        {
+            Battlefield field = Battlefield.Active;
+
+            if (field == null)
+            {
+                return desired;
+            }
+
+            // 벽 앞 이만큼부터 꺾기 시작한다. 선회 반경이 있으므로 벽에 닿아서
+            // 꺾으면 이미 늦다.
+            const float WarnBand = 80f;
+
+            float depth = field.DepthInside(transform.position);
+            float urgency = 1f - Mathf.Clamp01(depth / WarnBand);
+
+            if (urgency <= 0f)
+            {
+                return desired;
+            }
+
+            // 가장 가까운 안전한 자리 쪽으로 꺾는다. 중심을 겨누면 구석에서 빠져
+            // 나올 때 필요 이상으로 깊이 들어와서, 경계 근처가 텅 비게 된다.
+            Vector3 inward = field.ClampInside(transform.position, WarnBand) - transform.position;
+
+            if (inward.sqrMagnitude < 0.0001f)
+            {
+                inward = field.Center - transform.position;
+            }
+
+            return Vector3.Slerp(desired.normalized, inward.normalized, urgency);
         }
 
         /// <summary>Keeps the nose from drifting up or down when there is no target.</summary>
