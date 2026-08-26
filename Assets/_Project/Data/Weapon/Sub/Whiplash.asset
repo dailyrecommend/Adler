@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 95153967fb99e9d49b8ce730c6733c21, type: 3}
-  m_Name: Grapple
+  m_Name: Whiplash
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.GrappleDefinition
   DisplayName: Whiplash
   Description: A winch with a spear.
