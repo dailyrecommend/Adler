@@ -1,3 +1,4 @@
+using Adler.Combat;
 using UnityEngine;
 
 namespace Adler.Weapons
@@ -51,7 +52,56 @@ namespace Adler.Weapons
             {
                 Debug.LogError($"{nameof(GrappleWeapon)}: 몰고 갈 {nameof(GrapplingHook)}을 찾지 못했습니다.", this);
                 enabled = false;
+                return;
             }
+
+            _hook.PhaseChanged += OnPhaseChanged;
+        }
+
+        /// <summary>몸이 지워질 때 끊는다. 장비를 갈아입으면 여기가 그 자리다.</summary>
+        private void OnDestroy()
+        {
+            if (!ReferenceEquals(_hook, null))
+            {
+                _hook.PhaseChanged -= OnPhaseChanged;
+            }
+        }
+
+        /// <summary>
+        /// 물리는 순간 한 번 때린다. 걸어둔 동안 계속 깎지 않는다 —
+        /// 그러면 오래 매다는 것이 이득이 되어, 붙는 도구가 때리는 도구로 바뀐다.
+        /// </summary>
+        private void OnPhaseChanged(GrapplePhase from, GrapplePhase to)
+        {
+            if (to != GrapplePhase.Biting || Definition == null || Definition.Damage <= 0f)
+            {
+                return;
+            }
+
+            Transform hooked = _hook.Hooked;
+            IDamageable target = hooked != null ? hooked.GetComponentInParent<IDamageable>() : null;
+
+            if (target == null || !target.IsAlive)
+            {
+                return;
+            }
+
+            // 물린 자리를 맞은 자리로 쓴다. 갈고리는 레이로 나가지 않아 표면의 법선을
+            // 모르므로, 날아온 방향을 뒤집어 대신한다 — 연출이 튀는 쪽을 정하는 데 쓴다.
+            Vector3 point = _hook.Tip;
+            Vector3 normal = (transform.position - point).normalized;
+
+            DamageResult result = target.TakeDamage(new DamageInfo(
+                Definition.Damage,
+                Definition.Penetration,
+                Definition.Demolition,
+                point,
+                normal,
+                Owner));
+
+            // 맞은 자리는 레이가 아니라 줄이 정했다. 듣는 쪽들이 쓰는 것은
+            // 무엇을 맞혔는지와 어떻게 됐는지뿐이라, 빈 것을 넘겨도 잃는 것이 없다.
+            RaiseHit(default, target, result);
         }
 
         /// <summary>
