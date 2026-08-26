@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: dc07d54190bb9c04a8a9b850935a30e1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.36644274
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: dc07d54190bb9c04a8a9b850935a30e1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -12.456
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: dc07d54190bb9c04a8a9b850935a30e1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.19
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: dc07d54190bb9c04a8a9b850935a30e1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -84,7 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5544b3d6df9ef5e45bec2ab48673b9c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Adler.Runtime::Adler.Weapons.Projectile
-  _trailLength: 2
+  _trailLength: 2.5
   _detachTrailOnImpact: 1
 --- !u!96 &6067300014331695009
 TrailRenderer:

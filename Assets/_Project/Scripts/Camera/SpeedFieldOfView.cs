@@ -43,6 +43,12 @@ namespace Adler.CameraRig
         [Min(0f)]
         [SerializeField] private float _boostKickDistance = 2.5f;
 
+        [Tooltip("밀려나는 데 걸리는 시간(초). 0이면 한 프레임에 튕겨 나간다.\n\n" +
+                 "기체의 Boost Surge Seconds와 같은 값을 주면 카메라가 물러나는 것과\n" +
+                 "속도가 붙는 것이 함께 끝나 한 사건으로 읽힌다. 어긋나면 둘이 따로 논다.")]
+        [Min(0f)]
+        [SerializeField] private float _boostKickPush = 0.2f;
+
         [Tooltip("그 순간 화각에 더해지는 각도.\n" +
                  "거리와 함께 튕겨야 한 번의 사건으로 읽힌다.")]
         [Min(0f)]
@@ -132,8 +138,9 @@ namespace Adler.CameraRig
         /// 오므로, 모서리에서 한 번 튕기고 곧 돌아와야 그 변화가 눈에 남는다.
         /// </para>
         /// <para>
-        /// 미는 방향은 기체에서 카메라로 향하는 쪽이다. 카메라의 뒤쪽으로 밀면 아직 회전이
-        /// 확정되지 않은 단계라 조준 계산 뒤에 어긋나고, 급선회하는 동안 엉뚱한 데로 밀린다.
+        /// 나가는 몫과 돌아오는 몫이 다르게 흐른다. 나가는 것은 정해진 시간을 채우고,
+        /// 돌아오는 것은 지수로 잦아든다 — 미는 것은 기체가 속도를 얻는 그 사건이라
+        /// 길이가 정해져 있어야 하고, 돌아오는 것은 여운이라 끝이 뚜렷할 이유가 없다.
         /// </para>
         /// </summary>
         private void ApplyBoostKick(
@@ -144,10 +151,11 @@ namespace Adler.CameraRig
         {
             bool boosting = _aircraft.Model.IsBoosting;
 
-            // 켜지는 모서리에서만 채운다. 누르고 있는 동안 계속 채우면 돌아올 틈이 없다.
+            // 켜지는 모서리에서만 밀기 시작한다. 누르고 있는 동안 계속 시작하면
+            // 돌아올 틈이 없다.
             if (boosting && !extra.WasBoosting)
             {
-                extra.Kick = 1f;
+                extra.PushElapsed = 0f;
             }
 
             extra.WasBoosting = boosting;
@@ -157,7 +165,28 @@ namespace Adler.CameraRig
             if (deltaTime < 0f || !vcam.PreviousStateIsValid)
             {
                 extra.Kick = 0f;
+                extra.PushElapsed = -1f;
                 return;
+            }
+
+            // 나가는 동안은 정해진 시간을 쓴다. 한 프레임에 튕겨 나가면 밀린 그림만
+            // 남고 미는 동작은 안 보이는데, 속도가 붙는 데 시간이 걸리는 지금은 그
+            // 순간이 화면에서 비어 있게 된다. 붙는 시간과 같은 값을 주면 둘이 함께 간다.
+            if (extra.PushElapsed >= 0f && _boostKickPush > 0f)
+            {
+                extra.PushElapsed += deltaTime;
+
+                float t = Mathf.Clamp01(extra.PushElapsed / _boostKickPush);
+                extra.Kick = t * t * (3f - 2f * t);
+
+                if (t < 1f)
+                {
+                    ApplyPush(vcam, extra, ref state);
+                    return;
+                }
+
+                // 다 밀었다. 여기서부터는 돌아오는 몫이다.
+                extra.PushElapsed = -1f;
             }
 
             if (extra.Kick <= 0.001f)
@@ -168,6 +197,21 @@ namespace Adler.CameraRig
 
             extra.Kick = Mathf.Lerp(extra.Kick, 0f, 1f - Mathf.Exp(-_boostKickDecay * deltaTime));
 
+            ApplyPush(vcam, extra, ref state);
+        }
+
+        /// <summary>
+        /// 지금 튕긴 만큼 카메라를 기체에서 밀어낸다.
+        /// <para>
+        /// 미는 방향은 기체에서 카메라로 향하는 쪽이다. 카메라의 뒤쪽으로 밀면 아직 회전이
+        /// 확정되지 않은 단계라 조준 계산 뒤에 어긋나고, 급선회하는 동안 엉뚱한 데로 밀린다.
+        /// </para>
+        /// </summary>
+        private void ApplyPush(
+            CinemachineVirtualCameraBase vcam,
+            VcamExtraState extra,
+            ref CameraState state)
+        {
             if (_boostKickDistance <= 0f || vcam.Follow == null)
             {
                 return;
@@ -197,6 +241,8 @@ namespace Adler.CameraRig
         {
             public float SmoothedGain;
             public float Kick;
+            // 미는 중이면 흐른 시간, 아니면 -1. 나가는 몫과 돌아오는 몫을 가른다.
+            public float PushElapsed = -1f;
             public bool WasBoosting;
         }
     }

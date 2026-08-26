@@ -2727,7 +2727,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1850, y: 630}
+  m_AnchoredPosition: {x: -1850, y: 1000}
   m_SizeDelta: {x: 1000, y: 1200}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &317987488
@@ -6861,9 +6861,10 @@ MonoBehaviour:
   _fieldOfViewGain: 50
   _useTopSpeedAsReference: 1
   _maxSpeed: 0
-  _boostKickDistance: 2.5
-  _boostKickFieldOfView: 8
-  _boostKickDecay: 3.5
+  _boostKickDistance: 2
+  _boostKickPush: 0.2
+  _boostKickFieldOfView: 12
+  _boostKickDecay: 2
   _responsiveness: 3
 --- !u!114 &898042527
 MonoBehaviour:
@@ -13814,10 +13815,6 @@ PrefabInstance:
     - target: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
       propertyPath: m_Name
       value: Bullet
-      objectReference: {fileID: 0}
-    - target: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3107947852185196328, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
       propertyPath: m_LocalPosition.x

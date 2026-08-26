@@ -15,8 +15,8 @@ MonoBehaviour:
   DisplayName: Tester
   MinSpeed: 10
   CruiseSpeed: 20
-  Acceleration: 60
-  Deceleration: 40
+  Acceleration: 20
+  Deceleration: 20
   PitchRate: 120
   RollRate: 160
   ControlResponse: 8
@@ -29,4 +29,5 @@ MonoBehaviour:
   BoostReengageFraction: 0.25
   GravityInfluence: 0.3
   BoostMultiplier: 2
+  BoostSurgeSeconds: 0.2
   Grip: 5

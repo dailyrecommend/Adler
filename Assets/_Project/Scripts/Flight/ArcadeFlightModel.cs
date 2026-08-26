@@ -35,6 +35,10 @@ namespace Adler.Flight
         private float _speed;
         private bool _boosting;
 
+        // 밟은 순간부터 흐른 시간과 그때의 속도. 붙는 동안만 뜻이 있다.
+        private float _surgeElapsed = -1f;
+        private float _surgeFrom;
+
         // 실제로 나아가는 방향과 빠르기. 기수를 뒤따라가므로 둘이 어긋날 수 있다.
         private Vector3 _velocity;
         private bool _frozen;
@@ -76,6 +80,13 @@ namespace Adler.Flight
             Mathf.InverseLerp(_stats.MinSpeed, TopSpeed, _speed);
         public bool IsBoosting => _boosting;
         public bool IsFrozen => _frozen;
+
+        /// <summary>
+        /// 부스터를 밟아 속도가 붙는 중인지. 붙는 동안에는 평소 가속이 쉰다 —
+        /// 둘이 함께 돌면 정해둔 시간보다 빨리 도착해 시간을 정한 뜻이 없어진다.
+        /// </summary>
+        private bool Surging =>
+            _surgeElapsed >= 0f && _surgeElapsed < _stats.Airframe.BoostSurgeSeconds;
 
         /// <inheritdoc />
         public void SetTether(in Tether tether) => _tether = tether;
@@ -149,6 +160,10 @@ namespace Adler.Flight
             _pitch = 0f;
             _roll = 0f;
             _boosting = false;
+
+            // 붙던 중에 격추됐을 수 있다. 지우지 않으면 재출격한 기체가
+            // 밟지도 않았는데 남은 곡선을 마저 타면서 저절로 빨라진다.
+            _surgeElapsed = -1f;
 
             // 얼어붙은 채로 격추됐을 수 있다. 여기서 풀지 않으면 재출격한 기체가
             // 중력만 받은 채 조종되지 않는다.
@@ -306,11 +321,34 @@ namespace Adler.Flight
             // 계산해 넘어오므로, 상대가 부스터를 켜도 함께 빨라진다.
             target = Mathf.Max(target, _tether.SpeedFloor);
 
-            // 밟는 순간에는 기다리지 않는다. 부스터는 유일한 가속 수단이라 눌렀는데
-            // 잠시 뒤에 빨라지면, 밟은 것이 통했는지를 소리와 화면으로만 짐작하게 된다.
-            if (_boosting && !wasBoosting)
+            // 밟는 순간은 평소 가속을 쓰지 않는다. 부스터는 유일한 가속 수단이라
+            // 눌렀는데 한참 뒤에 빨라지면, 밟은 것이 통했는지를 소리와 화면으로만
+            // 짐작하게 된다. 그렇다고 순간이동시키면 밟은 것이 사건이 아니라
+            // 상태 전환이 되어, 실리는 맛이 통째로 사라진다.
+            //
+            // 그래서 정해진 시간 안에 붙인다. 지금 속도가 얼마든 같은 시간이 걸리므로
+            // 강하 중에 밟든 상승 중에 밟든 붙는 박자가 같고, 카메라가 튕겼다 돌아오는
+            // 시간과 맞춰두면 둘이 한 사건으로 읽힌다.
+            if (_boosting && !wasBoosting && _stats.Airframe.BoostSurgeSeconds > 0f)
             {
-                _speed = target;
+                _surgeFrom = _speed;
+                _surgeElapsed = 0f;
+            }
+
+            // 붙는 도중에 손을 떼면 거기서 끝낸다. 그대로 두면 이 곡선이 감속에까지
+            // 쓰여서, 놓는 순간이 평소 감속보다 빠르거나 느려진다.
+            if (!_boosting)
+            {
+                _surgeElapsed = -1f;
+            }
+
+            if (Surging)
+            {
+                _surgeElapsed += deltaTime;
+
+                float t = Mathf.Clamp01(_surgeElapsed / _stats.Airframe.BoostSurgeSeconds);
+                _speed = Mathf.Lerp(_surgeFrom, target, t * t * (3f - 2f * t));
+
                 return;
             }
 
