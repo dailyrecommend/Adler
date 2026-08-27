@@ -364,7 +364,7 @@
                 {
                     "name": "",
                     "id": "20000000-0000-4000-8000-000000000032",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
