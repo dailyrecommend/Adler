@@ -46,6 +46,30 @@ namespace Adler.Weapons
                  "한 기체에 같은 자리를 노리는 무기가 둘이면 나중 것은 걸리지 않는다.")]
         public WeaponSlot Slot = WeaponSlot.Primary;
 
+        [Header("소리")]
+        [Tooltip("한 발 나갈 때의 소리. 연사 루프가 있으면 그쪽이 우선한다.")]
+        public AudioClip FireSound;
+
+        [Tooltip("연사 중에 도는 루프. 기총처럼 발 사이가 붙은 무기가 쓴다.\n" +
+                 "발마다 울리면 초당 수십 개가 쌓여 동시 재생 한도에 잘려 나간다.\n" +
+                 "비워두면 발마다 위 소리가 난다.")]
+        public AudioClip FireLoop;
+
+        [Tooltip("루프의 재생 속도. 1이면 녹음 그대로다.\n\n" +
+                 "녹음된 연사 박자가 실제 분당 발사 수와 안 맞을 때 여기서 맞춘다 —\n" +
+                 "빠르게 돌리면 음도 함께 높아지고, 늦추면 낮아진다. 소리란 그런 것이라\n" +
+                 "크게 벗어나면 다른 총처럼 들리니, 그때는 클립을 바꾸는 편이 맞다.")]
+        [Range(0.25f, 3f)]
+        public float LoopPitch = 1f;
+
+        [Tooltip("소리 크기.")]
+        [Range(0f, 1f)]
+        public float SoundVolume = 0.6f;
+
+        [Tooltip("한 발마다 흔들리는 음높이 폭. 같은 소리의 반복이 기계음으로 들리지 않게 한다.")]
+        [Range(0f, 0.5f)]
+        public float PitchJitter = 0.08f;
+
         [Header("발사")]
         [Tooltip("분당 발사 수.")]
         [Min(1f)]

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7701608303108763517}
   - component: {fileID: 1723308048525701755}
+  - component: {fileID: -5095058886388482382}
   m_Layer: 10
   m_Name: WPN_Missle
   m_TagString: Untagged
@@ -54,6 +55,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2176
   _targeting: {fileID: 0}
+--- !u!114 &-5095058886388482382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728313410899837566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cdf69b03058f1845ae9e51e956f747d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.WeaponVoice
+  _weapon: {fileID: 0}
+  _loopHold: 0.12
+  _loopFadeOut: 25
+  _minInterval: 0.08
 --- !u!1 &4301659477039982165
 GameObject:
   m_ObjectHideFlags: 0

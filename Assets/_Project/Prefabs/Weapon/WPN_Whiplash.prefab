@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4519462351373033321}
   - component: {fileID: 4474007226338456242}
   - component: {fileID: 4932442649045515652}
+  - component: {fileID: 765761002670525207}
   m_Layer: 10
   m_Name: WPN_Whiplash
   m_TagString: Untagged
@@ -99,6 +100,22 @@ MonoBehaviour:
   _sag: 0.12
   _taut: 0.2
   _trail: 0.55
+--- !u!114 &765761002670525207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2693696006843987921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cdf69b03058f1845ae9e51e956f747d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Adler.Runtime::Adler.Audio.WeaponVoice
+  _weapon: {fileID: 0}
+  _loopHold: 0.12
+  _loopFadeOut: 25
+  _minInterval: 0.08
 --- !u!1 &5451871354298282361
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,6 +18,11 @@ MonoBehaviour:
   Picture: {fileID: 0}
   Equipment: {fileID: 6046996318531784477, guid: 4e66cb2e5f5e8bc4ea81803a3c9d034b, type: 3}
   Slot: 0
+  FireSound: {fileID: 0}
+  FireLoop: {fileID: 8300000, guid: dcfd48846e001b34a8fa26971a1cc1bd, type: 3}
+  LoopPitch: 2
+  SoundVolume: 0.5
+  PitchJitter: 0.08
   RoundsPerMinute: 1500
   Prefab: {fileID: 2335809881998593426, guid: 908007b77af7c7947b2f16f16cf8aa3b, type: 3}
   Range: 300
