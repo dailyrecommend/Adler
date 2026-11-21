@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_Toon_Black
   m_Shader: {fileID: 4800000, guid: 4135ee246117dce4694e920e9fcc9fd8, type: 3}
-  m_Parent: {fileID: 0}
+  m_Parent: {fileID: 2100000, guid: 0ea8aabebf7beb64fb1c184b49dce6e7, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -22,26 +22,10 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
-    m_Floats:
-    - _RimOn: 0
-    - _RimPower: 0.5
-    - _RimThreshold: 0.6
-    - _Rounding: 0
-    - _ShadowRange: 0.35
-    - _Softness: 0
-    - _SpecularOn: 0
-    - _SpecularSize: 256
-    - _Steps: 3
+    m_Floats: []
     m_Colors:
-    - _BaseColor: {r: 0.2069242, g: 0.21960773, b: 0.23584908, a: 1}
-    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShadowColor: {r: 0.35, g: 0.4, b: 0.55, a: 1}
-    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.14311142, g: 0.14646798, b: 0.1509434, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
